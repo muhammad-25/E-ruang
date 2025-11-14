@@ -7,6 +7,8 @@ const  db = require("../database")
 // ubah info yang di terima ke bentuk json
 app.use(bodyParser.json())
 
+console.log ("tess")
+
 app.get('/', (req, res) => {
   // ngambil data atau query yang ada di url, dengan key value username (cek postman : params)
   const nama = req.query.username
