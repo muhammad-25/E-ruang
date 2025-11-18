@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title><%= title || 'My EJS App' %></title>
+  <link rel="stylesheet" href="/public/css/style.css" />
+</head>
+<body>
+  <!-- navigation (partial) -->
+  <%- include('../partials/header') %>
+
+  <!-- tempat isi halaman -->
+  <main class="container">
+    <%- body %>  <!-- <- express-ejs-layouts injects page content here -->
+  </main>
+
+  <footer class="site-footer">
+    <p>© <%= new Date().getFullYear() %> My EJS Layout App</p>
+  </footer>
+
+  <!-- optional: script khusus halaman yang dikirim lewat render() -->
+
+</body>
+</html>
