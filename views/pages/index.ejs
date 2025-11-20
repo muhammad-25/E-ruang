@@ -1,2 +1,99 @@
-<h1>Halo, <%= user %>!</h1>
-<p>Ini contoh halaman index yang di-render ke dalam <code>layouts/main.ejs</code>.</p>
+<header class="hero">
+    <div class="container">
+        <h1>Selamat Datang, user</h1>
+        <p>Selamat datang di E-Ruang</p>
+    </div>
+</header>
+
+
+<section class="stats-wrap">
+    <div class="stat">
+        <div class="icon"></div>
+        <div class="text">
+            <div class="label">Ruangan Tersedia</div>
+            <div class="value">16</div>
+        </div>
+    </div>
+
+
+<div class="stat">
+    <div class="icon"></div>
+    <div class="text">
+        <div class="label">Ruangan Dipakai</div>
+        <div class="value">20</div>
+    </div>
+</div>
+
+
+    <div class="stat">
+        <div class="icon"></div>
+        <div class="text">
+            <div class="label">Total Ruangan</div>
+            <div class="value">36</div>
+        </div>
+    </div>
+</section>
+
+<section class="rooms-page">
+  <div class="page-header">
+    <h2>Sistem Peminjaman Ruangan</h2>
+    <p>Peminjaman dan perizinan dilakukan secara online</p>
+  </div>
+
+  <div class="filters-wrap">
+    <div class="filters-card">
+      <div class="filters-left">
+        <div class="filter-icon" aria-hidden="true">
+          <!-- small filter funnel SVG -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 5H21" stroke="#2B77E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 12H16" stroke="#2B77E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 19H14" stroke="#2B77E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="filters-title">
+          <div class="title-strong">Filters</div>
+        </div>
+      </div>
+
+      <div class="filters-controls">
+        <label class="search">
+          <span class="search-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 21l-4.35-4.35" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="11" cy="11" r="6" stroke="#6B7280" stroke-width="2"/>
+            </svg>
+          </span>
+          <input type="text" placeholder="Search" />
+        </label>
+
+        <select>
+          <option>Gedung</option>
+          <option>Gedung A</option>
+          <option>Gedung B</option>
+        </select>
+
+        <select>
+          <option>Kapasitas</option>
+          <option><= 20</option>
+          <option>21 - 50</option>
+        </select>
+
+        <select>
+          <option>Waktu</option>
+          <option>08:00 - 10:00</option>
+          <option>10:00 - 12:00</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- area cards (kamu bilang card polos — aku sisakan grid kosong untuk nanti diisi) -->
+  <div class="cards-grid">
+    <div class="card-placeholder"></div>
+    <div class="card-placeholder"></div>
+    <div class="card-placeholder"></div>
+    <div class="card-placeholder"></div>
+  </div>
+</section>

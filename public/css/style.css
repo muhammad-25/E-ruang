@@ -6,9 +6,13 @@ body {
 nav {
     display: flex;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 999;
     justify-content: space-between;
     padding: 10px 40px;
-    background: #1E222D;
+    height: 50px;
+    background: #262834;
     border-bottom: 2px solid #4DA8E4;
 }
 
@@ -73,4 +77,107 @@ nav {
     background: #63B7F7;
     border: none;
     color: #1E222D;
+}
+
+
+
+
+.site-footer{
+    position:relative;
+    background:#262834;
+    color:#dbeeea;
+    border-radius:28px;
+    padding:100px 48px;
+    margin:36px;
+    overflow:hidden}
+.footer-inner{
+    max-width:1200px;
+    margin:0 auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    grid-template-columns:320px repeat(3,1fr);
+    gap:40px;
+    align-items:start;
+    position:relative;
+    z-index:2}
+.col-left .brand img{
+    width:120px;
+    display:block;
+    margin-bottom:14px}
+.col-left .desc{
+    color:rgba(255,255,255,0.9);
+    max-width:320px;
+    line-height:1.6}
+.socials{
+    margin-top:22px;
+    display:flex;
+    gap:12px}
+.socials .s{
+    display:inline-flex;
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    background:#fff;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none}
+.socials svg{
+    display:block}
+
+
+.col h3{
+    color:#fff;
+    font-size:22px;
+    margin:8px 0 18px}
+.col ul{
+    list-style:none;
+    padding:0;
+    margin:0}
+.col ul li{
+    margin-bottom:12px}
+.col ul li a{
+    color:rgba(255,255,255,0.85);
+    text-decoration:none;
+    font-size:15px}
+.col ul li a:hover{
+    text-decoration:underline}
+
+
+.footer-watermark{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:-48px;
+    font-size:180px;
+    font-weight:800;
+    color:rgba(255,255,255,0.06);
+    pointer-events:none;
+    user-select:none;
+    white-space:nowrap;
+    z-index:1}
+
+
+/* responsive */
+@media (max-width:1000px){
+
+.footer-inner{
+    grid-template-columns:1fr 1fr;
+    gap:28px}
+.col-left{
+    order:-1}
+}
+@media (max-width:640px){
+
+.site-footer{
+    padding:28px 20px;
+    border-radius:18px;
+    margin:16px}
+.footer-inner{
+    grid-template-columns:1fr;
+    gap:18px}
+.footer-watermark{
+    font-size:72px;
+    right:8px;
+    bottom:-10px}
 }
