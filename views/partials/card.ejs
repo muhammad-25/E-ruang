@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="/css/card.css" />
+<div class="container-card">
+<h1>Daftar Ruang Kelas — Gaya Marketplace (Gratis)</h1>
+
+<div class="grid">
+
+    <!-- Card 1 -->
+
+    <% for (let i = 0; i < 3; i++) { %>
+    <article class="card card--vibrant">
+        <div class="media">
+        <span class="badge available">Tersedia</span>
+        <button class="fav" aria-label="Favorit">❤</button>
+        <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=0b86f5b7b3b2b3a9c3d7f6d8a3e4f4a1" alt="Ruang Kelas"/>
+        </div>
+        <div class="content">
+        <div class="title-row">
+            <div>
+            <div class="title">Ruang Kelas A102</div>
+            <div class="subtitle">Gedung A — Fakultas Ilmu Komputer</div>
+            </div>
+        </div>
+
+        <div class="meta">
+            <div class="chip">Kapasitas: 40</div>
+            <div class="chip ac">AC</div>
+            <div class="chip proy">Proyektor</div>
+        </div>
+
+        <p style="margin:0; font-size:13px; color:#475569">Lokasi: Lantai 1, dekat kantin. Cocok untuk kuliah kecil, seminar, dan praktik.</p>
+
+        <div style="flex:1"></div>
+
+        <div class="bottom">
+            <div class="actions">
+            <button class="btn btn-primary">Booking</button>
+            </div>
+        </div>
+        </div>
+        <div class="footer">
+        <div>Jam operasional: 08:00 - 17:00</div>
+        <div style="color:#64748b; font-weight:600">Terakhir diperbarui 2 hari lalu</div>
+        </div>
+    </article> 
+    <% } %>
+</div>

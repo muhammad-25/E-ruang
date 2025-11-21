@@ -17,22 +17,22 @@
     </div>
 
 
-<div class="stat">
-    <div class="icon"></div>
-    <div class="text">
-        <div class="label">Ruangan Dipakai</div>
-        <div class="value">20</div>
-    </div>
-</div>
+  <div class="stat">
+      <div class="icon"></div>
+      <div class="text">
+          <div class="label">Ruangan Dipakai</div>
+          <div class="value">20</div>
+      </div>
+  </div>
 
 
-    <div class="stat">
-        <div class="icon"></div>
-        <div class="text">
-            <div class="label">Total Ruangan</div>
-            <div class="value">36</div>
-        </div>
-    </div>
+  <div class="stat">
+      <div class="icon"></div>
+      <div class="text">
+          <div class="label">Total Ruangan</div>
+          <div class="value">36</div>
+      </div>
+  </div>
 </section>
 
 <section class="rooms-page">
@@ -45,7 +45,6 @@
     <div class="filters-card">
       <div class="filters-left">
         <div class="filter-icon" aria-hidden="true">
-          <!-- small filter funnel SVG -->
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M3 5H21" stroke="#2B77E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M8 12H16" stroke="#2B77E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -71,8 +70,7 @@
 
         <select>
           <option>Gedung</option>
-          <option>Gedung A</option>
-          <option>Gedung B</option>
+          <option>Gedung GDS</option>
         </select>
 
         <select>
@@ -90,13 +88,7 @@
     </div>
   </div>
 
-  <!-- area cards (kamu bilang card polos — aku sisakan grid kosong untuk nanti diisi) -->
-  <div class="cards-grid">
-    <div class="card-placeholder"></div>
-    <div class="card-placeholder"></div>
-    <div class="card-placeholder"></div>
-    <div class="card-placeholder"></div>
-  </div>
+  <%- include('../partials/card') %>
 </section>
 
 <div class="wrap">
@@ -108,7 +100,7 @@
       <details>
         <summary aria-controls="faq1"><div class="qwrap"><span class="q">1. Bagaimana cara memesan ruangan?</span><span class="q-sub">Langkah singkat untuk melakukan booking</span></div><span class="chev">▾</span></summary>
         <div class="answer" id="faq1">
-         Masuk ke akun → pilih menu <em>Booking</em> → pilih tanggal & jam → pilih ruang → isi form (nama/NIM/NIP, unit, keperluan, estimasi peserta). Lampirkan surat izin bila diperlukan lalu klik <strong>Kirim</strong>. Konfirmasi akan dikirim lewat notifikasi atau email dari admin.
+         Masuk ke akun → pilih menu <em>Booking</em> → pilih tanggal & jam → pilih ruang → isi form. Lampirkan surat izin bila diperlukan lalu klik <strong>Kirim</strong>. Konfirmasi akan dikirim lewat notifikasi.
         </div>
       </details>
 
