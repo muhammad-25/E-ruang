@@ -1,8 +1,20 @@
-/* =========================================
-   TAMBAHAN KHUSUS HALAMAN REGISTER
-   ========================================= */
+/* Reset dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
 
-/* Kita balik urutannya: Gambar dulu, baru Form */
+body {
+    background-color: #2c2c2c; 
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container utama untuk REGISTER (Dibalik: Gambar Kiri, Form Kanan) */
 .register-container {
     display: flex;
     width: 90%;
@@ -14,18 +26,21 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* Bagian Kiri: Gambar */
+/* --- BAGIAN KIRI (GAMBAR) --- */
 .register-image-section {
-    flex: 1.5; /* Lebih lebar */
+    flex: 1.5; /* Bagian gambar lebih lebar */
     position: relative;
     z-index: 1;
-    /* Ganti URL ini dengan foto yang kamu mau */
-    background-image: url('/images/foto-lab.jpg'); 
+    
+    /* Pastikan kamu punya file gambar 'hero.jpg' di folder public/assets/ */
+    /* Sesuai struktur foldermu, pathnya jadi seperti ini: */
+    /* background-image: url('/assets/hero.jpg');  */
+    
     background-size: cover;
     background-position: center;
 }
 
-/* Bagian Kanan: Form Register */
+/* --- BAGIAN KANAN (FORM REGISTER) --- */
 .register-form-section {
     flex: 1;
     background-color: white;
@@ -35,40 +50,89 @@
     justify-content: center;
     position: relative;
     z-index: 2;
-
-    /* PENTING: Melengkung di KIRI */
+    
+    /* KUNCI DESAIN: Melengkung di sisi KIRI */
     border-top-left-radius: 100px;
     border-bottom-left-radius: 100px;
-    
-    /* Margin negatif di KIRI agar menumpuk ke gambar */
+    /* Margin negatif agar menumpuk ke kiri di atas gambar */
     margin-left: -50px; 
 }
 
-/* Judul Register */
-.register-title {
+h2.register-title {
     font-weight: 700;
     font-size: 32px;
     color: #000;
-    text-align: center; /* Di gambar sepertinya rata tengah */
+    text-align: center;
     margin-bottom: 30px;
 }
 
-/* Tombol Register (kita pakai style yang mirip login tapi beda class jika mau custom) */
-.register-btn {
-    width: 200px; /* Di gambar tombolnya agak kecil tidak full width */
-    margin: 20px auto 0 auto; /* Posisi tengah */
+/* Styling Input Fields (Sama seperti login) */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
     display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.input-field-container {
+    position: relative;
+}
+
+.input-field-container input {
+    width: 100%;
+    padding: 10px 5px;
+    border: none;
+    border-bottom: 2px solid #ddd;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.input-field-container input:focus {
+    border-bottom-color: #333;
+}
+.input-field-container input::placeholder {
+    color: #aaa;
+}
+
+
+/* Tombol Register */
+.register-btn {
+    width: 100%;
+    margin-top: 20px;
     padding: 12px;
     background-color: #2c2c2c;
     color: white;
     border: none;
     border-radius: 5px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
 .register-btn:hover {
     background-color: #444;
+}
+
+/* Responsif untuk HP */
+@media (max-width: 768px) {
+    .register-container {
+        flex-direction: column-reverse; /* Dibalik urutannya di HP */
+        height: auto;
+    }
+    .register-form-section {
+        border-radius: 20px 20px 0 0;
+        margin-left: 0;
+        padding: 30px;
+    }
+    .register-image-section {
+        height: 200px;
+        border-radius: 0 0 20px 20px;
+    }
 }

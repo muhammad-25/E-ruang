@@ -49,7 +49,7 @@ app.get('/register', (req, res) => {
 // Route Dashboard Admin
 app.get('/admin-dashboard', (req, res) => {
     // Sesuaikan nama file: admin-dasboard (tanpa 'h' sesuai screenshotmu)
-    res.render('pages/admin-dasboard', { 
+    res.render('pages/admin-dashboard', { 
         layout: false, 
         title: 'Admin Dashboard' 
     });
