@@ -1,0 +1,154 @@
+/* Reset dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #2c2c2c; 
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container utama */
+.login-container {
+    display: flex;
+    width: 90%;
+    max-width: 1000px;
+    height: 600px;
+    background-color: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* --- BAGIAN KIRI (FORM) --- */
+.login-form-section {
+    flex: 1;
+    background-color: white;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+    margin-right: -50px; 
+}
+
+h2.login-title {
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.input-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.input-field-container {
+    position: relative;
+}
+
+.input-field-container input {
+    width: 100%;
+    padding: 10px 35px 10px 5px;
+    border: none;
+    border-bottom: 2px solid #ddd;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.input-field-container input:focus {
+    border-bottom-color: #333;
+}
+
+.input-field-container input::placeholder {
+    color: #aaa;
+}
+
+.input-field-container i {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #333;
+    font-size: 18px;
+}
+
+.forgot-pass-link {
+    text-align: right;
+    margin-top: -15px;
+    margin-bottom: 30px;
+}
+
+.forgot-pass-link a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #2c2c2c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+    background-color: #444;
+}
+
+/* --- BAGIAN KANAN (FOTO) --- */
+.login-image-section {
+    flex: 1.5;
+    position: relative;
+    z-index: 1;
+    
+    /* PENTING: Path ini mengarah ke folder public/images/ */
+    background-image: url('/images/foto-lab.jpg'); 
+    
+    background-size: cover;
+    background-position: center;
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+        height: auto;
+    }
+    .login-form-section {
+        border-radius: 20px 20px 0 0;
+        margin-right: 0;
+        padding: 30px;
+    }
+    .login-image-section {
+        height: 200px;
+        border-radius: 0 0 20px 20px;
+    }
+}

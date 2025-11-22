@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-container">
+            <img src="https://upload.wikimedia.org/wikipedia/id/0/0d/Logo_Universitas_Negeri_Jakarta.png" alt="Logo UNJ" class="logo-img">
+        </div>
+
+        <ul class="nav-links">
+            <li>
+                <a href="#" class="active"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+            </li>
+            <li>
+                <a href="#"><i class="fa-solid fa-file-pen"></i> Pengajuan</a>
+            </li>
+            <div class="sub-menu">
+                <a href="#">Menunggu</a>
+                <a href="#">Disetujui</a>
+                <a href="#">Ditolak</a>
+            </div>
+
+            <li>
+                <a href="#"><i class="fa-solid fa-list"></i> Daftar Ruangan</a>
+            </li>
+            <li>
+                <a href="#"><i class="fa-regular fa-calendar"></i> Jadwal</a>
+            </li>
+            <li>
+                <a href="#"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+            </li>
+            <li>
+                <a href="/login"><i class="fa-solid fa-right-from-bracket"></i> Log out</a>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        
+        <h1 class="header-title">Hallo, Admin</h1>
+        <p class="header-subtitle">Selamat datang di panel pengelolaan peminjaman ruang.</p>
+
+        <div class="stats-container">
+            <div class="card blue">
+                <h3>Peminjaman (bulan ini)</h3>
+                <div class="number">217</div>
+            </div>
+            <div class="card red">
+                <h3>Menunggu Pengajuan</h3>
+                <div class="number">1</div>
+            </div>
+            <div class="card orange">
+                <h3>Ruangan Tersedia</h3>
+                <div class="number">16</div>
+            </div>
+        </div>
+
+        <div class="recent-requests">
+            <h2 class="section-title">Pengajuan Terbaru</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama Pemohon</th>
+                        <th>Ruang</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ahmad</td>
+                        <td>GDS 515</td>
+                        <td>12-11-2005</td>
+                        <td>09.00-12.00</td>
+                        <td><span class="badge pending">Menunggu</span></td>
+                        <td>
+                            <button class="btn btn-approve">Setuju</button>
+                            <button class="btn btn-reject">Tolak</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Dr. Budi Santoso</td>
+                        <td>GDS 515</td>
+                        <td>12-11-2005</td>
+                        <td>09.00-12.00</td>
+                        <td><span class="badge approved">Disetujui</span></td>
+                        <td>
+                            <button class="btn btn-edit">Edit</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Dr. Budi Santoso</td>
+                        <td>GDS 515</td>
+                        <td>12-11-2005</td>
+                        <td>09.00-12.00</td>
+                        <td><span class="badge rejected">Ditolak</span></td>
+                        <td>
+                            <button class="btn btn-edit">Edit</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -27,7 +27,35 @@ app.get('/', (req, res) => {
   res.render('pages/index', { title: 'Beranda', user: 'Vaazi' });
 });
 
+// ... (kode atas biarkan saja)
 
+// Route Login
+app.get('/login', (req, res) => {
+    // layout: false -> agar tidak menggunakan template default (main.ejs)
+    res.render('pages/login', { 
+        layout: false, 
+        title: 'Login Page' 
+    });
+});
+
+// Route Register
+app.get('/register', (req, res) => {
+    res.render('pages/register', { 
+        layout: false, 
+        title: 'Register Page' 
+    });
+});
+
+// Route Dashboard Admin
+app.get('/admin-dashboard', (req, res) => {
+    // Sesuaikan nama file: admin-dasboard (tanpa 'h' sesuai screenshotmu)
+    res.render('pages/admin-dasboard', { 
+        layout: false, 
+        title: 'Admin Dashboard' 
+    });
+});
+
+// ... (module.exports = app; jangan dihapus)
 
 
 module.exports = app;

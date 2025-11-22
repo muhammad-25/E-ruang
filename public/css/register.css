@@ -1,0 +1,74 @@
+/* =========================================
+   TAMBAHAN KHUSUS HALAMAN REGISTER
+   ========================================= */
+
+/* Kita balik urutannya: Gambar dulu, baru Form */
+.register-container {
+    display: flex;
+    width: 90%;
+    max-width: 1000px;
+    height: 600px;
+    background-color: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* Bagian Kiri: Gambar */
+.register-image-section {
+    flex: 1.5; /* Lebih lebar */
+    position: relative;
+    z-index: 1;
+    /* Ganti URL ini dengan foto yang kamu mau */
+    background-image: url('/images/foto-lab.jpg'); 
+    background-size: cover;
+    background-position: center;
+}
+
+/* Bagian Kanan: Form Register */
+.register-form-section {
+    flex: 1;
+    background-color: white;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+
+    /* PENTING: Melengkung di KIRI */
+    border-top-left-radius: 100px;
+    border-bottom-left-radius: 100px;
+    
+    /* Margin negatif di KIRI agar menumpuk ke gambar */
+    margin-left: -50px; 
+}
+
+/* Judul Register */
+.register-title {
+    font-weight: 700;
+    font-size: 32px;
+    color: #000;
+    text-align: center; /* Di gambar sepertinya rata tengah */
+    margin-bottom: 30px;
+}
+
+/* Tombol Register (kita pakai style yang mirip login tapi beda class jika mau custom) */
+.register-btn {
+    width: 200px; /* Di gambar tombolnya agak kecil tidak full width */
+    margin: 20px auto 0 auto; /* Posisi tengah */
+    display: block;
+    padding: 12px;
+    background-color: #2c2c2c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.register-btn:hover {
+    background-color: #444;
+}
