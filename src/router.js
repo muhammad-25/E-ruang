@@ -4,10 +4,14 @@ const expressLayouts = require('express-ejs-layouts');
 const app = express()
 const port = 3000
 const bodyParser = require("body-parser")
-const  db = require("../database")
+const  db = require("../database");
+const { body } = require('express-validator');
+const { ensureGuest } = require('./middlewares/authMiddlewares');
+const authController = require("./controllers/authController")
 
 // ubah info yang di terima ke bentuk json
 app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
@@ -39,12 +43,21 @@ app.get('/login', (req, res) => {
 });
 
 // Route Register
-app.get('/register', (req, res) => {
-    res.render('pages/register', { 
-        layout: false, 
-        title: 'Register Page' 
-    });
-});
+
+app.get('/register', ensureGuest, authController.showRegister);
+app.post(
+  '/register',
+  [
+    body('name').trim().notEmpty().withMessage('Nama harus diisi'),
+    body('email').isEmail().withMessage('Email tidak valid').normalizeEmail(),
+    body('password').isLength({ min: 6 }).withMessage('Password minimal 6 karakter'),
+    body('passwordConfirm').custom((value, { req }) => {
+      if (value !== req.body.password) throw new Error('Konfirmasi password tidak cocok');
+      return true;
+    })
+  ],
+  authController.register
+);
 
 // Route Dashboard Admin
 app.get('/admin-dashboard', (req, res) => {

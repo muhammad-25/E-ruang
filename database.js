@@ -1,18 +1,28 @@
-const mysql = require("mysql2")
+// db.js
+const mysql = require('mysql2/promise');
+// require('dotenv').config();
 
-const connection = mysql.createConnection ({
-    host: 'localhost',
-    user: 'root',       // default user XAMPP
-    password: '',       // kosong kalau belum diatur
-    database: 'e-ruang'
-})
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Koneksi database gagal:', err);
-  } else {
-    console.log('Terhubung ke MySQL!');
-  }
+// konfigurasi pool
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASS || '',
+  database: process.env.DB_NAME || 'e-ruang',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-module.exports = connection
+// test koneksi sekali saat start (opsional)
+(async () => {
+  try {
+    const conn = await pool.getConnection();
+    await conn.ping(); // cek koneksi
+    conn.release();
+    console.log('Terhubung ke MySQL (pool)!');
+  } catch (err) {
+    console.error('Koneksi database gagal:', err);
+  }
+})();
+
+module.exports = pool;
