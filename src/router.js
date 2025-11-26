@@ -63,7 +63,7 @@ app.post(
 app.get('/admin-dashboard', (req, res) => {
     // Sesuaikan nama file: admin-dasboard (tanpa 'h' sesuai screenshotmu)
     res.render('pages/admin-dashboard', { 
-        layout: false, 
+        layout: "layouts/admin", 
         title: 'Admin Dashboard' 
     });
 });
