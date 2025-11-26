@@ -1,0 +1,285 @@
+<!-- Add Class Main Content (EJS partial) -->
+<!-- Expectation: this partial is inserted into your layout (sidebar/header already present) -->
+<link rel="stylesheet" href="/css/card.css" />
+<section class="panel">
+<header class="panel__header">
+    <div class="title">
+    <h1>Tambah Kelas untuk Dipinjam</h1>
+    <p class="subtitle">Masukkan informasi ruang agar mahasiswa/staff bisa melakukan peminjaman.</p>
+    </div>
+    <div class="actions">
+    <button id="previewToggle" class="btnadd btn--ghost">Tampilkan Preview</button>
+    </div>
+</header>
+
+<div class="panel__body">
+    <form id="addClassForm" action="/admin/kelas/tambah" method="POST" enctype="multipart/form-data">
+    <div class="grid">
+        <!-- Form column -->
+        <div class="card form-card">
+        <label class="field">
+            <span class="label">Nama Ruang</span>
+            <input name="name" id="roomName" type="text" placeholder="Contoh: Lab Jaringan 301" required />
+        </label>
+
+        <div class="row two-cols">
+            <label class="field">
+            <span class="label">Gedung</span>
+            <input name="building" type="text" placeholder="Contoh: Gedung A" />
+            </label>
+
+            <label class="field">
+            <span class="label">Nomor/Ruang</span>
+            <input name="room_number" type="text" placeholder="Contoh: 301" />
+            </label>
+        </div>
+
+        <label class="field">
+            <span class="label">Deskripsi singkat</span>
+            <textarea name="description" rows="3" placeholder="Tambah detail: kapasitas, catatan, akses listrik..."></textarea>
+        </label>
+
+        <div class="field">
+            <label class="label">Kapasitas (orang)</label>
+            <input name="capacity" id="capacity" type="number" min="1" max="1000" value="30" />
+        </div>
+
+        <div class="field">
+            <span class="label">Fasilitas</span>
+            <div id="facilities" class="chips">
+            <button type="button" class="chip">Proyektor</button>
+            <button type="button" class="chip">AC</button>
+            <button type="button" class="chip">Wifi</button>
+            <button type="button" class="chip">Meja & Kursi</button>
+            <button type="button" class="chip">Papan Tulis</button>
+            </div>
+            <input type="hidden" name="facilities_selected" id="facilitiesSelected" />
+        </div>
+
+        <div class="field">
+            <span class="label">Warna aksen ruangan</span>
+            <div class="flex-inline">
+            <input id="accentColor" name="accent_color" type="color" value="#4DA8E4" />
+            <small class="muted">Warna ini muncul di preview</small>
+            </div>
+        </div>
+
+        <div class="field">
+            <span class="label">Foto Ruang (maks 3)</span>
+            <input id="photos" name="photos" type="file" accept="image/*" multiple />
+            <div id="photoPreview" class="photo-preview"></div>
+        </div>
+
+        <div class="field schedule">
+            <span class="label">Jadwal tersedia</span>
+            <div id="scheduleList">
+            <!-- initial schedule row (multi-day) -->
+            <div class="schedule-row">
+                <div class="days">
+                    <label><input type="checkbox" value="Senin" class="day-checkbox">Senin</label>
+                    <label><input type="checkbox" value="Selasa" class="day-checkbox">Selasa</label>
+                    <label><input type="checkbox" value="Rabu" class="day-checkbox">Rabu</label>
+                    <label><input type="checkbox" value="Kamis" class="day-checkbox">Kamis</label>
+                    <label><input type="checkbox" value="Jumat" class="day-checkbox">Jumat</label>
+                    <label><input type="checkbox" value="Sabtu" class="day-checkbox">Sabtu</label>
+                    <label><input type="checkbox" value="Minggu" class="day-checkbox">Minggu</label>
+                </div>
+                <input name="schedule_start[]" type="time" />
+                <span class="to">—</span>
+                <input name="schedule_end[]" type="time" />
+                <input type="hidden" name="schedule_days[]" class="schedule-days-hidden" />
+                <button type="button" class="btnadd btn--remove">Hapus</button>
+            </div>
+            </div>
+            <button type="button" id="addScheduleBtn" class="btnadd btn--sm">Tambah Jadwal</button>
+        </div>
+
+        <div class="form-footer">
+            <button type="submit" class="btnadd btn--primary">Simpan Ruang</button>
+            <button type="reset" class="btnadd btn--muted">Reset</button>
+        </div>
+        </div>
+
+        <!-- Preview column -->
+        <aside class="card preview-card" id="previewCard">
+            <%- include('../partials/carda') %>
+        </aside>
+    </div>
+    </form>
+</div>
+</section>
+
+<style>
+:root{
+    --bg: linear-gradient(180deg, #fff7fb 0%, #f3fbff 100%);
+    --card: #ffffff;
+    --accent: #4DA8E4;
+    --muted: #6b7280;
+    --glass: rgba(255,255,255,0.7);
+    --radius: 12px;
+}
+
+/* container expects layout to manage full width; keep max width comfortable */
+#add-class-main.container{padding:28px 24px;}
+.panel{background:var(--bg); padding:18px; border-radius:14px; box-shadow:0 6px 24px rgba(20,20,60,0.08)}
+.panel__header{display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px}
+.title h1{margin:0; font-size:20px}
+.subtitle{margin:2px 0 0; color:var(--muted); font-size:13px}
+.days label{margin: 5px;color: black;}
+.grid{display:grid; grid-template-columns:1fr 360px; gap:18px}
+
+.card{background:var(--card); border-radius:var(--radius); padding:16px; box-shadow: 0 6px 18px rgba(15,20,40,0.05)}
+.form-card{min-height:480px}
+
+.field{margin-bottom:12px}
+.label{display:block; font-weight:600; margin-bottom:8px}
+input[type="text"], textarea, select, input[type="time"]{width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6eef8; background:#fbfdff}
+textarea{resize:vertical}
+
+.row.two-cols{display:flex; gap:12px}
+.row.two-cols .field{flex:1}
+
+input[type=range]{width:100%}
+
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chip{background:linear-gradient(90deg,#f6f9ff,#fff7fb); border:1px solid #e6eef8; padding:8px 10px; border-radius:999px; cursor:pointer}
+.chip.active{background:linear-gradient(90deg,var(--accent),#7bd0ff); color:#fff; border:0}
+
+.muted{color:var(--muted); font-size:13px}
+
+.photo-preview{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap}
+.photo-preview img{width:80px; height:60px; object-fit:cover; border-radius:8px; box-shadow:0 6px 14px rgba(15,20,40,0.06)}
+
+.preview-card{display:flex; flex-direction:column; gap:12px;}
+.preview-top{position:relative}
+.preview-badge{position:absolute; left:12px; top:12px; background:var(--accent); color:#fff; padding:6px 10px; border-radius:8px; font-size:12px}
+.preview-image{height:160px; border-radius:8px; background:linear-gradient(90deg,var(--accent), #7bd0ff); display:flex; align-items:center; justify-content:center; color:#fff}
+.placeholder-icon{width:56px; height:56px; opacity:0.9}
+
+.preview-body h3{margin:0}
+.preview-body p{margin:6px 0}
+.preview-meta{display:flex; gap:12px; color:var(--muted); font-size:13px}
+.preview-actions{display:flex; gap:8px; margin-top:12px}
+
+.btnadd{border:0; margin: 10px 10px; padding:8px 12px; border-radius:8px; cursor:pointer}
+.btn--primary{background:var(--accent); color:#fff}
+.btn--muted{background:#f2f4f8}
+.btn--outline{background:transparent; border:1px solid #e6eef8}
+.btn--small{padding:6px 8px}
+.btn--ghost{background:transparent}
+.btn--sm{padding:6px 8px; border-radius:6px}
+.btn--remove{background:#fff0f0; color:#9b1c1c; border-radius:6px; border:1px solid #ffd6d6; padding:6px 8px}
+
+.form-footer{display:flex; gap:10px; justify-content:flex-start; margin-top:8px}
+
+/* responsive */
+@media (max-width:980px){
+    .grid{grid-template-columns:1fr}
+    .preview-card{order:-1}
+}
+</style>
+
+<script>
+(function(){
+    // Facilities chip selection
+    const chips = document.querySelectorAll('#facilities .chip');
+    const facilitiesSelected = document.getElementById('facilitiesSelected');
+    function updateFacilitiesField(){
+    const picked = Array.from(chips).filter(c=>c.classList.contains('active')).map(c=>c.textContent.trim());
+    facilitiesSelected.value = picked.join(',');
+    document.getElementById('p-fac').textContent = picked.slice(0,5).join(', ') || 'Tidak ada';
+    }
+    chips.forEach(ch => ch.addEventListener('click', ()=>{ ch.classList.toggle('active'); updateFacilitiesField(); }));
+    updateFacilitiesField();
+
+    // Capacity (number input)
+    const capacity = document.getElementById('capacity');
+    const pCap = document.getElementById('p-cap');
+    capacity.addEventListener('input', ()=>{ pCap.textContent = capacity.value; });
+
+    // Photo preview
+    const photosIn = document.getElementById('photos');
+    const photoPreview = document.getElementById('photoPreview');
+    const previewImage = document.getElementById('previewImage');
+    photosIn && photosIn.addEventListener('change', (e)=>{
+    photoPreview.innerHTML = '';
+    const files = Array.from(e.target.files).slice(0,3);
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev)=>{
+        const img = document.createElement('img'); img.src = ev.target.result; photoPreview.appendChild(img);
+        previewImage.style.backgroundImage = `url(${ev.target.result})`;
+        previewImage.style.backgroundSize = 'cover';
+        previewImage.innerHTML = '';
+        };
+        reader.readAsDataURL(file);
+    });
+    });
+
+    // Update preview text fields live
+    const roomName = document.getElementById('roomName');
+    roomName && roomName.addEventListener('input', ()=> document.getElementById('p-name').textContent = roomName.value || 'Lab Jaringan 301');
+    const building = document.querySelector('input[name="building"]');
+    const roomNumber = document.querySelector('input[name="room_number"]');
+    function updateSub(){ document.getElementById('p-sub').textContent = ((building.value||'Gedung A') + ' — ' + (roomNumber.value||'301')) }
+    building && building.addEventListener('input', updateSub);
+    roomNumber && roomNumber.addEventListener('input', updateSub);
+
+    // Accent color -> update CSS variable for preview
+
+    // Schedule add/remove (with multi-day selection per row)
+    const scheduleList = document.getElementById('scheduleList');
+    document.getElementById('addScheduleBtn').addEventListener('click', ()=>{
+    const row = document.createElement('div'); row.className = 'schedule-row';
+    row.innerHTML = `<div class="days">
+        <label><input type="checkbox" value="Senin" class="day-checkbox">Senin</label>
+        <label><input type="checkbox" value="Selasa" class="day-checkbox">Selasa</label>
+        <label><input type="checkbox" value="Rabu" class="day-checkbox">Rabu</label>
+        <label><input type="checkbox" value="Kamis" class="day-checkbox">Kamis</label>
+        <label><input type="checkbox" value="Jumat" class="day-checkbox">Jumat</label>
+        <label><input type="checkbox" value="Sabtu" class="day-checkbox">Sabtu</label>
+        <label><input type="checkbox" value="Minggu" class="day-checkbox">Minggu</label>
+        </div>
+        <input name="schedule_start[]" type="time" /> <span class="to">—</span> <input name="schedule_end[]" type="time" />
+        <input type="hidden" name="schedule_days[]" class="schedule-days-hidden" />
+        <button type="button" class="btn--remove">Hapus</button>`;
+    scheduleList.appendChild(row);
+    });
+
+    // update hidden input when checkboxes change
+    scheduleList.addEventListener('change', (e)=>{
+    if(e.target.classList && e.target.classList.contains('day-checkbox')){
+        const row = e.target.closest('.schedule-row');
+        const hidden = row.querySelector('.schedule-days-hidden');
+        const picked = Array.from(row.querySelectorAll('.day-checkbox')).filter(c=>c.checked).map(c=>c.value);
+        hidden.value = picked.join(',');
+    }
+    });
+
+    scheduleList.addEventListener('click', (e)=>{
+    if(e.target.classList.contains('btn--remove')) e.target.closest('.schedule-row').remove();
+    });
+
+    // Preview toggle
+    const previewCard = document.getElementById('previewCard');
+    document.getElementById('previewToggle').addEventListener('click', ()=>{
+    previewCard.classList.toggle('hidden');
+    });
+
+    // Basic form validation prior to submit (simple client-side check)
+    const form = document.getElementById('addClassForm');
+    form.addEventListener('submit', (e)=>{
+    if(!roomName.value.trim()){ e.preventDefault(); alert('Nama ruang harus diisi'); roomName.focus(); return false; }
+    // ensure schedule hidden inputs are up to date
+    Array.from(document.querySelectorAll('.schedule-row')).forEach(row=>{
+        const hidden = row.querySelector('.schedule-days-hidden');
+        if(hidden){
+        const picked = Array.from(row.querySelectorAll('.day-checkbox')).filter(c=>c.checked).map(c=>c.value);
+        hidden.value = picked.join(',');
+        }
+    });
+    // facilities data already stored to hidden input
+    });
+
+})();
+</script>

@@ -68,6 +68,15 @@ app.get('/admin-dashboard', (req, res) => {
     });
 });
 
+app.get('/add', (req, res) => {
+    // Sesuaikan nama file: admin-dasboard (tanpa 'h' sesuai screenshotmu)
+    res.render('pages/tambahKelas', { 
+        layout: "layouts/admin", 
+        title: 'Tambah Kelas' 
+    });
+});
+
+
 // ... (module.exports = app; jangan dihapus)
 
 
