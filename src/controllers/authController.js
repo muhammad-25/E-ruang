@@ -112,7 +112,7 @@ exports.login = async (req, res) => {
     const user = await User.findByEmail(email);
     if (!user) {
       return res.status(401).render('pages/login', {
-        errors: [{ msg: 'Email  salah' }],
+        errors: [{ msg: 'Email atau password salah' }],
         layout: false,
         title: 'Login Page',
         old

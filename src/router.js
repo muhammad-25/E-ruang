@@ -6,7 +6,7 @@ const port = 3000
 const bodyParser = require("body-parser")
 const  db = require("../database");
 const { body } = require('express-validator');
-const { ensureGuest, ensureAdmin } = require('./middlewares/authMiddlewares');
+const { ensureGuest, ensureUser, ensureAdmin, ensureAuth } = require('./middlewares/authMiddlewares');
 const authController = require("./controllers/authController")
 
 const session = require('express-session');
@@ -42,7 +42,7 @@ const sessionOptions = {
 app.use(session(sessionOptions));
 
 
-app.get('/', (req, res) => {
+app.get('/', ensureUser,(req, res) => {
   res.render('pages/index', { title: 'Beranda', user: 'Vaazi' });
 });
 
@@ -83,7 +83,8 @@ app.post(
 );
 
 // ---------- LOGOUT ----------
-app.post('/logout', authController.logout);
+app.get('/logout', authController.logout);
+// app.post('/logout', authController.logout);
 
 
 // Route Dashboard Admin

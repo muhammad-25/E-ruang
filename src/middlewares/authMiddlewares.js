@@ -9,6 +9,11 @@ exports.ensureGuest = (req, res, next) => {
   return next();
 };
 
+exports.ensureUser = (req, res, next) => {
+  if (req.session && req.session.userRoleId == "1") return res.redirect('/admin-dashboard');
+  return next();
+};
+
 exports.ensureAdmin = (req, res, next) => {
   if (req.session && req.session.userRoleId != "1") return res.redirect('/');
   return next();
