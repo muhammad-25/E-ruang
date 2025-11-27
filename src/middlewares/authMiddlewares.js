@@ -8,3 +8,8 @@ exports.ensureGuest = (req, res, next) => {
   if (req.session && req.session.userId) return res.redirect('/');
   return next();
 };
+
+exports.ensureAdmin = (req, res, next) => {
+  if (req.session && req.session.userRoleId != "1") return res.redirect('/');
+  return next();
+};

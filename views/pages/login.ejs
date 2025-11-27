@@ -16,14 +16,19 @@
     <div class="login-container">
         <div class="login-form-section">
             <h2 class="login-title">LOGIN</h2>
-            
+            <% if (errors && errors.length) { %>
+                <ul>
+                <% errors.forEach(function(err){ %>
+                    <li><%= err.msg %></li>
+                <% }) %>
+                </ul>
+            <% } %>
             <form action="/login" method="POST">
                 
                 <div class="input-group">
-                    <label for="username">Username</label>
+                    <label for="email">Email</label>
                     <div class="input-field-container">
-                        <input type="text" id="username" name="username" placeholder="Username/NIM" required>
-                        <i class="fa-regular fa-user"></i>
+                        <input type="email" id="email" name="email" placeholder="Email" required value="<%= (old && old.email) ? old.email :'' %>">
                     </div>
                 </div>
 

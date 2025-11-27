@@ -6,8 +6,10 @@ const port = 3000
 const bodyParser = require("body-parser")
 const  db = require("../database");
 const { body } = require('express-validator');
-const { ensureGuest } = require('./middlewares/authMiddlewares');
+const { ensureGuest, ensureAdmin } = require('./middlewares/authMiddlewares');
 const authController = require("./controllers/authController")
+
+const session = require('express-session');
 
 // ubah info yang di terima ke bentuk json
 app.use(bodyParser.json())
@@ -24,23 +26,44 @@ app.set('layout', 'layouts/main'); // layout default (views/layouts/main.ejs)
 // static files (css/js/images)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// ======== SESSION SETUP ========
 
+const sessionOptions = {
+  name: 'connect.sid', // nama cookie default
+  secret: process.env.SESSION_SECRET || 'rahasia_development', // ganti di production lewat env var
+  resave: false,                // jangan simpan session kalau tidak berubah
+  saveUninitialized: false,     // jangan simpan session kosong
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 1 hari (ms) — sesuaikan jika perlu
+    httpOnly: true,
+  }
+};
+
+app.use(session(sessionOptions));
 
 
 app.get('/', (req, res) => {
   res.render('pages/index', { title: 'Beranda', user: 'Vaazi' });
 });
 
-// ... (kode atas biarkan saja)
 
 // Route Login
-app.get('/login', (req, res) => {
-    // layout: false -> agar tidak menggunakan template default (main.ejs)
-    res.render('pages/login', { 
-        layout: false, 
-        title: 'Login Page' 
-    });
-});
+app.get('/login', ensureGuest, authController.showLogin);
+
+app.post(
+  '/login',
+  [
+    body('email')
+      .isEmail()
+      .withMessage('Email tidak valid')
+      .normalizeEmail(),
+
+    body('password')
+      .notEmpty()
+      .withMessage('Password wajib diisi')
+  ],
+  authController.login
+);
 
 // Route Register
 
@@ -59,25 +82,24 @@ app.post(
   authController.register
 );
 
+// ---------- LOGOUT ----------
+app.post('/logout', authController.logout);
+
+
 // Route Dashboard Admin
-app.get('/admin-dashboard', (req, res) => {
-    // Sesuaikan nama file: admin-dasboard (tanpa 'h' sesuai screenshotmu)
+app.get('/admin-dashboard', ensureAdmin ,(req, res) => {
     res.render('pages/admin-dashboard', { 
         layout: "layouts/admin", 
         title: 'Admin Dashboard' 
     });
 });
 
-app.get('/add', (req, res) => {
-    // Sesuaikan nama file: admin-dasboard (tanpa 'h' sesuai screenshotmu)
+app.get('/add', ensureAdmin ,(req, res) => {
     res.render('pages/tambahKelas', { 
         layout: "layouts/admin", 
         title: 'Tambah Kelas' 
     });
 });
-
-
-// ... (module.exports = app; jangan dihapus)
 
 
 module.exports = app;
