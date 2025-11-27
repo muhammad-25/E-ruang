@@ -17,10 +17,10 @@ body {
 /* Container utama untuk REGISTER (Dibalik: Gambar Kiri, Form Kanan) */
 .register-container {
     display: flex;
-    width: 90%;
-    max-width: 1000px;
-    height: 600px;
-    background-color: #fff;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    background-color: #000000;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -34,7 +34,9 @@ body {
     
     /* Pastikan kamu punya file gambar 'hero.jpg' di folder public/assets/ */
     /* Sesuai struktur foldermu, pathnya jadi seperti ini: */
-    /* background-image: url('/assets/hero.jpg');  */
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('/assets/labkom.jpg'); 
     
     background-size: cover;
     background-position: center;
@@ -55,7 +57,7 @@ body {
     border-top-left-radius: 100px;
     border-bottom-left-radius: 100px;
     /* Margin negatif agar menumpuk ke kiri di atas gambar */
-    margin-left: -50px; 
+    margin-left: -100px; 
 }
 
 h2.register-title {

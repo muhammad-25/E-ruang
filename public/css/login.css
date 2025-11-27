@@ -17,19 +17,19 @@ body {
 /* Container utama */
 .login-container {
     display: flex;
-    width: 90%;
-    max-width: 1000px;
-    height: 600px;
-    background-color: #fff;
+    width: 100%;
+    max-width: 1100%;
+    height: 100%;
+    background-color: rgb(0, 0, 0);
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    /* box-shadow: 0 10px 30px rgba(0,0,0,0.3); */
 }
 
 /* --- BAGIAN KIRI (FORM) --- */
 .login-form-section {
     flex: 1;
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     padding: 50px;
     display: flex;
     flex-direction: column;
@@ -38,7 +38,7 @@ body {
     z-index: 2;
     border-top-right-radius: 100px;
     border-bottom-right-radius: 100px;
-    margin-right: -50px; 
+    margin-right: -100px; 
 }
 
 h2.login-title {
@@ -128,11 +128,14 @@ h2.login-title {
     flex: 1.5;
     position: relative;
     z-index: 1;
+
     
     /* PENTING: Path ini mengarah ke folder public/images/ */
-    background-image: url('/images/foto-lab.jpg'); 
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('/assets/labkom.jpg'); 
     
-    background-size: cover;
+    background-size:cover;
     background-position: center;
 }
 
