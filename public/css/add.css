@@ -247,3 +247,85 @@ input[type=range]{
     justify-content:flex-start;
     margin-top:8px
 }
+
+
+.day-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.day-card {
+  position: relative;
+  padding: 10px 18px;
+  background: #f7f9fc;
+  border: 2px solid #dce3f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+  font-weight: 600;
+  user-select: none;
+}
+
+.day-card input {
+  display: none;
+}
+
+.day-card input:checked + span {
+  color: white;
+}
+
+.day-card input:checked + span,
+.day-card input:checked ~ span {
+  color: #fff;
+}
+
+.day-card input:checked ~ span {
+  color: white;
+}
+
+.day-card input:checked + span {
+  color: white;
+}
+
+.day-card:has(input:checked) {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: white;
+  transform: scale(1.05);
+}
+
+
+.facilities-selector {
+  display: flex;
+  gap: 10px;
+  color: black;
+  flex-wrap: wrap;
+}
+
+.facility-card {
+  position: relative;
+  padding: 10px 18px;
+  background: #f7f9fc;
+  border: 2px solid #dce3f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+  font-weight: 600;
+  user-select: none;
+}
+
+.facility-card input {
+  display: none;
+}
+
+.facility-card input:checked + span {
+  color: white;
+}
+
+.facility-card:has(input:checked) {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: white;
+  transform: scale(1.05);
+}

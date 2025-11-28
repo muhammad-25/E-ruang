@@ -2,14 +2,42 @@ const express = require('express')
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const app = express()
-const port = 3000
+const adminController = require('./controllers/adminController');
 const bodyParser = require("body-parser")
-const  db = require("../database");
+const multer = require('multer');
 const { body } = require('express-validator');
 const { ensureGuest, ensureUser, ensureAdmin, ensureAuth } = require('./middlewares/authMiddlewares');
 const authController = require("./controllers/authController")
  
 const session = require('express-session');
+
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // Pastikan folder public/uploads/rooms sudah dibuat
+    cb(null, 'public/uploads/rooms'); 
+  },
+  filename: function (req, file, cb) {
+    // Format nama file: room-timestamp-random.jpg
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'room-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // Limit 2MB
+  fileFilter: function (req, file, cb) {
+    // Hanya terima gambar
+    const filetypes = /jpeg|jpg|png|gif|webp/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Hanya file gambar yang diperbolehkan!'));
+  }
+});
 
 // ubah info yang di terima ke bentuk json
 app.use(bodyParser.json())
@@ -98,12 +126,7 @@ app.get('/admin-dashboard', ensureAdmin ,(req, res) => {
     });
 });
 
-app.get('/add', ensureAdmin ,(req, res) => {
-    res.render('pages/tambahKelas', { 
-        layout: "layouts/admin", 
-        title: 'Tambah Kelas' 
-    });
-});
-
+app.get('/add', adminController.viewTambahKelas);
+app.post('/add', upload.array('photos', 3), adminController.storeClass);
 
 module.exports = app;

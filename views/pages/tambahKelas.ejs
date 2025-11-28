@@ -14,80 +14,134 @@
 </header>
 
 <div class="panel__body">
-    <form id="addClassForm" action="/admin/kelas/tambah" method="POST" enctype="multipart/form-data">
+    <form id="addClassForm" action="/add" method="POST" enctype="multipart/form-data">
     <div>
         <!-- Form column -->
         <div class="card form-card">
-        <label class="field">
-            <span class="label">Nama Ruang</span>
-            <input name="name" id="roomName" type="text" placeholder="Contoh: Lab Jaringan 301" required />
-        </label>
-
-        <div class="row two-cols">
             <label class="field">
-            <span class="label">Gedung</span>
-            <input name="building" type="text" placeholder="Contoh: Gedung A" />
+                <span class="label">Nama Ruang</span>
+                <input name="name" id="roomName" type="text" placeholder="Contoh: Lab Jaringan 301" required />
             </label>
 
-            <label class="field">
-            <span class="label">Nomor/Ruang</span>
-            <input name="room_number" type="text" placeholder="Contoh: 301" />
-            </label>
-        </div>
+            <div class="row two-cols">
+                <label class="field">
+                <span class="label">Gedung</span>
+                <input name="building" type="text" placeholder="Contoh: Gedung A" />
+                </label>
 
-        <label class="field">
-            <span class="label">Deskripsi singkat</span>
-            <textarea name="description" rows="3" placeholder="Tambah detail: kapasitas, catatan, akses listrik..."></textarea>
-        </label>
-
-        <div class="field">
-            <label class="label">Kapasitas (orang)</label>
-            <input name="capacity" id="capacity" type="number" min="1" max="1000" value="30" />
-        </div>
-
-        <div class="field">
-            <span class="label">Fasilitas</span>
-            <div id="facilities" class="chips">
-            <button type="button" class="chip">Proyektor</button>
-            <button type="button" class="chip">AC</button>
-            <button type="button" class="chip">Wifi</button>
-            <button type="button" class="chip">Meja & Kursi</button>
-            <button type="button" class="chip">Papan Tulis</button>
+                <label class="field">
+                <span class="label">Nomor/Ruang</span>
+                <input name="room_number" type="text" placeholder="Contoh: 301" />
+                </label>
             </div>
-            <input type="hidden" name="facilities_selected" id="facilitiesSelected" />
-        </div>
 
+            <label class="field">
+                <span class="label">Deskripsi singkat</span>
+                <textarea name="description" rows="3" placeholder="Tambah detail: kapasitas, catatan, akses listrik..."></textarea>
+            </label>
 
-        <div class="field">
-            <span class="label">Foto Ruang (maks 3)</span>
-            <input id="photos" name="photos" type="file" accept="image/*" multiple />
-            <div id="photoPreview" class="photo-preview"></div>
-        </div>
+            <div class="field">
+                <label class="label">Kapasitas (orang)</label>
+                <input name="capacity" id="capacity" type="number" min="1" max="1000" value="30" />
+            </div>
 
-        <div class="field schedule">
-            <span class="label">Jadwal tersedia</span>
-            <div id="scheduleList">
-            <div class="schedule-row">
-                <div class="days">
-                    <label><input type="checkbox" value="Senin" class="day-checkbox">Senin</label>
-                    <label><input type="checkbox" value="Selasa" class="day-checkbox">Selasa</label>
-                    <label><input type="checkbox" value="Rabu" class="day-checkbox">Rabu</label>
-                    <label><input type="checkbox" value="Kamis" class="day-checkbox">Kamis</label>
-                    <label><input type="checkbox" value="Jumat" class="day-checkbox">Jumat</label>
-                    <label><input type="checkbox" value="Sabtu" class="day-checkbox">Sabtu</label>
-                    <label><input type="checkbox" value="Minggu" class="day-checkbox">Minggu</label>
+            <div class="field">
+                <span class="label">Fasilitas</span>
+                <div id="facilities" class="facilities-selector">
+
+                    <label class="facility-card">
+                        <input type="checkbox" name="facilities[]" value="1">
+                        <span>Proyektor</span>
+                    </label>
+
+                    <label class="facility-card">
+                        <input type="checkbox" name="facilities[]" value="2">
+                        <span>AC</span>
+                    </label>
+
+                    <label class="facility-card">
+                        <input type="checkbox" name="facilities[]" value="3">
+                        <span>WiFi</span>
+                    </label>
+
+                    <label class="facility-card">
+                        <input type="checkbox" name="facilities[]" value="4">
+                        <span>Meja & Kursi</span>
+                    </label>
+
+                    <label class="facility-card">
+                        <input type="checkbox" name="facilities[]" value="5">
+                        <span>Papan Tulis</span>
+                    </label>
+                    
+                    <label class="facility-card">
+                        <input type="checkbox" name="facilities[]" value="6">
+                        <span>Sound System</span>
+                    </label>
+
                 </div>
-                <input name="schedule_start[]" type="time" />
-                <span class="to">—</span>
-                <input name="schedule_end[]" type="time" />
-                <input type="hidden" name="schedule_days[]" class="schedule-days-hidden" />
             </div>
-            </div>
-        </div>
 
-        <div class="form-footer">
-            <button type="submit" class="btnadd btn--primary">Simpan Ruang</button>
-        </div>
+
+            <div class="field">
+                <span class="label">Foto Ruang (maks 3)</span>
+                <input id="photos" name="photos" type="file" accept="image/*" multiple />
+                <div id="photoPreview" class="photo-preview"></div>
+            </div>
+
+            <div class="field schedule">
+                <span class="label">Jadwal tersedia</span>
+                <div id="scheduleList">
+                <div class="schedule-row">
+                    <div class="days">
+                        <div class="day-selector">
+                            <label class="day-card">
+                                <input type="checkbox" value="Senin" class="day-checkbox">
+                                <span>Senin</span>
+                            </label>
+
+                            <label class="day-card">
+                                <input type="checkbox" value="Selasa" class="day-checkbox">
+                                <span>Selasa</span>
+                            </label>
+
+                            <label class="day-card">
+                                <input type="checkbox" value="Rabu" class="day-checkbox">
+                                <span>Rabu</span>
+                            </label>
+
+                            <label class="day-card">
+                                <input type="checkbox" value="Kamis" class="day-checkbox">
+                                <span>Kamis</span>
+                            </label>
+
+                            <label class="day-card">
+                                <input type="checkbox" value="Jumat" class="day-checkbox">
+                                <span>Jumat</span>
+                            </label>
+
+                            <label class="day-card">
+                                <input type="checkbox" value="Sabtu" class="day-checkbox">
+                                <span>Sabtu</span>
+                            </label>
+
+                            <label class="day-card">
+                                <input type="checkbox" value="Minggu" class="day-checkbox">
+                                <span>Minggu</span>
+                            </label>
+                            </div>
+                    </div>
+                    <input name="schedule_start[]" type="time" />
+                    <span class="to">—</span>
+                    <input name="schedule_end[]" type="time" />
+                    <input type="hidden" name="schedule_days[]" class="schedule-days-hidden" />
+                </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btnadd btn--primary">Simpan Ruang</button>
+            </div>
         </div>
     </div>
     </form>
@@ -95,4 +149,81 @@
 </section>
 
 
- 
+ <script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+
+
+    // ==========================================
+    // 2. LOGIKA JADWAL (CHECKBOX HARI)
+    // ==========================================
+    const scheduleList = document.getElementById('scheduleList');
+
+    // Event listener change pada container jadwal
+    scheduleList.addEventListener('change', function(e) {
+        // Cek jika yang berubah adalah checkbox hari
+        if (e.target.classList.contains('day-checkbox')) {
+            
+            // Cari elemen 'row' terdekat (parent dari checkbox ini)
+            // Ini penting agar logika tidak tertukar antar baris jadwal jika ada banyak baris
+            const row = e.target.closest('.schedule-row');
+            
+            // Cari semua checkbox yang TERCENTANG di dalam baris INI saja
+            const checkedBoxes = row.querySelectorAll('.day-checkbox:checked');
+            
+            // Cari input hidden target di dalam baris INI saja
+            const hiddenInput = row.querySelector('.schedule-days-hidden');
+            
+            // Ambil value (Senin, Selasa, dst) dan gabungkan koma
+            const selectedDays = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            // Masukkan ke input hidden
+            hiddenInput.value = selectedDays.join(',');
+            
+            console.log('Jadwal row ini:', hiddenInput.value); // Untuk debug
+        }
+    });
+
+    // ==========================================
+    // 3. (BONUS) PREVIEW GAMBAR
+    // ==========================================
+    const photoInput = document.getElementById('photos');
+    const photoPreview = document.getElementById('photoPreview');
+
+    if(photoInput) {
+        photoInput.addEventListener('change', function() {
+            photoPreview.innerHTML = ''; // Clear preview lama
+            const files = this.files;
+
+            if (files) {
+                Array.from(files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.height = '80px';
+                            img.style.marginRight = '10px';
+                            img.style.borderRadius = '8px';
+                            img.style.objectFit = 'cover';
+                            photoPreview.appendChild(img);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    /* CSS Tambahan untuk visualisasi tombol aktif */
+    .chip.active-chip {
+        background-color: #007bff; /* Warna biru (sesuaikan tema) */
+        color: white;
+        border-color: #0056b3;
+    }
+</style>
+
+
