@@ -1,46 +1,67 @@
 <link rel="stylesheet" href="/css/card.css" />
 <div class="container-card">
-<h1>Daftar Ruang Kelas</h1>
+    <h1>Daftar Ruang Kelas</h1>
 
-<div class="grid">
+    <div class="grid">
+        <% if (locals.rooms && rooms.length > 0) { %>
+            
+            <% rooms.forEach(room => { %>
+            <article class="card card--vibrant">
+                <div class="media">
+                    <span class="badge available">Tersedia</span>
+                    <button class="fav" aria-label="Favorit">❤</button>
+                    
+                    <img 
+                        src="<%= room.thumbnail ? '/uploads/rooms/' + room.thumbnail : 'https://placehold.co/600x400?text=No+Image' %>" 
+                        alt="<%= room.name %>"
+                        loading="lazy"
+                    />
+                </div>
+                
+                <div class="content">
+                    <div class="title-row">
+                        <div>
+                            <div class="title"><%= room.name %> (<%= room.code %>)</div>
+                            <div class="subtitle"><%= room.gedung || 'Gedung tidak diketahui' %></div>
+                        </div>
+                    </div>
 
-    <!-- Card 1 -->
+                    <div class="meta">
+                        <div class="chip">Kapasitas: <%= room.capacity %></div>
+                        
+                        <% if (room.facilities && room.facilities.length > 0) { %>
+                            <% room.facilities.slice(0, 3).forEach(fac => { %>
+                                <div class="chip"><%= fac.nama %></div>
+                            <% }) %>
+                            <% if (room.facilities.length > 3) { %>
+                                <div class="chip">+<%= room.facilities.length - 3 %></div>
+                            <% } %>
+                        <% } %>
+                    </div>
 
-    <% for (let i = 0; i < 3; i++) { %>
-    <article class="card card--vibrant">
-        <div class="media">
-        <span class="badge available">Tersedia</span>
-        <button class="fav" aria-label="Favorit">❤</button>
-        <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=0b86f5b7b3b2b3a9c3d7f6d8a3e4f4a1" alt="Ruang Kelas"/>
-        </div>
-        <div class="content">
-        <div class="title-row">
-            <div>
-            <div class="title">Ruang Kelas A102</div>
-            <div class="subtitle">Gedung A — Fakultas Ilmu Komputer</div>
+                    <p style="margin:0; font-size:13px; color:#475569">
+                        <%= room.deskripsi ? room.deskripsi.substring(0, 80) + '...' : 'Tidak ada deskripsi.' %>
+                    </p>
+
+                    <div style="flex:1"></div>
+
+                    <div class="bottom">
+                        <div class="actions">
+                            <a href="/booking/<%= room.id %>" class="btn btn-primary">Booking</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <div>Jam operasional: 08:00 - 17:00</div>
+                </div>
+            </article> 
+            <% }) %>
+
+        <% } else { %>
+            <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+                <h3>Belum ada ruangan yang tersedia saat ini.</h3>
             </div>
-        </div>
-
-        <div class="meta">
-            <div class="chip">Kapasitas: 40</div>
-            <div class="chip ac">AC</div>
-            <div class="chip proy">Proyektor</div>
-        </div>
-
-        <p style="margin:0; font-size:13px; color:#475569">Lokasi: Lantai 1, dekat kantin. Cocok untuk kuliah kecil, seminar, dan praktik.</p>
-
-        <div style="flex:1"></div>
-
-        <div class="bottom">
-            <div class="actions">
-            <button class="btn btn-primary">Booking</button>
-            </div>
-        </div>
-        </div>
-        <div class="footer">
-        <div>Jam operasional: 08:00 - 17:00</div>
-        <div style="color:#64748b; font-weight:600">Terakhir diperbarui 2 hari lalu</div>
-        </div>
-    </article> 
-    <% } %>
+        <% } %>
+    </div>
 </div>

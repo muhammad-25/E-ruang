@@ -3,6 +3,20 @@
 
 const db = require('../../database'); 
 
+// --- TAMBAHKAN FUNGSI HELPER INI ---
+async function query(sql, params = []) {
+  if (typeof db.execute === 'function') {
+    const [rows] = await db.execute(sql, params);
+    return rows;
+  }
+  if (typeof db.query === 'function') {
+    const [rows] = await db.query(sql, params);
+    return rows;
+  }
+  throw new Error('Database client error');
+}
+// ------------------------------------
+
 const RoomFacilities = {
   // add single mapping
   async addFacilityToRoom(roomId, facilityId) {
@@ -26,9 +40,11 @@ const RoomFacilities = {
   },
 
   async getFacilitiesByRoom(roomId) {
+    // Perhatikan: di DB kolom nama fasilitas adalah 'nama', bukan 'name'
+    // Saya ubah ORDER BY f.name menjadi ORDER BY f.nama sesuai SQL dump kamu
     const sql = `SELECT f.* FROM facilities f
       JOIN room_facilities rf ON rf.facility_id = f.id
-      WHERE rf.room_id = ? ORDER BY f.name ASC`;
+      WHERE rf.room_id = ? ORDER BY f.nama ASC`;
     return await query(sql, [roomId]);
   },
 
@@ -40,7 +56,6 @@ const RoomFacilities = {
   },
 
   // Replace all facilities for a room with a given array of facilityIds
-  // Uses transaction if underlying pool supports getConnection
   async replaceFacilitiesForRoom(roomId, facilityIds = []) {
     if (typeof db.getConnection === 'function') {
       const conn = await db.getConnection();
@@ -53,7 +68,6 @@ const RoomFacilities = {
           for (const fid of facilityIds) {
             params.push(roomId, fid);
           }
-          // Note: do not use ? for full VALUES list, provide constructed placeholders
           const insertSql = `INSERT INTO room_facilities (room_id, facility_id) VALUES ${placeholders}`;
           await conn.execute(insertSql, params);
         }
@@ -67,7 +81,7 @@ const RoomFacilities = {
       }
     }
 
-    // fallback non-transactional: delete then insert sequentially
+    // fallback non-transactional
     await query('DELETE FROM room_facilities WHERE room_id = ?', [roomId]);
     if (Array.isArray(facilityIds) && facilityIds.length) {
       for (const fid of facilityIds) {
@@ -78,8 +92,6 @@ const RoomFacilities = {
   }
 };
 
-module.exports.RoomPhotos = module.exports; // first export (for compatibility)
-module.exports.Facilities = module.exports; // not ideal; but we want separate modules in separate files
-module.exports.RoomFacilities = RoomFacilities; // exported pivot model
-
-
+module.exports.RoomPhotos = module.exports; 
+module.exports.Facilities = module.exports; 
+module.exports.RoomFacilities = RoomFacilities;
