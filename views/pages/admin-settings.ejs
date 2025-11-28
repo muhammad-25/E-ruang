@@ -1,20 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengaturan - E-RUANG</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <link rel="stylesheet" href="/css/admin-settings.css">
-    <link rel="stylesheet" href="/css/admin-dashboard.css"> </head>
-<body>
 
-    <%- include('../partials/adminNavbar') %>
-
-    <div class="settings-container">
+<div class="settings-container">
         
         <div class="settings-header">
             <h2>Pengaturan</h2>
@@ -41,11 +28,11 @@
                     <div class="form-row">
                         <div class="form-col">
                             <label>Nama Lengkap</label>
-                            <input type="text" name="name" value="<%= user ? user.name : '' %>" placeholder="Masukkan nama lengkap">
+                            <input type="text" name="name"  placeholder="Masukkan nama lengkap">
                         </div>
                         <div class="form-col">
                             <label>Email</label>
-                            <input type="email" name="email" value="<%= user ? user.email : '' %>" placeholder="Masukkan email">
+                            <input type="email" name="email"  placeholder="Masukkan email">
                         </div>
                     </div>
                     <div class="form-group" style="margin-top: 20px;">
@@ -135,5 +122,3 @@
             if(activeBtn) activeBtn.classList.add('active');
         }
     </script>
-</body>
-</html>

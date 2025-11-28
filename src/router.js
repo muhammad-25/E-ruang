@@ -129,4 +129,11 @@ app.get('/admin-dashboard', ensureAdmin ,(req, res) => {
 app.get('/add', adminController.viewTambahKelas);
 app.post('/add', upload.array('photos', 3), adminController.storeClass);
 
+app.get('/admin-settings', ensureAdmin ,(req, res) => {
+    res.render('pages/admin-settings', { 
+        layout: "layouts/admin", 
+        title: 'Admin Dashboard' 
+    });
+});
+
 module.exports = app;
