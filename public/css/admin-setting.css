@@ -1,0 +1,175 @@
+/* Container Utama */
+.settings-container {
+    padding: 30px;
+    background-color: #F4F6F9; /* Abu-abu muda background dashboard */
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 260px; /* Sesuaikan dengan lebar sidebar kamu */
+}
+
+/* Header Section */
+.settings-header {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    margin-bottom: 25px;
+}
+
+.settings-header h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.settings-header p {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Card Utama */
+.settings-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    overflow: hidden;
+    padding: 30px;
+}
+
+/* Navigasi Tab */
+.settings-tabs {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 30px;
+    gap: 30px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 15px 5px;
+    font-size: 16px;
+    color: #888;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-btn i {
+    font-size: 18px;
+}
+
+.tab-btn:hover {
+    color: #4A90E2;
+}
+
+.tab-btn.active {
+    color: #4A90E2;
+    font-weight: 600;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #4A90E2;
+    border-radius: 3px 3px 0 0;
+}
+
+/* Form Styles */
+.tab-content {
+    display: none; /* Default hidden */
+    animation: fadeIn 0.4s ease;
+}
+
+.tab-content.active {
+    display: block; /* Show active */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-col {
+    flex: 1;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background-color: #fff;
+    transition: border 0.3s;
+}
+
+input:focus {
+    border-color: #4A90E2;
+    outline: none;
+}
+
+/* Button */
+.btn-save {
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    transition: background 0.3s;
+}
+
+.btn-save:hover {
+    background-color: #357ABD;
+}
+
+/* Warning Box (Khusus Keamanan) */
+.warning-box {
+    margin-top: 25px;
+    background-color: #FFF9E6;
+    border: 1px solid #FFEeba;
+    padding: 15px;
+    border-radius: 8px;
+    color: #856404;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.warning-box strong {
+    color: #d69e2e;
+}

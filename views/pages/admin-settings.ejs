@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan - E-RUANG</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/css/admin-settings.css">
+    <link rel="stylesheet" href="/css/admin-dashboard.css"> </head>
+<body>
+
+    <%- include('../partials/adminNavbar') %>
+
+    <div class="settings-container">
+        
+        <div class="settings-header">
+            <h2>Pengaturan</h2>
+            <p>Kelola Pengaturan Sistem dan Akun Anda.</p>
+        </div>
+
+        <div class="settings-card">
+            
+            <div class="settings-tabs">
+                <button class="tab-btn active" onclick="openTab('profil')">
+                    <i class="fa-regular fa-user"></i> Profil Admin
+                </button>
+                <button class="tab-btn" onclick="openTab('umum')">
+                    <i class="fa-solid fa-graduation-cap"></i> Informasi Umum
+                </button>
+                <button class="tab-btn" onclick="openTab('keamanan')">
+                    <i class="fa-solid fa-lock"></i> Keamanan
+                </button>
+            </div>
+
+            <div id="profil" class="tab-content active">
+                <h3 style="margin-bottom: 20px; color: #333;">Informasi Profil</h3>
+                <form action="/admin/settings/profile" method="POST">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>Nama Lengkap</label>
+                            <input type="text" name="name" value="<%= user ? user.name : '' %>" placeholder="Masukkan nama lengkap">
+                        </div>
+                        <div class="form-col">
+                            <label>Email</label>
+                            <input type="email" name="email" value="<%= user ? user.email : '' %>" placeholder="Masukkan email">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Nomor Telepon</label>
+                        <input type="tel" name="phone" placeholder="Contoh: 08123456789">
+                    </div>
+                    
+                    <button type="submit" class="btn-save">
+                        <i class="fa-regular fa-floppy-disk"></i> Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+
+            <div id="umum" class="tab-content">
+                <h3 style="margin-bottom: 20px; color: #333;">Informasi Umum</h3>
+                <form action="/admin/settings/general" method="POST">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label>Nama Institusi</label>
+                            <input type="text" name="institution" placeholder="Universitas Negeri Jakarta">
+                        </div>
+                        <div class="form-col">
+                            <label>Email Institusi</label>
+                            <input type="email" name="inst_email" placeholder="admin@unj.ac.id">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Alamat</label>
+                        <input type="text" name="address" placeholder="Jl. Rawamangun Muka...">
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor Telepon Kantor</label>
+                        <input type="tel" name="office_phone" placeholder="(021) 1234567">
+                    </div>
+
+                    <button type="submit" class="btn-save">
+                        <i class="fa-regular fa-floppy-disk"></i> Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+
+            <div id="keamanan" class="tab-content">
+                <h3 style="margin-bottom: 20px; color: #333;">Ubah Password</h3>
+                <form action="/admin/settings/security" method="POST">
+                    <div class="form-group">
+                        <label>Password Saat Ini</label>
+                        <input type="password" name="currentPassword" placeholder="Masukkan password lama">
+                    </div>
+                    <div class="form-group">
+                        <label>Password Baru</label>
+                        <input type="password" name="newPassword" placeholder="Masukkan password baru">
+                    </div>
+                    <div class="form-group">
+                        <label>Konfirmasi Password Baru</label>
+                        <input type="password" name="confirmPassword" placeholder="Ulangi password baru">
+                    </div>
+
+                    <button type="submit" class="btn-save">
+                        <i class="fa-regular fa-floppy-disk"></i> Simpan Perubahan
+                    </button>
+
+                    <div class="warning-box">
+                        <strong>Catatan:</strong> Pastikan password baru Anda memiliki minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka untuk keamanan yang lebih baik.
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function openTab(tabName) {
+            // 1. Sembunyikan semua konten tab
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // 2. Hilangkan status active dari semua tombol
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // 3. Munculkan konten yang dipilih
+            document.getElementById(tabName).classList.add('active');
+
+            // 4. Set tombol yang diklik jadi active
+            // (Mencari tombol yang onclick-nya sesuai)
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabName));
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+    </script>
+</body>
+</html>
