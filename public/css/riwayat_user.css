@@ -38,22 +38,11 @@
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-* {
-    box-sizing: border-box;
-    border-width: 0;
-    border-style: solid;
-}
 
-body {
-    margin: 0;
-    font-family: var(--font-sans);
-    color: var(--color-slate-900);
-    min-height: 100vh;
-    background-image: linear-gradient(to bottom right, var(--color-slate-50), var(--color-blue-50), var(--color-indigo-50));
-}
 
-h1, h2, h3, p { margin: 0; }
-button, select, input { font-family: inherit; }
+
+
+
 
 /* --- UTILITIES & LAYOUT --- */
 .container {

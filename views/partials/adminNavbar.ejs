@@ -6,20 +6,34 @@
 
         <ul class="nav-links">
             <li>
-                <a href="#" class="active"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a>
+                <a href="/admin-dashboard" class="<%= typeof currentRoute !== 'undefined' && currentRoute === '/admin-dashboard' ? 'active' : '' %>">
+                    <i class="fa-solid fa-table-cells-large"></i> Dashboard
+                </a>
             </li>
-            <li>
-                <a href="#"><i class="fa-solid fa-file-pen"></i> Pengajuan</a>
-            </li>
-            <div class="sub-menu">
-                <a href="#">Menunggu</a>
-                <a href="#">Disetujui</a>
-                <a href="#">Ditolak</a>
-            </div>
 
             <li>
-                <a href="#"><i class="fa-solid fa-list"></i> Daftar Ruangan</a>
+                <a href="javascript:void(0)" class="dropdown-toggle">
+                    <span><i class="fa-solid fa-file-pen"></i> Pengajuan</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </a>
+                <div class="sub-menu">
+                    <a href="#">Menunggu</a>
+                    <a href="#">Disetujui</a>
+                    <a href="#">Ditolak</a>
+                </div>
             </li>
+
+            <li>
+                <a href="javascript:void(0)" class="dropdown-toggle">
+                    <span><i class="fa-solid fa-list"></i> Daftar Ruangan</span>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </a>
+                <div class="sub-menu">
+                    <a href="/list-ruangan">List Ruangan</a>
+                    <a href="/add">Tambah Ruangan</a>
+                </div>
+            </li>
+
             <li>
                 <a href="#"><i class="fa-regular fa-calendar"></i> Jadwal</a>
             </li>
@@ -27,8 +41,31 @@
                 <a href="/admin-settings"><i class="fa-solid fa-gear"></i> Pengaturan</a>
             </li>
             <li>
-                <a href="/login"><i class="fa-solid fa-right-from-bracket"></i> Log out</a>
+                <a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Log out</a>
             </li>
         </ul>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Ambil semua elemen dengan class dropdown-toggle
+            const dropdowns = document.querySelectorAll(".dropdown-toggle");
+
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener("click", function () {
+                    // 1. Toggle class 'active' pada tombol yang diklik (untuk putar panah)
+                    this.classList.toggle("active");
+
+                    // 2. Ambil elemen sub-menu tepat setelah tombol ini
+                    const submenu = this.nextElementSibling;
+
+                    // 3. Toggle class 'show' untuk memicu animasi CSS
+                    if (submenu.classList.contains("show")) {
+                        submenu.classList.remove("show");
+                    } else {
+                        submenu.classList.add("show");
+                    }
+                });
+            });
+        });
+    </script>
 </aside>

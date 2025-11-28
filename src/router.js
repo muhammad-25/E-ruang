@@ -8,7 +8,9 @@ const multer = require('multer');
 const { body } = require('express-validator');
 const { ensureGuest, ensureUser, ensureAdmin, ensureAuth } = require('./middlewares/authMiddlewares');
 const authController = require("./controllers/authController")
- 
+ const RoomModel = require('./models/roomModel');
+const RoomPhoto = require('./models/roomphoto');
+const RoomFacilities = require('./models/roomFacilities');
 const session = require('express-session');
 
 
@@ -70,8 +72,50 @@ const sessionOptions = {
 app.use(session(sessionOptions));
 
 
-app.get('/', ensureUser,(req, res) => {
-  res.render('pages/index', { title: 'Beranda', user: 'Vaazi' });
+// --- BAGIAN ATAS (IMPORT) ---
+// Pastikan path models sesuai dengan struktur foldermu
+
+
+// ... (kode import lainnya tetap sama) ...
+
+// --- BAGIAN ROUTE HOMEPAGE ---
+// Ganti bagian app.get('/', ...) yang lama dengan kode di bawah ini:
+
+app.get('/', ensureUser, async (req, res) => {
+  try {
+    // 1. Ambil semua ruangan yang aktif
+    const rooms = await RoomModel.listRooms({ onlyActive: true });
+
+    // 2. Ambil detail tambahan (Foto & Fasilitas) untuk setiap ruangan
+    // Kita pakai Promise.all agar efisien
+    const roomsWithData = await Promise.all(rooms.map(async (room) => {
+      
+      // Ambil foto
+      const photos = await RoomPhoto.listPhotosByRoom(room.id);
+      // Cari foto utama (is_main = 1), kalau tidak ada pakai foto pertama
+      const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
+
+      // Ambil fasilitas
+      // Perhatikan: di file roomFacilities.js kamu exportnya: module.exports.RoomFacilities
+      const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
+
+      return {
+        ...room, // data asli (id, name, capacity, dll)
+        thumbnail: mainPhoto ? mainPhoto.filename : null, // simpan nama file foto
+        facilities: facilities || [] // simpan array fasilitas
+      };
+    }));
+
+    res.render('pages/index', { 
+      title: 'Beranda', 
+      user: req.user ? req.user.name : 'User', // Ambil nama user dari session jika ada
+      rooms: roomsWithData // KIRIM DATA KE VIEW
+    });
+
+  } catch (error) {
+    console.error("Error fetching homepage data:", error);
+    res.status(500).send("Terjadi kesalahan pada server.");
+  }
 });
 
 app.get('/history',(req, res) => {
@@ -156,5 +200,12 @@ app.post('/admin/settings/security', ensureAdmin, (req, res) => {
 
 app.get('/add', adminController.viewTambahKelas);
 app.post('/add', upload.array('photos', 3), adminController.storeClass);
+
+app.get('/admin-settings', ensureAdmin ,(req, res) => {
+    res.render('pages/admin-settings', { 
+        layout: "layouts/admin", 
+        title: 'Admin Dashboard' 
+    });
+});
 
 module.exports = app;
