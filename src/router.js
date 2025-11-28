@@ -8,7 +8,7 @@ const  db = require("../database");
 const { body } = require('express-validator');
 const { ensureGuest, ensureUser, ensureAdmin, ensureAuth } = require('./middlewares/authMiddlewares');
 const authController = require("./controllers/authController")
-
+ 
 const session = require('express-session');
 
 // ubah info yang di terima ke bentuk json
@@ -46,6 +46,9 @@ app.get('/', ensureUser,(req, res) => {
   res.render('pages/index', { title: 'Beranda', user: 'Vaazi' });
 });
 
+app.get('/history',(req, res) => {
+  res.render('pages/history', { title: 'Riwayat', user: 'Vaazi' });
+});
 
 // Route Login
 app.get('/login', ensureGuest, authController.showLogin);

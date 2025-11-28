@@ -1,0 +1,73 @@
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<link rel="stylesheet" href="/css/riwayat_user.css" />
+
+
+<div class="header-wrapper">
+    <div class="container header-content">
+        <div class="control-bar mb-6">
+            <div>
+                <h1 class="page-title">Riwayat Peminjaman</h1>
+                <p class="page-desc">Kelola dan pantau semua riwayat peminjaman ruangan Anda</p>
+            </div>
+
+        </div>
+
+        <div class="flex flex-col sm-row gap-3">
+            <div class="relative" style="flex: 1;">
+                <i data-lucide="search" class="icon-absolute-left"></i>
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    placeholder="Cari ruangan atau keperluan..." 
+                    class="input-field input-with-icon"
+                >
+            </div>
+            <div class="flex gap-3">
+                <div class="relative" style="width: 180px;">
+                    <i data-lucide="filter" class="icon-absolute-left" style="z-index: 10;"></i>
+                    <select id="statusFilter" class="select-field select-with-icon">
+                        <option value="all">Semua Status</option>
+                        <option value="upcoming">Akan Datang</option>
+                        <option value="ongoing">Berlangsung</option>
+                        <option value="completed">Selesai</option>
+                        <option value="cancelled">Dibatalkan</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="icon-absolute-right"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-8">
+    <div class="view-toggle-container">
+        <button 
+            onclick="setView('timeline')" 
+            id="btn-timeline"
+            class="btn-view active"
+        >
+            Timeline View
+        </button>
+        <button 
+            onclick="setView('grid')" 
+            id="btn-grid"
+            class="btn-view"
+        >
+            Grid View
+        </button>
+    </div>
+
+    <div id="bookings-container" class="timeline-layout">
+        </div>
+
+    <div id="empty-state" class="empty-state">
+        <div class="empty-icon-box">
+            <i data-lucide="search" class="w-8 h-8 text-slate-400" style="color: var(--color-slate-400);"></i>
+        </div>
+        <h3 class="font-semibold" style="margin-bottom: 0.5rem;">Tidak ada hasil</h3>
+        <p style="color: var(--color-slate-600);">Coba ubah filter atau kata kunci pencarian Anda</p>
+    </div>
+</div>
+
+<script src="/js/riwayat_user.js"></script>
