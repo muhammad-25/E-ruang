@@ -14,6 +14,67 @@ body {
 }
 
 /* --- SIDEBAR (KIRI) --- */
+
+/* --- SUB-MENU & ANIMASI --- */
+
+/* Parent menu yang punya sub-menu */
+.dropdown-toggle {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between; /* Agar panah ada di kanan */
+    align-items: center;
+}
+
+/* Ikon panah kecil di kanan */
+.arrow-icon {
+    font-size: 10px;
+    transition: transform 0.3s ease; /* Animasi putar panah */
+}
+
+/* Saat menu terbuka, panah berputar 90 derajat */
+.dropdown-toggle.active .arrow-icon {
+    transform: rotate(90deg);
+}
+
+/* Style Sub-menu (Default: Tersembunyi) */
+.sub-menu {
+    list-style: none;
+    padding-left: 0;
+    
+    /* KUNCI ANIMASI: Max-height 0 ke sekian pixel */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    
+    /* Transisi halus untuk tinggi dan transparansi */
+    transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
+    
+    border-radius: 10px;
+    margin-top: 5px;
+}
+
+/* Link di dalam sub-menu */
+.sub-menu a {
+    padding: 10px 15px 10px 50px; /* Indentasi teks */
+    font-size: 13px;
+    color: #bbb;
+    display: block;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.sub-menu a:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Class tambahan via JS saat menu dibuka */
+.sub-menu.show {
+    max-height: 300px; /* Nilai max-height harus lebih besar dari konten asli */
+    opacity: 1;
+    margin-bottom: 10px;
+}
+
 .sidebar {
     width: 260px;
     background-color: #545F71;
@@ -74,7 +135,7 @@ body {
 /* Sub-menu (Menunggu, Disetujui, Ditolak) */
 .sub-menu {
     padding-left: 45px; /* Indentasi ke dalam */
-    margin-top: -5px;
+    margin-top: 5;
     margin-bottom: 5px;
 }
 
