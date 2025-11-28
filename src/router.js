@@ -122,8 +122,36 @@ app.get('/logout', authController.logout);
 app.get('/admin-dashboard', ensureAdmin ,(req, res) => {
     res.render('pages/admin-dashboard', { 
         layout: "layouts/admin", 
-        title: 'Admin Dashboard' 
+        title: 'Admin Dashboard',
+        path: '/admin-dashboard'
     });
+
+});
+
+// 1. Route untuk Menampilkan Halaman Pengaturan
+app.get('/admin-settings', ensureAdmin, (req, res) => {
+    res.render('pages/admin-settings', { 
+        layout: "layouts/admin", // PENTING: Agar sidebar admin tetap muncul
+        title: 'Pengaturan Akun',
+        user: req.session, // Mengirim data session (nama/email) ke form
+        path: '/admin-settings'
+    });
+});
+
+// Nanti kita buat controller khususnya, sementara kita redirect dulu biar gak error 404
+app.post('/admin/settings/profile', ensureAdmin, (req, res) => {
+    console.log('Update Profil:', req.body);
+    res.redirect('/admin-settings'); // Balik lagi ke halaman setting
+});
+
+app.post('/admin/settings/general', ensureAdmin, (req, res) => {
+    console.log('Update Info Umum:', req.body);
+    res.redirect('/admin-settings');
+});
+
+app.post('/admin/settings/security', ensureAdmin, (req, res) => {
+    console.log('Update Password:', req.body);
+    res.redirect('/admin-settings');
 });
 
 app.get('/add', adminController.viewTambahKelas);
