@@ -116,6 +116,10 @@ app.get('/history',(req, res) => {
   res.render('pages/history', { title: 'Riwayat', user: 'Vaazi' });
 });
 
+app.get('/detail_ruangan',(req, res) => {
+  res.render('pages/detail_ruangan', { title: 'Riwayat', user: 'Vaazi' });
+});
+
 app.get('/profile', (req, res) => {
     
     // Kita buat data bohong-bohongan (Dummy)
