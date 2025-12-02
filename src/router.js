@@ -117,7 +117,7 @@ app.get('/history',(req, res) => {
 });
 
 app.get('/detail_ruangan',(req, res) => {
-  res.render('pages/detail_ruangan', { title: 'Riwayat', user: 'Vaazi' });
+  res.render('pages/detail_ruangan', { title: 'Detail_Ruangan', user: 'Vaazi' });
 });
 
 app.get('/profile', (req, res) => {

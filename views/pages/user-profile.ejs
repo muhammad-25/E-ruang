@@ -47,9 +47,6 @@
                     <button class="tab-btn active" onclick="openTab('biodata')">
                         <i class="fa-regular fa-id-card"></i> Biodata Diri
                     </button>
-                    <button class="tab-btn" onclick="openTab('riwayat')">
-                        <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Peminjaman
-                    </button>
                     <button class="tab-btn" onclick="openTab('keamanan')">
                         <i class="fa-solid fa-shield-halved"></i> Keamanan akun
                     </button>
@@ -105,42 +102,7 @@
                     </form>
                 </div>
 
-                <div id="riwayat" class="tab-content">
-                    <h3 style="margin-bottom: 20px; color: #333; font-size: 18px;">Pengajuan Terakhir Anda</h3>
-                    
-                    <div class="history-table-container">
-                        <table class="history-table">
-                            <thead>
-                                <tr>
-                                    <th>Tanggal Pinjam</th>
-                                    <th>Ruangan</th>
-                                    <th>Keperluan</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>28 Nov 2025, 09:00</td>
-                                    <td><strong>Lab Komputer A</strong></td>
-                                    <td>Praktikum Mandiri PPW</td>
-                                    <td><span class="status-badge status-menunggu">Menunggu</span></td>
-                                </tr>
-                                <tr>
-                                    <td>20 Nov 2025, 13:00</td>
-                                    <td><strong>Ruang Sidang Lt.3</strong></td>
-                                    <td>Rapat Himpunan</td>
-                                    <td><span class="status-badge status-disetujui">Disetujui</span></td>
-                                </tr>
-                                <tr>
-                                    <td>15 Nov 2025, 08:00</td>
-                                    <td><strong>Aula Serbaguna</strong></td>
-                                    <td>Seminar Proposal</td>
-                                    <td><span class="status-badge status-ditolak">Ditolak</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                     </div>
+
 
                 <div id="keamanan" class="tab-content">
                     <form action="/profile/security" method="POST">
