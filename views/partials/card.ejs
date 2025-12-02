@@ -6,56 +6,53 @@
         <% if (locals.rooms && rooms.length > 0) { %>
             
             <% rooms.forEach(room => { %>
-            <article class="card card--vibrant">
-                <div class="media">
-                    <span class="badge available">Tersedia</span>
-                    <button class="fav" aria-label="Favorit">❤</button>
-                    
-                    <img 
-                        src="<%= room.thumbnail ? '/uploads/rooms/' + room.thumbnail : 'https://placehold.co/600x400?text=No+Image' %>" 
-                        alt="<%= room.name %>"
-                        loading="lazy"
-                    />
-                </div>
-                
-                <div class="content">
-                    <div class="title-row">
-                        <div>
-                            <div class="title"><%= room.name %> (<%= room.code %>)</div>
-                            <div class="subtitle"><%= room.gedung || 'Gedung tidak diketahui' %></div>
-                        </div>
-                    </div>
-
-                    <div class="meta">
-                        <div class="chip">Kapasitas: <%= room.capacity %></div>
+            <a href="/room/<%= room.id %>">
+                <article class="card card--vibrant">
+                    <div class="media">
+                        <span class="badge available">Tersedia</span>
+                        <button class="fav" aria-label="Favorit">❤</button>
                         
-                        <% if (room.facilities && room.facilities.length > 0) { %>
-                            <% room.facilities.slice(0, 3).forEach(fac => { %>
-                                <div class="chip"><%= fac.nama %></div>
-                            <% }) %>
-                            <% if (room.facilities.length > 3) { %>
-                                <div class="chip">+<%= room.facilities.length - 3 %></div>
-                            <% } %>
-                        <% } %>
+                        <img 
+                            src="<%= room.thumbnail ? '/uploads/rooms/' + room.thumbnail : 'https://placehold.co/600x400?text=No+Image' %>" 
+                            alt="<%= room.name %>"
+                            loading="lazy"
+                        />
                     </div>
-
-                    <p style="margin:0; font-size:13px; color:#475569">
-                        <%= room.deskripsi ? room.deskripsi.substring(0, 80) + '...' : 'Tidak ada deskripsi.' %>
-                    </p>
-
-                    <div style="flex:1"></div>
-
-                    <div class="bottom">
-                        <div class="actions">
-                            <a href="/booking/<%= room.id %>" class="btn btn-primary">Booking</a>
+                    
+                    <div class="content">
+                        <div class="title-row">
+                            <div>
+                                <div class="title"><%= room.name %> (<%= room.code %>)</div>
+                                <div class="subtitle"><%= room.gedung || 'Gedung tidak diketahui' %></div>
+                            </div>
                         </div>
+
+                        <div class="meta">
+                            <div class="chip">Kapasitas: <%= room.capacity %></div>
+                            
+                            <% if (room.facilities && room.facilities.length > 0) { %>
+                                <% room.facilities.slice(0, 3).forEach(fac => { %>
+                                    <div class="chip"><%= fac.nama %></div>
+                                <% }) %>
+                                <% if (room.facilities.length > 3) { %>
+                                    <div class="chip">+<%= room.facilities.length - 3 %></div>
+                                <% } %>
+                            <% } %>
+                        </div>
+
+                        <p style="margin:0; font-size:13px; color:#475569">
+                            <%= room.deskripsi ? room.deskripsi.substring(0, 80) + '...' : 'Tidak ada deskripsi.' %>
+                        </p>
+
+                        <div style="flex:1"></div>
+
                     </div>
-                </div>
-                
-                <div class="footer">
-                    <div>Jam operasional: 08:00 - 17:00</div>
-                </div>
-            </article> 
+                    
+                    <div class="footer">
+                        <div>Jam operasional: 08:00 - 17:00</div>
+                    </div>
+                </article> 
+            </a>
             <% }) %>
 
         <% } else { %>

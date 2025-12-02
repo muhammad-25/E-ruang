@@ -12,7 +12,7 @@ const authController = require("./controllers/authController")
 const RoomPhoto = require('./models/roomphoto');
 const RoomFacilities = require('./models/roomFacilities');
 const session = require('express-session');
-
+const roomController = require('./controllers/roomController'); 
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -116,9 +116,8 @@ app.get('/history',(req, res) => {
   res.render('pages/history', { title: 'Riwayat', user: 'Vaazi' });
 });
 
-app.get('/detail_ruangan',(req, res) => {
-  res.render('pages/detail_ruangan', { title: 'Detail_Ruangan', user: 'Vaazi' });
-});
+app.get('/room/:id', roomController.getRoomDetail);
+
 
 app.get('/profile', (req, res) => {
     
@@ -214,7 +213,7 @@ app.post('/admin/settings/security', ensureAdmin, (req, res) => {
     res.redirect('/admin-settings');
 });
 
-app.get('/add', adminController.viewTambahKelas);
+app.get('/add', ensureAdmin ,adminController.viewTambahKelas);
 app.post('/add', upload.array('photos', 3), adminController.storeClass);
 
 app.get('/admin-settings', ensureAdmin ,(req, res) => {

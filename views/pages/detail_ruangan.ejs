@@ -1,35 +1,46 @@
 <link rel="stylesheet" href="/css/detail_ruangan.css" />
 
 <div class="wrap">
- 
     <div class="grid">
         <main>
         <div class="card">
             <div class="media" id="media">
-            <img id="mainImg" src="https://images.unsplash.com/photo-1542317854-4b3b3c9b7f0c?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="Ruang Kuliah">
-            <div class="thumbs" id="thumbs">
-                <div class="thumb active" data-src="https://images.unsplash.com/photo-1542317854-4b3b3c9b7f0c?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder"><img src="https://images.unsplash.com/photo-1542317854-4b3b3c9b7f0c?q=80&w=200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="t1"></div>
-                <div class="thumb" data-src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder"><img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="t2"></div>
-                <div class="thumb" data-src="https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder"><img src="https://images.unsplash.com/photo-1557800636-894a64c1696f?q=80&w=200&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="t3"></div>
-            </div>
+                <% 
+                   // Helper URL Gambar
+                   const mainImgUrl = mainPhoto ? `/uploads/rooms/${mainPhoto.filename}` : 'https://placehold.co/800x600?text=No+Image';
+                %>
+                <img id="mainImg" src="<%= mainImgUrl %>" alt="<%= room.name %>">
+                
+                <div class="thumbs" id="thumbs">
+                    <% if (photos && photos.length > 0) { %>
+                        <% photos.forEach((photo, index) => { %>
+                            <div class="thumb <%= (mainPhoto && photo.id === mainPhoto.id) ? 'active' : '' %>" 
+                                 data-src="/uploads/rooms/<%= photo.filename %>">
+                                <img src="/uploads/rooms/<%= photo.filename %>" alt="thumb-<%= index %>">
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
             </div>
 
             <div class="content">
             <div class="title">
                 <div>
-                <h1>Ruang Kuliah LT3-05</h1>
-                <div class="sub">Gedung A • Lantai 3 • Kode: LT3-05</div>
+                <h1><%= room.name %></h1>
+                <div class="sub">
+                    Gedung <%= room.gedung %> • Kode: <%= room.code || room.nomor_ruang %>
+                </div>
                 </div>
 
                 <div style="text-align:right">
                 <div class="muted">Kapasitas</div>
-                <div style="font-weight:700">40 orang</div>
+                <div style="font-weight:700"><%= room.capacity %> orang</div>
                 </div>
             </div>
 
             <div class="meta">
-                <div class="m">Jam Operasional: 07:00 — 20:00</div>
-                <div class="m">Reservasi Max: 8 jam/hari</div>
+                <div class="m">Jam Operasional: 07:00 — 21:00</div>
+                <div class="m">Status: <%= room.is_active ? 'Aktif' : 'Non-Aktif' %></div> 
                 <div class="m">Verifikasi: Manual oleh Admin</div>
             </div>
 
@@ -37,16 +48,21 @@
                 <div>
                 <h3 style="margin:0 0 8px 0">Fasilitas</h3>
                 <ul class="list">
-                    <li>• Proyektor</li>
-                    <li>• AC</li>
-                    <li>• Whiteboard</li>
-                    <li>• Koneksi LAN</li>
+                    <% if (facilities && facilities.length > 0) { %>
+                        <% facilities.forEach(item => { %>
+                            <li>• <%= item.nama || item.name %></li> 
+                        <% }) %>
+                    <% } else { %>
+                        <li>• Tidak ada data fasilitas</li>
+                    <% } %>
                 </ul>
                 </div>
 
                 <div>
                 <h3 style="margin:0 0 8px 0">Deskripsi</h3>
-                <div class="list">Ruang kuliah standar untuk kapasitas 40 mahasiswa. Dekat lift, akses mudah, cocok untuk kuliah, seminar kecil, dan workshop.</div>
+                <div class="list">
+                    <%= room.deskripsi || 'Belum ada deskripsi untuk ruangan ini.' %>
+                </div>
                 </div>
             </div>
 
@@ -81,7 +97,10 @@
         <aside class="aside">
         <div class="panel" id="booking">
             <div style="font-weight:700;margin-bottom:8px">Formulir Peminjaman</div>
-            <form id="bookingForm">
+            
+            <form id="bookingForm" action="/booking/create" method="POST">
+            <input type="hidden" name="room_id" value="<%= room.id %>">
+
             <div class="row">
                 <label for="date">Tanggal</label>
                 <input id="date" name="date" type="date" required />
@@ -99,13 +118,13 @@
             </div>
 
             <div class="row">
-                <label for="name">Penanggung Jawab (Nama / NIM / Ormawa)</label>
-                <input id="name" name="name" type="text" placeholder="Nama / NIM / Organisasi" required />
+                <label for="name">Penanggung Jawab</label>
+                <input id="name" name="name" type="text" value="<%= typeof user !== 'object' ? '' : user.name %>" placeholder="Nama / NIM / Organisasi" required />
             </div>
 
             <div class="row">
                 <label for="note">Catatan (opsional)</label>
-                <textarea id="note" name="note" rows="3" placeholder="Butuh alat tambahan / catatan"></textarea>
+                <textarea id="note" name="note" rows="3" placeholder="Keperluan acara..."></textarea>
             </div>
 
             <div id="msg"></div>
@@ -114,9 +133,8 @@
             </form>
 
             <div class="similar">
-            <h4 style="margin:12px 0 8px 0">Ruangan Serupa</h4>
-            <a href="#">LT3-06 — Ruang Kuliah <span class="muted">• Kapasitas 40</span></a>
-            <a href="#">LT2-01 — Ruang Seminar <span class="muted">• Kapasitas 60</span></a>
+                <h4 style="margin:12px 0 8px 0">Info Ruangan</h4>
+                <div class="muted">ID Ruangan: #<%= room.id %></div>
             </div>
         </div>
         </aside>
