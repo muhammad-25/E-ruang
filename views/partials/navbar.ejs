@@ -12,8 +12,13 @@
   </div> 
 
   <div class="buttons">
-    <a href="/register"><button class="btn">Register</button></a>
-    <a href="/login"><button class="btn login">Log In</button></a>
+    <% if (isLoggedIn) { %>
+      <a href="/logout"><button class="btn login">Log Out</button></a>
+      
+    <% } else { %>
+      <a href="/register"><button class="btn">Register</button></a>
+      <a href="/login"><button class="btn login">Log In</button></a>
+    <% } %>
   </div>
 
   <script>

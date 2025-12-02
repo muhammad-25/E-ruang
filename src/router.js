@@ -49,6 +49,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
 
 
+
 // pakai express-ejs-layouts
 app.use(expressLayouts);
 app.set('layout', 'layouts/main'); // layout default (views/layouts/main.ejs)
@@ -71,38 +72,31 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 
+app.use((req, res, next) => {
+  if (req.session && req.session.userId) {
+    res.locals.isLoggedIn = true;
+    res.locals.user = req.session; 
+  } else {
+    res.locals.isLoggedIn = false;
+    res.locals.user = null;
+  }
+  next();
+});
 
-// --- BAGIAN ATAS (IMPORT) ---
-// Pastikan path models sesuai dengan struktur foldermu
 
-
-// ... (kode import lainnya tetap sama) ...
-
-// --- BAGIAN ROUTE HOMEPAGE ---
-// Ganti bagian app.get('/', ...) yang lama dengan kode di bawah ini:
 
 app.get('/', ensureUser, async (req, res) => {
   try {
-    // 1. Ambil semua ruangan yang aktif
     const rooms = await RoomModel.listRooms({ onlyActive: true });
-
-    // 2. Ambil detail tambahan (Foto & Fasilitas) untuk setiap ruangan
-    // Kita pakai Promise.all agar efisien
     const roomsWithData = await Promise.all(rooms.map(async (room) => {
-      
-      // Ambil foto
       const photos = await RoomPhoto.listPhotosByRoom(room.id);
-      // Cari foto utama (is_main = 1), kalau tidak ada pakai foto pertama
       const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
-
-      // Ambil fasilitas
-      // Perhatikan: di file roomFacilities.js kamu exportnya: module.exports.RoomFacilities
       const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
 
       return {
-        ...room, // data asli (id, name, capacity, dll)
-        thumbnail: mainPhoto ? mainPhoto.filename : null, // simpan nama file foto
-        facilities: facilities || [] // simpan array fasilitas
+        ...room, 
+        thumbnail: mainPhoto ? mainPhoto.filename : null, 
+        facilities: facilities || [] 
       };
     }));
 
