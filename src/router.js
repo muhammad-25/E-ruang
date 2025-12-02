@@ -116,6 +116,24 @@ app.get('/history',(req, res) => {
   res.render('pages/history', { title: 'Riwayat', user: 'Vaazi' });
 });
 
+app.get('/profile', (req, res) => {
+    
+    // Kita buat data bohong-bohongan (Dummy)
+    // Biar EJS tidak error saat minta nama/email
+    const userPalsu = {
+        name: "Budi Mahasiswa",
+        email: "budi@mahasiswa.unj.ac.id",
+        role_id: 2 // Anggap aja role mahasiswa
+    };
+
+    res.render('pages/user-profile', { 
+        title: 'Preview Profil',
+        path: '/profile',
+        user: userPalsu, // <--- INI OBATNYA (Kirim data palsu ke view)
+        layout: 'layouts/main' // Pastikan pakai layout user biasa
+    });
+});
+
 // Route Login
 app.get('/login', ensureGuest, authController.showLogin);
 
