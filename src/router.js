@@ -13,6 +13,7 @@ const RoomPhoto = require('./models/roomphoto');
 const RoomFacilities = require('./models/roomFacilities');
 const session = require('express-session');
 const roomController = require('./controllers/roomController'); 
+const bookingController = require('./controllers/bookingController');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -117,7 +118,7 @@ app.get('/history',(req, res) => {
 });
 
 app.get('/room/:id', roomController.getRoomDetail);
-
+app.post('/booking/create', ensureUser, bookingController.processBooking);
 
 app.get('/profile', (req, res) => {
     

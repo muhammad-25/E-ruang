@@ -97,39 +97,56 @@
         <aside class="aside">
         <div class="panel" id="booking">
             <div style="font-weight:700;margin-bottom:8px">Formulir Peminjaman</div>
+
+            <script>
+                // Script sederhana untuk mengambil parameter URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const errorMsg = urlParams.get('error');
+                const successMsg = urlParams.get('success');
+
+                if (errorMsg) {
+                    document.write(`<div style="background:#fee2e2; color:#991b1b; padding:10px; border-radius:6px; margin-bottom:10px; font-size:0.9rem;">⚠️ ${errorMsg}</div>`);
+                    // Opsional: Hapus parameter dari URL agar bersih saat direfresh
+                    window.history.replaceState(null, null, window.location.pathname);
+                }
+                if (successMsg) {
+                    document.write(`<div style="background:#dcfce7; color:#166534; padding:10px; border-radius:6px; margin-bottom:10px; font-size:0.9rem;">✅ ${successMsg}</div>`);
+                    window.history.replaceState(null, null, window.location.pathname);
+                }
+            </script>
             
             <form id="bookingForm" action="/booking/create" method="POST">
-            <input type="hidden" name="room_id" value="<%= room.id %>">
+                <input type="hidden" name="room_id" value="<%= room.id %>">
 
-            <div class="row">
-                <label for="date">Tanggal</label>
-                <input id="date" name="date" type="date" required />
-            </div>
-
-            <div style="display:flex;gap:8px">
-                <div style="flex:1" class="row">
-                <label for="start">Mulai</label>
-                <input id="start" name="start" type="time" required />
+                <div class="row">
+                    <label for="date">Tanggal</label>
+                    <input id="date" name="date" type="date" required />
                 </div>
-                <div style="flex:1" class="row">
-                <label for="end">Selesai</label>
-                <input id="end" name="end" type="time" required />
+
+                <div style="display:flex;gap:8px">
+                    <div style="flex:1" class="row">
+                    <label for="start">Mulai</label>
+                    <input id="start" name="start" type="time" required />
+                    </div>
+                    <div style="flex:1" class="row">
+                    <label for="end">Selesai</label>
+                    <input id="end" name="end" type="time" required />
+                    </div>
                 </div>
-            </div>
 
-            <div class="row">
-                <label for="name">Penanggung Jawab</label>
-                <input id="name" name="name" type="text" value="<%= typeof user !== 'object' ? '' : user.name %>" placeholder="Nama / NIM / Organisasi" required />
-            </div>
+                <div class="row">
+                    <label for="name">Penanggung Jawab</label>
+                    <input id="name" name="name" type="text" value="<%= typeof user !== 'object' ? '' : user.name %>" placeholder="Nama / NIM / Organisasi" required />
+                </div>
 
-            <div class="row">
-                <label for="note">Catatan (opsional)</label>
-                <textarea id="note" name="note" rows="3" placeholder="Keperluan acara..."></textarea>
-            </div>
+                <div class="row">
+                    <label for="note">Catatan (opsional)</label>
+                    <textarea id="note" name="note" rows="3" placeholder="Keperluan acara..."></textarea>
+                </div>
 
-            <div id="msg"></div>
-            <button type="submit">Kirim Permintaan</button>
-            <div class="small-info">Setelah dikirim, admin akan memverifikasi. Anda akan menerima notifikasi di dashboard atau email.</div>
+                <div id="msg"></div>
+                <button type="submit">Kirim Permintaan</button>
+                <div class="small-info">Setelah dikirim, admin akan memverifikasi. Anda akan menerima notifikasi di dashboard atau email.</div>
             </form>
 
             <div class="similar">

@@ -10,7 +10,6 @@
 
     // Simple form submit demo
     document.getElementById('bookingForm').addEventListener('submit',function(e){
-      e.preventDefault();
       const msg = document.getElementById('msg');
       msg.innerHTML = '<div class="success">Permintaan peminjaman dikirim. Tunggu konfirmasi dari admin.</div>';
       // reset form after 1.2s
