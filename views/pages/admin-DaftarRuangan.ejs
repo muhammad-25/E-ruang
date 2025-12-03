@@ -1,0 +1,76 @@
+<link rel="stylesheet" href="/css/admin-DaftarRuangan.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Main Content -->
+<main class="main-container">
+    <!-- Header -->
+    <header class="main-header">
+        <div>
+            <h1 class="header-title">List Ruangan</h1>
+            <p class="header-subtitle">Kelola ketersediaan dan detail ruangan kantor.</p>
+        </div>
+        <div class="admin-badge">
+            <div class="admin-avatar">A</div>
+            <span class="admin-name">Admin</span>
+        </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <div class="content-area">
+        <!-- Actions Bar -->
+        <div class="actions-bar">
+            <div class="search-container">
+                <i data-lucide="search" class="search-icon"></i>
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    placeholder="Cari nama ruangan..." 
+                    class="search-input"
+                >
+            </div>
+            <!-- Tombol Tambah mengarah ke halaman lain -->
+            <a 
+                href="tambah-ruangan.html" 
+                class="add-button"
+            >
+                <i data-lucide="plus" class="w-5 h-5"></i>
+                Tambah Ruangan
+            </a>
+        </div>
+
+        <!-- Table Card -->
+        <div class="table-card">
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead class="table-head">
+                        <tr>
+                            <th>Info Ruangan</th>
+                            <th>Kapasitas</th>
+                            <th>Fasilitas</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roomTableBody">
+                        <!-- Rows will be populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination Placeholder -->
+            <div class="pagination-bar">
+                <span id="showingText">Menampilkan 0 data</span>
+                <div class="pagination-buttons">
+                    <button class="pagination-button" disabled>Sebelumnya</button>
+                    <button class="pagination-button">Selanjutnya</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script src="/js/admin-DaftarRuangan.js"></script>

@@ -223,4 +223,11 @@ app.get('/admin-settings', ensureAdmin ,(req, res) => {
     });
 });
 
+app.get('/admin-DaftarRuangan', ensureAdmin ,(req, res) => {
+    res.render('pages/admin-DaftarRuangan', { 
+        layout: "layouts/admin", 
+        title: 'Daftar Ruangan' 
+    });
+});
+
 module.exports = app;
