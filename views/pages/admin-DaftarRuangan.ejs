@@ -1,12 +1,8 @@
 <link rel="stylesheet" href="/css/admin-DaftarRuangan.css" />
 <script src="https://unpkg.com/lucide@latest"></script>
-
-<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Main Content -->
 <main class="main-container">
-    <!-- Header -->
     <header class="main-header">
         <div>
             <h1 class="header-title">List Ruangan</h1>
@@ -14,34 +10,22 @@
         </div>
         <div class="admin-badge">
             <div class="admin-avatar">A</div>
-            <span class="admin-name">Admin</span>
+            <span class="admin-name"><%= typeof user !== 'undefined' ? user.name : 'Admin' %></span>
         </div>
     </header>
 
-    <!-- Scrollable Content -->
     <div class="content-area">
-        <!-- Actions Bar -->
         <div class="actions-bar">
             <div class="search-container">
                 <i data-lucide="search" class="search-icon"></i>
-                <input 
-                    type="text" 
-                    id="searchInput"
-                    placeholder="Cari nama ruangan..." 
-                    class="search-input"
-                >
+                <input type="text" id="searchInput" placeholder="Cari nama ruangan..." class="search-input">
             </div>
-            <!-- Tombol Tambah mengarah ke halaman lain -->
-            <a 
-                href="/add" 
-                class="add-button"
-            >
+            <a href="/add" class="add-button">
                 <i data-lucide="plus" class="w-5 h-5"></i>
                 Tambah Ruangan
             </a>
         </div>
 
-        <!-- Table Card -->
         <div class="table-card">
             <div class="table-wrapper">
                 <table class="data-table">
@@ -55,22 +39,74 @@
                         </tr>
                     </thead>
                     <tbody id="roomTableBody">
-                        <!-- Rows will be populated by JS -->
+                        <% if (rooms.length === 0) { %>
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding: 20px;">
+                                    Belum ada data ruangan.
+                                </td>
+                            </tr>
+                        <% } else { %>
+                            <% rooms.forEach(room => { %>
+                            <tr class="room-row">
+                                <td>
+                                    <div class="room-info">
+                                        <% if(room.thumbnail) { %>
+                                            <img src="/uploads/rooms/<%= room.thumbnail %>" alt="<%= room.name %>" class="room-image">
+                                        <% } else { %>
+                                            <div class="room-image" style="background:#eee; display:flex; align-items:center; justify-content:center;">
+                                                <i data-lucide="image" style="color:#ccc"></i>
+                                            </div>
+                                        <% } %>
+                                        <div>
+                                            <div class="room-name"><%= room.name %></div>
+                                            <div class="room-type"><%= room.gedung %> - <%= room.nomor_ruang %></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="capacity-info">
+                                        <i data-lucide="users" class="w-4 h-4"></i>
+                                        <span><%= room.capacity %> Orang</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="facilities-list">
+                                        <% room.facilities.slice(0, 2).forEach(fac => { %>
+                                            <span class="facility-badge"><%= fac.nama || fac.name %></span>
+                                        <% }) %>
+                                        
+                                        <% if (room.facilities.length > 2) { %>
+                                            <span class="facility-badge facility-count">+<%= room.facilities.length - 2 %></span>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-available">
+                                        Tersedia
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/edit?id=<%= room.id %>" class="action-button edit-button" title="Edit">
+                                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        </a>
+                                        <button onclick="deleteRoom('<%= room.id %>')" class="action-button delete-button" title="Hapus">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
             
-            <!-- Pagination Placeholder -->
             <div class="pagination-bar">
-                <span id="showingText">Menampilkan 0 data</span>
-                <div class="pagination-buttons">
-                    <button class="pagination-button" disabled>Sebelumnya</button>
-                    <button class="pagination-button">Selanjutnya</button>
-                </div>
+                <span id="showingText">Menampilkan <%= rooms.length %> data</span>
             </div>
         </div>
     </div>
 </main>
-
 
 <script src="/js/admin-DaftarRuangan.js"></script>

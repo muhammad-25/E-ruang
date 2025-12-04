@@ -192,6 +192,14 @@ app.get('/admin-dashboard', ensureAdmin ,(req, res) => {
 
 });
 
+app.get('/edit', ensureAdmin ,(req, res) => {
+    res.render('pages/edit-kelas', { 
+        layout: "layouts/admin", 
+        title: 'Edit Kelas',
+    });
+
+});
+
 // 1. Route untuk Menampilkan Halaman Pengaturan
 app.get('/admin-settings', ensureAdmin, (req, res) => {
     res.render('pages/admin-settings', { 
@@ -228,11 +236,10 @@ app.get('/admin-settings', ensureAdmin ,(req, res) => {
     });
 });
 
-app.get('/admin-DaftarRuangan', ensureAdmin ,(req, res) => {
-    res.render('pages/admin-DaftarRuangan', { 
-        layout: "layouts/admin", 
-        title: 'Daftar Ruangan' 
-    });
-});
+
+
+app.get('/admin-DaftarRuangan', ensureAdmin, adminController.viewDaftarRuangan);
+
+app.delete('/admin/room/delete/:id', ensureAdmin, adminController.deleteRoom);
 
 module.exports = app;

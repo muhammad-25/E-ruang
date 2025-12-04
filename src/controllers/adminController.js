@@ -117,6 +117,57 @@ module.exports = {
             console.error('Error adding class:', error);
             res.redirect('/add');
         }
+    },
+
+    viewDaftarRuangan: async (req, res) => {
+    try {
+        // Ambil semua ruangan
+        const rooms = await RoomModel.listRooms();
+
+        // Kita perlu melengkapi data ruangan dengan Foto Utama & Fasilitas
+        // Menggunakan Promise.all agar efisien
+        const roomsWithData = await Promise.all(rooms.map(async (room) => {
+            // Ambil foto
+            const photos = await RoomPhoto.listPhotosByRoom(room.id);
+            const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
+            
+            // Ambil fasilitas
+            // Akses model sesuai struktur export di file roomFacilities.js kamu
+            const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
+
+            return {
+                ...room,
+                thumbnail: mainPhoto ? mainPhoto.filename : null,
+                facilities: facilities || [] // Array fasilitas
+            };
+        }));
+
+        res.render('pages/admin-DaftarRuangan', { 
+            layout: "layouts/admin", 
+            title: 'Daftar Ruangan',
+            rooms: roomsWithData // Kirim data ke EJS
+        });
+
+    } catch (error) {
+        console.error("Error fetching rooms:", error);
+        res.status(500).send("Terjadi kesalahan server");
     }
+  },
+
+  // 2. MENGHAPUS RUANGAN
+  deleteRoom: async (req, res) => {
+      const { id } = req.params;
+      try {
+          // Hapus data (Logic penghapusan relasi foto/fasilitas biasanya ditangani DB cascade 
+          // atau harus dihapus manual satu persatu. Untuk sekarang kita panggil model deleteRoom)
+          await RoomModel.deleteRoom(id);
+          
+          // Kirim respon JSON agar bisa ditangkap fetch di frontend
+          res.json({ success: true, message: 'Ruangan berhasil dihapus' });
+      } catch (error) {
+          console.error("Error deleting room:", error);
+          res.status(500).json({ success: false, message: 'Gagal menghapus ruangan' });
+      }
+  }
 };
 

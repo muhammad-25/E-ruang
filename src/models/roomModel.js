@@ -117,8 +117,27 @@ module.exports = {
   },
 
   // Hapus ruangan (hard delete)
+  // FILE: src/models/roomModel.js
+
+// ... kode atas ...
+
+  // Hapus ruangan (hard delete) diperbarui
   async deleteRoom(id) {
+    // 1. Hapus Booking dulu (PENTING: Ini yang bikin error)
+    await query('DELETE FROM bookings WHERE room_id = ?', [id]);
+    
+    // 2. Hapus Jadwal
+    await query('DELETE FROM room_schedules WHERE room_id = ?', [id]);
+    
+    // 3. Hapus Foto
+    await query('DELETE FROM room_photos WHERE room_id = ?', [id]);
+    
+    // 4. Hapus Relasi Fasilitas
+    await query('DELETE FROM room_facilities WHERE room_id = ?', [id]);
+
+    // 5. Baru hapus Ruangannya
     const sql = 'DELETE FROM rooms WHERE id = ?';
+    
     if (typeof db.execute === 'function') {
       const [result] = await db.execute(sql, [id]);
       return { affectedRows: result.affectedRows };
@@ -126,6 +145,7 @@ module.exports = {
     const [result] = await db.query(sql, [id]);
     return { affectedRows: result.affectedRows };
   },
+
 
   // Soft delete: set is_active = 0
   async softDeleteRoom(id) {
