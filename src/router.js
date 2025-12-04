@@ -117,6 +117,10 @@ app.get('/history',(req, res) => {
   res.render('pages/history', { title: 'Riwayat', user: 'Vaazi' });
 });
 
+app.get('/listRuangan',(req, res) => {
+  res.render('pages/listRuangan', { title: 'List Ruangan', user: 'Vaazi' });
+});
+
 app.get('/room/:id', roomController.getRoomDetail);
 app.post('/booking/create', ensureUser, bookingController.processBooking);
 
