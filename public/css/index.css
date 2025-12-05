@@ -45,6 +45,7 @@
     display:flex;
     align-items:center;
     gap:14px;
+    padding: 13px;
     flex:1
 }
 
@@ -61,16 +62,18 @@
 
 .stat .text{
     display:flex;
+    
     flex-direction:column
 }
 
 .stat .label{
-    font-size:13px;
+    font-size:16px;
+    font-size: large;
     color:#6b7280
 }
 
 .stat .value{
-    font-size:20px;
+    font-size:25px;
     font-weight:700;
     margin-top:6px
 }

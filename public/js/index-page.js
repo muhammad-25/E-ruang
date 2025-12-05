@@ -100,3 +100,57 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/* helper easing */
+function easeOutQuad(t){ return t*(2-t); }
+
+function formatNumber(n){
+  // ubah jadi number lalu format (ribuan)
+  return Number.isFinite(n) ? n.toLocaleString() : n;
+}
+
+function animateCount(el, duration = 1500){
+  const end = parseFloat(el.dataset.target ?? el.textContent.replace(/,/g, '')) || 0;
+  const start = 0;
+  let startTime = null;
+
+  function step(timestamp){
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOutQuad(progress);
+    const current = Math.round(start + (end - start) * eased);
+
+    el.textContent = formatNumber(current);
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = formatNumber(end); // pastikan tepat
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+/* Trigger saat elemen terlihat */
+const observer = new IntersectionObserver((entries, obs) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateCount(entry.target, 1400);
+      obs.unobserve(entry.target); // hanya sekali
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.stats-wrap .value').forEach(el => {
+  // jika kamu ingin mulai dari angka yang sudah ada di HTML, jangan set data-target.
+  // tapi kita disarankan pakai data-target (lebih konsisten).
+  if (!el.dataset.target) {
+    el.dataset.target = el.textContent.replace(/,/g, '');
+    el.textContent = '0';
+  } else {
+    el.textContent = '0';
+  }
+  observer.observe(el);
+});
