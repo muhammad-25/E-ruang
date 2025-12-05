@@ -113,9 +113,7 @@ app.get('/', ensureUser, async (req, res) => {
   }
 });
 
-app.get('/history',(req, res) => {
-  res.render('pages/history', { title: 'Riwayat', user: 'Vaazi' });
-});
+app.get('/history', ensureAuth, bookingController.userHistory);
 
 app.get('/listRuangan',(req, res) => {
   res.render('pages/listRuangan', { title: 'List Ruangan', user: 'Vaazi' });
@@ -192,13 +190,8 @@ app.get('/admin-dashboard', ensureAdmin ,(req, res) => {
 
 });
 
-app.get('/edit', ensureAdmin ,(req, res) => {
-    res.render('pages/edit-kelas', { 
-        layout: "layouts/admin", 
-        title: 'Edit Kelas',
-    });
-
-});
+app.get('/edit', ensureAdmin, adminController.viewEditKelas);
+app.post('/edit/update', ensureAdmin, upload.array('photos', 3), adminController.updateClass);
 
 // 1. Route untuk Menampilkan Halaman Pengaturan
 app.get('/admin-settings', ensureAdmin, (req, res) => {

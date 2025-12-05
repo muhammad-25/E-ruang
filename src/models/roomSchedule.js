@@ -35,9 +35,22 @@ module.exports = {
     return result;
   },
 
+  // **FUNGSI BARU UNTUK MEMPERBAIKI ERROR INI**
+  // Mengambil semua jadwal berdasarkan room_id
+  async getSchedulesByRoom(roomId) {
+    const sql = 'SELECT * FROM room_schedules WHERE room_id = ? ORDER BY FIELD(hari, "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"), jam_mulai ASC';
+    return await query(sql, [roomId]);
+  },
+
   // Hapus jadwal berdasarkan room_id (berguna saat update)
   async deleteSchedulesByRoom(roomId) {
-    return await query('DELETE FROM room_schedules WHERE room_id = ?', [roomId]);
-  }
-};
+    const sql = 'DELETE FROM room_schedules WHERE room_id = ?';
+    if (typeof db.execute === 'function') {
+      const [result] = await db.execute(sql, [roomId]);
+      return { affectedRows: result.affectedRows };
+    }
+    const [result] = await db.query(sql, [roomId]);
+    return { affectedRows: result.affectedRows };
+  },
 
+};

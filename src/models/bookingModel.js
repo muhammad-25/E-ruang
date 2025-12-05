@@ -66,5 +66,33 @@ module.exports = {
     }
     const [result] = await db.query(sql, params);
     return result;
+  },
+  async getBookingsByUserId(userId) {
+    const sql = `
+      SELECT 
+        b.id,
+        b.room_id,
+        b.penanggung_jawab,
+        b.description as purpose,
+        b.start_datetime,
+        b.end_datetime,
+        b.attendees_count as participants,
+        b.status as db_status,
+        b.created_at,  -- (Opsional) Ambil ini jika ingin menampilkan kapan dibuat
+        r.name as room_name,
+        r.gedung,
+        r.nomor_ruang,
+        (
+          SELECT filename 
+          FROM room_photos rp 
+          WHERE rp.room_id = r.id AND rp.is_main = 1 
+          LIMIT 1
+        ) as room_image
+      FROM bookings b
+      JOIN rooms r ON b.room_id = r.id
+      WHERE b.requester_id = ?
+      ORDER BY b.created_at DESC  -- <--- UBAH DI SINI (Terbaru dibuat ada di atas)
+    `;
+    return await query(sql, [userId]);
   }
 };

@@ -168,6 +168,153 @@ module.exports = {
           console.error("Error deleting room:", error);
           res.status(500).json({ success: false, message: 'Gagal menghapus ruangan' });
       }
+  },
+
+  viewEditKelas: async (req, res) => {
+    try {
+        const roomId = req.query.id; 
+        console.log('--- Mencoba Edit Ruangan dengan ID:', roomId);
+
+        if (!roomId) {
+          console.log('!!! ID Ruangan tidak ditemukan di URL.');
+          return res.redirect('/admin-DaftarRuangan');
+        }
+
+        // 1. Ambil Data Ruangan
+        const room = await RoomModel.getRoomById(roomId);
+        if (!room) {
+          console.log('!!! Ruangan tidak ditemukan untuk ID:', roomId);
+          return res.redirect('/admin-DaftarRuangan');
+        }
+
+        // 2. Ambil Fasilitas 
+        const allFacilities = await require('../models/facilities').listFacilities();
+        
+        // --- PERBAIKAN DI SINI ---
+        // Gunakan RoomFacilities.RoomFacilities (karena struktur export model Anda nested)
+        const facilitiesData = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(roomId);
+        // -------------------------
+
+        const currentFacilities = facilitiesData.map(f => f.id); // Perhatikan: biasanya id fasilitas ada di kolom 'id' fasilitas atau 'facility_id' tergantung query join. 
+        // Karena di model querynya "SELECT f.*", maka gunakan f.id
+
+        // 3. Ambil Foto
+        // Gunakan variable RoomPhoto yang sudah di-require di atas, tidak perlu require ulang
+        const photos = await RoomPhoto.listPhotosByRoom(roomId);
+
+        // 4. Ambil Jadwal
+        // Gunakan variable RoomSchedule yang sudah di-require di atas
+        const rawSchedules = await RoomSchedule.getSchedulesByRoom(roomId); 
+        
+        // Pengelompokan Jadwal
+        const groupedSchedules = {};
+        rawSchedules.forEach(schedule => {
+            const key = `${schedule.jam_mulai}-${schedule.jam_selesai}`;
+            if (!groupedSchedules[key]) {
+                groupedSchedules[key] = {
+                    id: schedule.id, 
+                    jam_mulai: schedule.jam_mulai,
+                    jam_selesai: schedule.jam_selesai,
+                    days: [] // Ganti 'hari' jadi 'days' agar sesuai dengan EJS (sch.days.includes)
+                };
+            }
+            // Pastikan push ke 'days' bukan 'hari' karena di EJS viewEditKelas baris 15 pakai 'sch.days'
+            groupedSchedules[key].days.push(schedule.hari);
+        });
+        const scheduleList = Object.values(groupedSchedules);
+
+        console.log('--- Data Berhasil Diambil. Merender halaman edit-kelas.');
+        
+        res.render('pages/edit-kelas', { 
+            layout: "layouts/admin", 
+            title: 'Edit Kelas',
+            room: room,                   
+            allFacilities: allFacilities, 
+            currentFacilities: currentFacilities, // Array of IDs
+            photos: photos, 
+            facilities: currentFacilities, // Tambahkan ini karena EJS baris 9 pakai variabel 'facilities' untuk cek includes
+            schedules: scheduleList       
+        });
+
+    } catch (error) {
+        console.error('!!! ERROR FATAL viewEditKelas:', error);
+        res.redirect('/admin-DaftarRuangan');
+    }
+  },
+
+  // 2. PROSES UPDATE DATA (POST)
+  updateClass: async (req, res) => {
+    try {
+        // Ambil ID dari body (hidden input) atau query, kita asumsikan dikirim via hidden input
+        const { 
+            id, // Pastikan ada input hidden name="id" di form EJS
+            name, building, room_number, description, capacity, 
+            facilities, // Checkbox facilities
+            schedule_days, schedule_start, schedule_end 
+        } = req.body;
+
+        // A. Update Data Utama Ruangan
+        const updateData = {
+            name, 
+            gedung: building, 
+            nomor_ruang: room_number, 
+            deskripsi: description, 
+            capacity: parseInt(capacity) || 0
+            // Code ruangan biasanya tidak diubah agar konsisten, atau bisa digenerate ulang
+        };
+        await RoomModel.updateRoom(id, updateData);
+
+        // B. Update Fasilitas (Hapus lama -> Insert baru)
+        // Jika user tidak centang apapun, facilities undefined, jadi kirim array kosong
+        const newFacilities = facilities ? (Array.isArray(facilities) ? facilities : [facilities]) : [];
+        await RoomFacilities.RoomFacilities.replaceFacilitiesForRoom(id, newFacilities);
+
+        // C. Update Jadwal (Hapus lama -> Insert baru)
+        // Hapus semua jadwal lama
+        await RoomSchedule.deleteSchedulesByRoom(id);
+        
+        // Insert jadwal baru (Logika sama seperti storeClass)
+        if (schedule_days && Array.isArray(schedule_days)) {
+            for (let i = 0; i < schedule_days.length; i++) {
+                const daysArray = schedule_days[i].split(','); 
+                const start = schedule_start[i];
+                const end = schedule_end[i];
+
+                if (start && end && daysArray.length > 0) {
+                    for (const day of daysArray) {
+                        if (day.trim() !== '') {
+                            await RoomSchedule.createSchedule({
+                                room_id: id,
+                                hari: day.trim(),
+                                jam_mulai: start,
+                                jam_selesai: end
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // D. Update Foto (Opsional: Tambah foto baru)
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                const file = req.files[i];
+                const photoData = {
+                    room_id: id,
+                    filename: file.filename, 
+                    url: `/uploads/rooms/${file.filename}`, 
+                    is_main: 0 // Foto baru jadi sekunder dulu
+                };
+                await RoomPhoto.createPhoto(photoData);
+            }
+        }
+
+        res.redirect('/admin-DaftarRuangan'); // Selesai, kembali ke list
+
+    } catch (error) {
+        console.error('Error updateClass:', error);
+        res.redirect('/edit?id=' + req.body.id);
+    }
   }
 };
 

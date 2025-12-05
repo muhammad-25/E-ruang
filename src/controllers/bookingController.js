@@ -76,5 +76,83 @@ module.exports = {
       // Redirect dengan pesan error yang jelas agar user tahu terjadi kesalahan sistem
       return res.redirect(`/room/${req.body.room_id || ''}?error=Gagal menyimpan data ke database (Server Error).`);
     }
+  },
+  userHistory: async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.redirect('/login');
+      }
+
+      // 1. Ambil data dari Model
+      const bookingsRaw = await BookingModel.getBookingsByUserId(userId);
+
+      // 2. Format data agar sesuai dengan struktur 'mockBookings' di frontend
+      const formattedBookings = bookingsRaw.map(b => {
+        const start = new Date(b.start_datetime);
+        const end = new Date(b.end_datetime);
+        const now = new Date();
+
+        // Format Tanggal (contoh: 15 Nov 2025)
+        const dateStr = start.toLocaleDateString('id-ID', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        });
+
+        // Format Jam (contoh: 09:00 - 11:00)
+        const timeStr = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')} - ${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+
+        // Hitung Durasi (Jam)
+        const durationMs = end - start;
+        const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+        const durationStr = `${durationHours} jam`;
+
+        // Logic Status Frontend (upcoming, ongoing, completed, cancelled)
+        let frontendStatus = 'upcoming';
+        
+        // Jika status DB 'pending' atau 'approved'
+        if (b.db_status !== 'rejected' && b.db_status !== 'cancelled') {
+            if (now > end) {
+                frontendStatus = 'completed';
+            } else if (now >= start && now <= end) {
+                frontendStatus = 'ongoing';
+            } else {
+                frontendStatus = 'upcoming';
+            }
+        } else {
+            // Jika DB bilang rejected/cancelled
+            frontendStatus = 'cancelled';
+        }
+
+        // Gambar Default jika kosong
+        const imagePath = b.room_image 
+          ? `/uploads/rooms/${b.room_image}` 
+          : 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1080&q=80'; // Placeholder
+
+        return {
+          id: b.id,
+          roomName: b.room_name,
+          roomImage: imagePath,
+          location: `${b.gedung || '-'}, Ruang ${b.nomor_ruang || '-'}`,
+          date: dateStr,
+          time: timeStr,
+          duration: durationStr,
+          purpose: b.purpose || 'Tidak ada keterangan',
+          status: frontendStatus, // status hasil kalkulasi waktu
+          dbStatus: b.db_status, // status asli dari DB (pending/approved)
+          participants: b.participants
+        };
+      });
+
+      // 3. Kirim ke View
+      res.render('pages/history', { 
+        title: 'Riwayat Peminjaman',
+        user: req.session, // Data user untuk navbar
+        bookingsData: JSON.stringify(formattedBookings) // KITA KIRIM SEBAGAI STRING JSON
+      });
+
+    } catch (error) {
+      console.error('Error fetching history:', error);
+      res.status(500).send('Terjadi kesalahan server saat mengambil data riwayat.');
+    }
   }
 };

@@ -64,7 +64,6 @@ module.exports = {
   // Edit ruangan
   async updateRoom(id, data) {
     const sql = `UPDATE rooms SET
-      code = ?,
       name = ?,
       gedung = ?,
       nomor_ruang = ?,
@@ -75,7 +74,7 @@ module.exports = {
       WHERE id = ?`;
 
     const params = [
-      data.code || null,
+      // data.code || null,  <-- HAPUS BARIS INI (Parameter ke-1)
       data.name || null,
       data.gedung || null,
       data.nomor_ruang || null,

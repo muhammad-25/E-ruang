@@ -3,227 +3,160 @@
 
 <link rel="stylesheet" href="/css/add.css" />
 <section class="panel">
-<header class="panel__header">
+  <header class="panel__header">
     <div class="title">
-    <h1>Tambah Kelas untuk Dipinjam</h1>
-    <p class="subtitle">Masukkan informasi ruang agar mahasiswa/staff bisa melakukan peminjaman.</p>
+      <h1>Edit Ruang Kelas</h1>
+      <p class="subtitle">Perbarui informasi ruangan, fasilitas, dan jadwal.</p>
     </div>
-    <div class="actions">
+  </header>
 
-    </div>
-</header>
+  <div class="panel__body">
+    <form id="editClassForm" action="/edit/update" method="POST" enctype="multipart/form-data">
+      
+      <input type="hidden" name="id" value="<%= room.id %>">
 
-<div class="panel__body">
-    <form id="addClassForm" action="/add" method="POST" enctype="multipart/form-data">
-    <div>
-        <!-- Form column -->
+      <div>
         <div class="card form-card">
+          
+          <label class="field">
+            <span class="label">Nama Ruang</span>
+            <input name="name" type="text" value="<%= room.name %>" required />
+          </label>
+
+          <div class="row two-cols">
             <label class="field">
-                <span class="label">Nama Ruang</span>
-                <input name="name" id="roomName" type="text" placeholder="Contoh: Lab Jaringan 301" required />
+              <span class="label">Gedung</span>
+              <input name="building" type="text" value="<%= room.gedung %>" />
             </label>
 
-            <div class="row two-cols">
-                <label class="field">
-                <span class="label">Gedung</span>
-                <input name="building" type="text" placeholder="Contoh: Gedung A" />
-                </label>
-
-                <label class="field">
-                <span class="label">Nomor/Ruang</span>
-                <input name="room_number" type="text" placeholder="Contoh: 301" />
-                </label>
-            </div>
-
             <label class="field">
-                <span class="label">Deskripsi singkat</span>
-                <textarea name="description" rows="3" placeholder="Tambah detail: kapasitas, catatan, akses listrik..."></textarea>
+              <span class="label">Nomor/Ruang</span>
+              <input name="room_number" type="text" value="<%= room.nomor_ruang %>" />
             </label>
+          </div>
 
-            <div class="field">
-                <label class="label">Kapasitas (orang)</label>
-                <input name="capacity" id="capacity" type="number" min="1" max="1000" value="30" />
+          <label class="field">
+            <span class="label">Deskripsi singkat</span>
+            <textarea name="description" rows="3"><%= room.deskripsi %></textarea>
+          </label>
+
+          <div class="field">
+            <label class="label">Kapasitas (orang)</label>
+            <input name="capacity" type="number" value="<%= room.capacity %>" />
+          </div>
+
+          <div class="field">
+            <span class="label">Fasilitas</span>
+            <div id="facilities" class="facilities-selector">
+                <% 
+                   // List fasilitas master (sebaiknya dilempar dari controller juga, tapi di sini kita hardcode sesuai contoh kamu sebelumnya).
+                   // Agar dinamis, cek apakah ID fasilitas ada di array `facilities` (data dari controller)
+                   const allFacilities = [
+                       {id: 1, name: 'Proyektor'}, {id: 2, name: 'AC'}, 
+                       {id: 3, name: 'WiFi'}, {id: 4, name: 'Meja & Kursi'},
+                       {id: 5, name: 'Papan Tulis'}, {id: 6, name: 'Sound System'}
+                   ];
+                %>
+                
+                <% allFacilities.forEach(item => { %>
+                    <label class="facility-card">
+                        <input type="checkbox" name="facilities[]" value="<%= item.id %>" 
+                               <%= facilities.includes(item.id) ? 'checked' : '' %> > <span><%= item.name %></span>
+                    </label>
+                <% }) %>
             </div>
+          </div>
 
-            <div class="field">
-                <span class="label">Fasilitas</span>
-                <div id="facilities" class="facilities-selector">
-
-                    <label class="facility-card">
-                        <input type="checkbox" name="facilities[]" value="1">
-                        <span>Proyektor</span>
-                    </label>
-
-                    <label class="facility-card">
-                        <input type="checkbox" name="facilities[]" value="2">
-                        <span>AC</span>
-                    </label>
-
-                    <label class="facility-card">
-                        <input type="checkbox" name="facilities[]" value="3">
-                        <span>WiFi</span>
-                    </label>
-
-                    <label class="facility-card">
-                        <input type="checkbox" name="facilities[]" value="4">
-                        <span>Meja & Kursi</span>
-                    </label>
-
-                    <label class="facility-card">
-                        <input type="checkbox" name="facilities[]" value="5">
-                        <span>Papan Tulis</span>
-                    </label>
-                    
-                    <label class="facility-card">
-                        <input type="checkbox" name="facilities[]" value="6">
-                        <span>Sound System</span>
-                    </label>
-
-                </div>
+          <div class="field">
+            <span class="label">Foto Saat Ini</span>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <% if(photos && photos.length > 0) { %>
+                    <% photos.forEach(p => { %>
+                        <img src="/uploads/rooms/<%= p.filename %>" style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+                    <% }) %>
+                <% } else { %>
+                    <p style="font-size: 0.9em; color: #666;">Belum ada foto.</p>
+                <% } %>
             </div>
+            
+            <span class="label">Tambah Foto Baru (Opsional)</span>
+            <input id="photos" name="photos" type="file" accept="image/*" multiple />
+            <div id="photoPreview" class="photo-preview"></div>
+          </div>
 
-
-            <div class="field">
-                <span class="label">Foto Ruang (maks 3)</span>
-                <input id="photos" name="photos" type="file" accept="image/*" multiple />
-                <div id="photoPreview" class="photo-preview"></div>
-            </div>
-
-            <div class="field schedule">
-                <span class="label">Jadwal tersedia</span>
-                <div id="scheduleList">
-                <div class="schedule-row">
+          <div class="field schedule">
+            <span class="label">Jadwal tersedia</span>
+            <div id="scheduleList">
+                
+              <% if (schedules && schedules.length > 0) { %>
+                <% schedules.forEach(sch => { %>
+                  <div class="schedule-row">
                     <div class="days">
                         <div class="day-selector">
-                            <label class="day-card">
-                                <input type="checkbox" value="Senin" class="day-checkbox">
-                                <span>Senin</span>
-                            </label>
-
-                            <label class="day-card">
-                                <input type="checkbox" value="Selasa" class="day-checkbox">
-                                <span>Selasa</span>
-                            </label>
-
-                            <label class="day-card">
-                                <input type="checkbox" value="Rabu" class="day-checkbox">
-                                <span>Rabu</span>
-                            </label>
-
-                            <label class="day-card">
-                                <input type="checkbox" value="Kamis" class="day-checkbox">
-                                <span>Kamis</span>
-                            </label>
-
-                            <label class="day-card">
-                                <input type="checkbox" value="Jumat" class="day-checkbox">
-                                <span>Jumat</span>
-                            </label>
-
-                            <label class="day-card">
-                                <input type="checkbox" value="Sabtu" class="day-checkbox">
-                                <span>Sabtu</span>
-                            </label>
-
-                            <label class="day-card">
-                                <input type="checkbox" value="Minggu" class="day-checkbox">
-                                <span>Minggu</span>
-                            </label>
-                            </div>
+                            <% ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'].forEach(day => { %>
+                                <label class="day-card">
+                                    <input type="checkbox" value="<%= day %>" class="day-checkbox" 
+                                           <%= sch.days.includes(day) ? 'checked' : '' %> >
+                                    <span><%= day %></span>
+                                </label>
+                            <% }) %>
+                        </div>
+                    </div>
+                    <input name="schedule_start[]" type="time" value="<%= sch.start %>" />
+                    <span class="to">—</span>
+                    <input name="schedule_end[]" type="time" value="<%= sch.end %>" />
+                    <input type="hidden" name="schedule_days[]" class="schedule-days-hidden" value="<%= sch.days.join(',') %>" />
+                  </div>
+                <% }) %>
+              
+              <% } else { %>
+                  <div class="schedule-row">
+                    <div class="days">
+                        <div class="day-selector">
+                            <% ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'].forEach(day => { %>
+                                <label class="day-card">
+                                    <input type="checkbox" value="<%= day %>" class="day-checkbox">
+                                    <span><%= day %></span>
+                                </label>
+                            <% }) %>
+                        </div>
                     </div>
                     <input name="schedule_start[]" type="time" />
                     <span class="to">—</span>
                     <input name="schedule_end[]" type="time" />
                     <input type="hidden" name="schedule_days[]" class="schedule-days-hidden" />
-                </div>
-                </div>
+                  </div>
+              <% } %>
+
+            </div>
             </div>
 
-            <div class="form-footer">
-                <button type="submit" class="btnadd btn--primary">Simpan Ruang</button>
-            </div>
+          <div class="form-footer">
+            <button type="submit" class="btnadd btn--primary">Simpan Perubahan</button>
+            <a href="/admin-DaftarRuangan" class="btnadd" style="background:#ccc; text-decoration:none; text-align:center; color: #333;">Batal</a>
+          </div>
+
         </div>
-    </div>
+      </div>
     </form>
-</div>
+  </div>
 </section>
 
-
- <script>
-document.addEventListener('DOMContentLoaded', function() {
-    
-
-
-    // ==========================================
-    // 2. LOGIKA JADWAL (CHECKBOX HARI)
-    // ==========================================
-    const scheduleList = document.getElementById('scheduleList');
-
-    // Event listener change pada container jadwal
-    scheduleList.addEventListener('change', function(e) {
-        // Cek jika yang berubah adalah checkbox hari
-        if (e.target.classList.contains('day-checkbox')) {
-            
-            // Cari elemen 'row' terdekat (parent dari checkbox ini)
-            // Ini penting agar logika tidak tertukar antar baris jadwal jika ada banyak baris
-            const row = e.target.closest('.schedule-row');
-            
-            // Cari semua checkbox yang TERCENTANG di dalam baris INI saja
-            const checkedBoxes = row.querySelectorAll('.day-checkbox:checked');
-            
-            // Cari input hidden target di dalam baris INI saja
-            const hiddenInput = row.querySelector('.schedule-days-hidden');
-            
-            // Ambil value (Senin, Selasa, dst) dan gabungkan koma
-            const selectedDays = Array.from(checkedBoxes).map(cb => cb.value);
-            
-            // Masukkan ke input hidden
-            hiddenInput.value = selectedDays.join(',');
-            
-            console.log('Jadwal row ini:', hiddenInput.value); // Untuk debug
-        }
-    });
-
-    // ==========================================
-    // 3. (BONUS) PREVIEW GAMBAR
-    // ==========================================
-    const photoInput = document.getElementById('photos');
-    const photoPreview = document.getElementById('photoPreview');
-
-    if(photoInput) {
-        photoInput.addEventListener('change', function() {
-            photoPreview.innerHTML = ''; // Clear preview lama
-            const files = this.files;
-
-            if (files) {
-                Array.from(files).forEach(file => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.style.height = '80px';
-                            img.style.marginRight = '10px';
-                            img.style.borderRadius = '8px';
-                            img.style.objectFit = 'cover';
-                            photoPreview.appendChild(img);
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                });
+<script>
+    // ... Copy script JS yang ada di file edit-kelas.ejs asli Anda ...
+    // Pastikan logika "change" listener tetap ada agar hidden input terupdate saat checkbox diklik ulang
+    document.addEventListener('DOMContentLoaded', function() {
+        const scheduleList = document.getElementById('scheduleList');
+        scheduleList.addEventListener('change', function(e) {
+            if (e.target.classList.contains('day-checkbox')) {
+                const row = e.target.closest('.schedule-row');
+                const checkedBoxes = row.querySelectorAll('.day-checkbox:checked');
+                const hiddenInput = row.querySelector('.schedule-days-hidden');
+                const selectedDays = Array.from(checkedBoxes).map(cb => cb.value);
+                hiddenInput.value = selectedDays.join(',');
             }
         });
-    }
-});
+        
+        // ... kode preview foto ...
+    });
 </script>
-
-<style>
-    /* CSS Tambahan untuk visualisasi tombol aktif */
-    .chip.active-chip {
-        background-color: #007bff; /* Warna biru (sesuaikan tema) */
-        color: white;
-        border-color: #0056b3;
-    }
-</style>
-
-
