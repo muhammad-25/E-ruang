@@ -29,6 +29,13 @@ body {
 .arrow-icon {
     font-size: 10px;
     transition: transform 0.3s ease; /* Animasi putar panah */
+    
+    /* Tambahan agar rotasi sempurna di tengah */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;   /* Ukuran kotak imajiner */
+    height: 25px;  /* Harus sama dengan width */
 }
 
 /* Saat menu terbuka, panah berputar 90 derajat */

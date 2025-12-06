@@ -1,0 +1,103 @@
+/* public/css/admin-pengajuan.css */
+
+.pengajuan-container {
+    padding: 30px;
+    background-color: #F4F6F9;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    /* margin-left: 260px; <-- Hapus ini jika layout utamanya sudah flexbox */
+}
+
+/* Card Style (Kotak Putih) */
+.pengajuan-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    padding: 25px;
+    margin-bottom: 30px;
+    scroll-margin-top: 20px
+    
+}
+
+.pengajuan-card h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Table Styling */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Jarak antar baris */
+}
+
+.custom-table th {
+    text-align: left;
+    padding: 10px 15px;
+    color: #888;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 1px solid #eee;
+}
+
+.custom-table td {
+    background-color: white; /* Baris terlihat menyatu */
+    padding: 15px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Status Badges */
+.badge {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
+.badge-menunggu { background-color: #FFF4E5; color: #FF9F43; border: 1px solid #FFE0B2; }
+.badge-setuju { background-color: #E5F9ED; color: #2ECC71; border: 1px solid #C8E6C9; }
+.badge-tolak { background-color: #FFEDED; color: #FF6B6B; border: 1px solid #FFCDD2; }
+
+/* Action Buttons */
+.btn-action {
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    color: white;
+}
+
+.btn-blue { background-color: #4A90E2; }
+.btn-blue:hover { background-color: #357ABD; }
+
+.btn-red { background-color: #FF6B6B; }
+.btn-red:hover { background-color: #E55050; }
+
+.btn-group {
+    display: flex;
+    gap: 5px;
+}
+
+/* Empty State Text */
+.empty-row td {
+    text-align: center;
+    color: #aaa;
+    padding: 30px;
+    font-style: italic;
+}

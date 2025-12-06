@@ -12,14 +12,15 @@
             </li>
 
             <li>
-                <a href="javascript:void(0)" class="dropdown-toggle">
+                <a href="javascript:void(0)" class="dropdown-toggle <%= typeof path !== 'undefined' && path.includes('/admin/pengajuan') ? 'active' : '' %>">
                     <span><i class="fa-solid fa-file-pen"></i> Pengajuan</span>
                     <i class="fa-solid fa-chevron-right arrow-icon"></i>
                 </a>
-                <div class="sub-menu">
-                    <a href="#">Menunggu</a>
-                    <a href="#">Disetujui</a>
-                    <a href="#">Ditolak</a>
+                
+                <div class="sub-menu <%= typeof path !== 'undefined' && path.includes('/admin/pengajuan') ? 'show' : '' %>">
+                    <a href="/admin/pengajuan#menunggu">Menunggu</a>
+                    <a href="/admin/pengajuan#disetujui">Disetujui</a>
+                    <a href="/admin/pengajuan#ditolak">Ditolak</a>
                 </div>
             </li>
 

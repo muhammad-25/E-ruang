@@ -235,4 +235,33 @@ app.get('/admin-DaftarRuangan', ensureAdmin, adminController.viewDaftarRuangan);
 
 app.delete('/admin/room/delete/:id', ensureAdmin, adminController.deleteRoom);
 
+// === ROUTE PENGAJUAN ADMIN ===
+app.get('/admin/pengajuan', ensureAdmin, (req, res) => {
+    
+    // --- MODE TEST ---
+    // Ubah jadi 'true' untuk melihat tampilan Kosong
+    // Ubah jadi 'false' untuk melihat tampilan Ada Data
+    const isTestEmpty = false; 
+
+    let mockData = [];
+
+    if (!isTestEmpty) {
+        // Data Dummy (Pura-pura dari Database)
+        mockData = [
+            { nim: '1313624040', date: '25-11-2005', time: '08.00-12.30', room: 'GDS 515', status: 'Menunggu' },
+            { nim: '1313624041', date: '23-11-2005', time: '09.00-12.00', room: 'GDS 514', status: 'Menunggu' },
+            { nim: '1313624044', date: '13-11-2005', time: '09.00-12.00', room: 'GDS 515', status: 'Disetujui' },
+            { nim: '1313624015', date: '12-11-2005', time: '09.00-12.00', room: 'GDS 514', status: 'Disetujui' },
+            { nim: '1313624081', date: '12-11-2005', time: '09.00-12.00', room: 'GDS 515', status: 'Ditolak' },
+        ];
+    }
+
+    res.render('pages/admin-pengajuan', {
+        layout: 'layouts/admin',
+        title: 'Daftar Pengajuan',
+        path: '/admin/pengajuan', // Biar navbar aktif
+        bookings: mockData // Kirim data ke View
+    });
+});
+
 module.exports = app;

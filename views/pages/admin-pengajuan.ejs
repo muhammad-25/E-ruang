@@ -1,0 +1,125 @@
+<link rel="stylesheet" href="/css/admin-pengajuan.css">
+
+<div class="pengajuan-container">
+    
+    <div class="pengajuan-card" id="menunggu">
+        <h3>Menunggu Persetujuan</h3>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>NIM</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Nama Kelas</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% const pending = bookings.filter(b => b.status === 'Menunggu'); %>
+                    
+                    <% if (pending.length > 0) { %>
+                        <% pending.forEach(item => { %>
+                        <tr>
+                            <td><%= item.nim %></td>
+                            <td><%= item.date %></td>
+                            <td><%= item.time %></td>
+                            <td><%= item.room %></td>
+                            <td><span class="badge badge-menunggu">Menunggu</span></td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="#" class="btn-action btn-blue">Setuju</a>
+                                    <a href="#" class="btn-action btn-red">Tolak</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    
+                    <% } else { %>
+                        <tr class="empty-row">
+                            <td colspan="6">Tidak ada pengajuan baru saat ini.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pengajuan-card" id="disetujui">
+        <h3>Disetujui</h3>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>NIM</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Nama Kelas</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% const approved = bookings.filter(b => b.status === 'Disetujui'); %>
+                    
+                    <% if (approved.length > 0) { %>
+                        <% approved.forEach(item => { %>
+                        <tr>
+                            <td><%= item.nim %></td>
+                            <td><%= item.date %></td>
+                            <td><%= item.time %></td>
+                            <td><%= item.room %></td>
+                            <td><span class="badge badge-setuju">Disetujui</span></td>
+                            <td>
+                                <a href="#" class="btn-action btn-blue">Edit</a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr class="empty-row"><td colspan="6">Belum ada data disetujui.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pengajuan-card" id="ditolak">
+        <h3>Ditolak</h3>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>NIM</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Nama Kelas</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% const rejected = bookings.filter(b => b.status === 'Ditolak'); %>
+                    
+                    <% if (rejected.length > 0) { %>
+                        <% rejected.forEach(item => { %>
+                        <tr>
+                            <td><%= item.nim %></td>
+                            <td><%= item.date %></td>
+                            <td><%= item.time %></td>
+                            <td><%= item.room %></td>
+                            <td><span class="badge badge-tolak">Ditolak</span></td>
+                            <td>
+                                <a href="#" class="btn-action btn-blue">Edit</a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr class="empty-row"><td colspan="6">Belum ada data ditolak.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
