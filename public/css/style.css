@@ -1,7 +1,3 @@
-html {
-    scroll-behavior: smooth;
-}
-
 body {
     margin: 0;
     padding: 0;
@@ -25,8 +21,6 @@ nav {
     background: #262834;
     border-bottom: 2px solid #4DA8E4;
 }
-.stats-wrap { display:flex; gap:1.5rem; }
-.stat .value { font-size:1.6rem; font-weight:700; }
 
 .left {
     display: flex;
@@ -36,15 +30,18 @@ nav {
     font-size: 20px;
 }
 
- bn 
+
 .left img {
     width: 45px;
 }
+
 
 .menu {
     display: flex;
     gap: 40px;
 }
+
+
 
 .menu a.active::after {
     content: "";
