@@ -36,18 +36,15 @@ nav {
     font-size: 20px;
 }
 
-
+ bn 
 .left img {
     width: 45px;
 }
-
 
 .menu {
     display: flex;
     gap: 40px;
 }
-
-
 
 .menu a.active::after {
     content: "";

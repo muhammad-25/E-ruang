@@ -101,3 +101,101 @@
     padding: 30px;
     font-style: italic;
 }
+
+/* --- MODAL POPUP STYLE --- */
+
+/* Latar Belakang Redup (Overlay) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Hitam transparan 50% */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Pastikan di atas segalanya */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Class untuk memunculkan modal */
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Kotak Putih Modal */
+.modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    width: 300px;
+    transform: scale(0.7);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efek membal (bouncy) */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-overlay.show .modal-box {
+    transform: scale(1);
+}
+
+/* Ikon Segitiga Merah */
+.modal-icon {
+    font-size: 50px;
+    color: #FF6B6B; /* Merah */
+    border: 3px solid #FF6B6B;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+/* Tombol di dalam Modal */
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-modal {
+    padding: 10px 25px;
+    border-radius: 25px;
+    border: none;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.btn-modal-setuju { background-color: #4285F4; }
+.btn-modal-setuju:hover { background-color: #3367D6; }
+
+.btn-modal-tolak { background-color: #FF6B6B; }
+.btn-modal-tolak:hover { background-color: #E55050; }
+
+/* Tombol Batal (X) di pojok (Opsional) */
+.btn-close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #aaa;
+    cursor: pointer;
+}

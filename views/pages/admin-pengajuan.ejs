@@ -72,7 +72,7 @@
                             <td><%= item.room %></td>
                             <td><span class="badge badge-setuju">Disetujui</span></td>
                             <td>
-                                <a href="#" class="btn-action btn-blue">Edit</a>
+                                <button type="button" class="btn-action btn-blue" onclick="openEditModal('<%= item.id %>')">Edit</button>
                             </td>
                         </tr>
                         <% }) %>
@@ -110,7 +110,7 @@
                             <td><%= item.room %></td>
                             <td><span class="badge badge-tolak">Ditolak</span></td>
                             <td>
-                                <a href="#" class="btn-action btn-blue">Edit</a>
+                                <button type="button" class="btn-action btn-blue" onclick="openEditModal('<%= item.id %>')">Edit</button>
                             </td>
                         </tr>
                         <% }) %>
@@ -121,5 +121,69 @@
             </table>
         </div>
     </div>
-
 </div>
+
+</div> <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <button type="button" class="btn-close-modal" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="modal-icon">
+            <i class="fa-solid fa-exclamation"></i>
+        </div>
+
+        <h3 class="modal-title">Edit Status</h3>
+
+        <form id="formStatusUpdate" method="POST" action="/admin/booking/update">
+            
+            <input type="hidden" name="booking_id" id="modalBookingId">
+            <input type="hidden" name="new_status" id="modalNewStatus">
+
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-modal-setuju" onclick="submitStatus('Disetujui')">
+                    Setuju
+                </button>
+                <button type="button" class="btn-modal btn-modal-tolak" onclick="submitStatus('Ditolak')">
+                    Tolak
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Fungsi Buka Modal
+    function openEditModal(bookingId) {
+        // 1. Simpan ID booking ke dalam input tersembunyi
+        document.getElementById('modalBookingId').value = bookingId;
+        
+        // 2. Munculkan Modal (Tambah class 'show')
+        document.getElementById('editModal').classList.add('show');
+    }
+
+    // Fungsi Tutup Modal
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('show');
+    }
+
+    // Fungsi Submit (Saat tombol Setuju/Tolak ditekan)
+    function submitStatus(status) {
+        // 1. Isi input status dengan pilihan admin
+        document.getElementById('modalNewStatus').value = status;
+        
+        // 2. Kirim Form
+        document.getElementById('formStatusUpdate').submit();
+    }
+
+    // Opsional: Tutup modal kalau klik area gelap (background)
+    // Hapus kode ini jika kamu ingin mewajibkan user memilih tombol
+    /*
+    window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    */
+</script>
