@@ -1,6 +1,7 @@
 // FILE: models/bookingModel.js
 const db = require('../../database');
 
+// ... (kode query wrapper dan checkAvailability tetap sama) ...
 async function query(sql, params = []) {
   if (typeof db.execute === 'function') {
     const [rows] = await db.execute(sql, params);
@@ -14,8 +15,9 @@ async function query(sql, params = []) {
 }
 
 module.exports = {
-  // Cek ketersediaan (Logika Overlap)
+  // ... (fungsi checkAvailability dan createBooking biarkan saja) ...
   async checkAvailability(roomId, startDateTime, endDateTime) {
+    // ... kode lama ...
     const sql = `
       SELECT id FROM bookings 
       WHERE room_id = ? 
@@ -29,11 +31,9 @@ module.exports = {
     return rows.length > 0;
   },
 
-  // --- PERBAIKAN DI SINI ---
   async createBooking(data) {
-    // Pastikan nama kolom sesuai standar (penanggung_jawab) 
-    // Hapus tanda strip (-) dan backtick jika kolom di DB Anda menggunakan underscore
-    const sql = `
+     // ... kode lama ...
+     const sql = `
       INSERT INTO bookings (
         requester_id, 
         room_id, 
@@ -54,21 +54,60 @@ module.exports = {
       data.description,
       data.start_datetime,
       data.end_datetime,
-      data.attendees_count || 0 // Default 0 jika capacity undefined
+      data.attendees_count || 0 
     ];
-
-    console.log("Menjalankan Query Insert Booking:", sql); // Debugging Log
-    console.log("Parameter:", params); // Debugging Log
-
+    
+    // ... eksekusi ...
     if (typeof db.execute === 'function') {
-      const [result] = await db.execute(sql, params);
+        const [result] = await db.execute(sql, params);
+        return result;
+      }
+      const [result] = await db.query(sql, params);
       return result;
-    }
-    const [result] = await db.query(sql, params);
-    return result;
   },
-  async getBookingsByUserId(userId) {
+
+  // --- TAMBAHKAN INI ---
+  async getAllBookings() {
+  const sql = `
+    SELECT 
+      b.id,
+      b.start_datetime,
+      b.end_datetime,
+      b.status,
+      b.approved_at,
+      b.description,        
+      b.penanggung_jawab,   
+      b.attendees_count,  
+      u.NIM,
+      u.name as user_name,
+      r.name as room_name,
+      r.gedung,             
+      admin.name as admin_name
+    FROM bookings b
+    JOIN users u ON b.requester_id = u.id
+    JOIN rooms r ON b.room_id = r.id
+    LEFT JOIN users admin ON b.approved_by = admin.id
+    ORDER BY b.created_at DESC
+  `;
+  return await query(sql);
+},
+
+  async updateStatus(bookingId, status, adminId) {
+    // Kita update status, approved_by (ID Admin), dan approved_at (Waktu Sekarang)
     const sql = `
+      UPDATE bookings 
+      SET 
+        status = ?, 
+        approved_by = ?, 
+        approved_at = NOW() 
+      WHERE id = ?
+    `;
+    return await query(sql, [status, adminId, bookingId]);
+  },
+
+  async getBookingsByUserId(userId) {
+     // ... kode lama ...
+     const sql = `
       SELECT 
         b.id,
         b.room_id,
@@ -78,7 +117,7 @@ module.exports = {
         b.end_datetime,
         b.attendees_count as participants,
         b.status as db_status,
-        b.created_at,  -- (Opsional) Ambil ini jika ingin menampilkan kapan dibuat
+        b.created_at, 
         r.name as room_name,
         r.gedung,
         r.nomor_ruang,
@@ -91,7 +130,7 @@ module.exports = {
       FROM bookings b
       JOIN rooms r ON b.room_id = r.id
       WHERE b.requester_id = ?
-      ORDER BY b.created_at DESC  -- <--- UBAH DI SINI (Terbaru dibuat ada di atas)
+      ORDER BY b.created_at DESC 
     `;
     return await query(sql, [userId]);
   }

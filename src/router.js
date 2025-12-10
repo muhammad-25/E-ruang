@@ -14,6 +14,7 @@ const RoomFacilities = require('./models/roomFacilities');
 const session = require('express-session');
 const roomController = require('./controllers/roomController'); 
 const bookingController = require('./controllers/bookingController');
+const BookingModel = require('./models/bookingModel'); 
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -235,33 +236,95 @@ app.get('/admin-DaftarRuangan', ensureAdmin, adminController.viewDaftarRuangan);
 
 app.delete('/admin/room/delete/:id', ensureAdmin, adminController.deleteRoom);
 
-// === ROUTE PENGAJUAN ADMIN ===
-app.get('/admin/pengajuan', ensureAdmin, (req, res) => {
-    
-    // --- MODE TEST ---
-    // Ubah jadi 'true' untuk melihat tampilan Kosong
-    // Ubah jadi 'false' untuk melihat tampilan Ada Data
-    const isTestEmpty = false; 
 
-    let mockData = [];
+app.get('/admin/pengajuan', ensureAdmin, async (req, res) => {
+    try {
+        // 1. Ambil data asli dari Database
+        const rawBookings = await BookingModel.getAllBookings();
 
-    if (!isTestEmpty) {
-        // Data Dummy (Pura-pura dari Database)
-        mockData = [
-            { nim: '1313624040', date: '25-11-2005', time: '08.00-12.30', room: 'GDS 515', status: 'Menunggu' },
-            { nim: '1313624041', date: '23-11-2005', time: '09.00-12.00', room: 'GDS 514', status: 'Menunggu' },
-            { nim: '1313624044', date: '13-11-2005', time: '09.00-12.00', room: 'GDS 515', status: 'Disetujui' },
-            { nim: '1313624015', date: '12-11-2005', time: '09.00-12.00', room: 'GDS 514', status: 'Disetujui' },
-            { nim: '1313624081', date: '12-11-2005', time: '09.00-12.00', room: 'GDS 515', status: 'Ditolak' },
-        ];
+        // 2. Mapping data agar sesuai format yang diminta EJS 
+        // (EJS minta: nim, date, time, room, status, id)
+        const formattedBookings = rawBookings.map(b => {
+            const start = new Date(b.start_datetime);
+            const end = new Date(b.end_datetime);
+
+            // Format Tanggal: "25-11-2005"
+            const dateStr = start.toLocaleDateString('id-ID', {
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            }).replace(/\//g, '-');
+
+            // Format Waktu: "08.00-12.30"
+            const timeStart = start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
+            const timeEnd = end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
+            
+            // Mapping Status DB ke Tampilan
+            // DB: pending, approved, rejected
+            // Tampilan: Menunggu, Disetujui, Ditolak
+            let statusDisplay = 'Menunggu';
+            if (b.status === 'approved') statusDisplay = 'Disetujui';
+            if (b.status === 'rejected') statusDisplay = 'Ditolak';
+
+            return {
+                id: b.id,
+                nim: b.NIM || ' - ',
+                requester_name: b.user_name, // Nama Akun Peminjam
+                date: dateStr,
+                time: `${timeStart}-${timeEnd}`,
+                room: b.room_name,
+                gedung: b.gedung,
+                status: statusDisplay,
+                // --- DATA DETAIL ---
+                pj: b.penanggung_jawab,
+                desc: b.description,
+                count: b.attendees_count
+            };
+        });
+
+        res.render('pages/admin-pengajuan', {
+            layout: 'layouts/admin',
+            title: 'Daftar Pengajuan',
+            path: '/admin/pengajuan',
+            bookings: formattedBookings // Kirim data yang sudah diformat
+        });
+
+    } catch (error) {
+        console.error("Error fetching admin bookings:", error);
+        res.status(500).send("Terjadi kesalahan server saat mengambil data pengajuan.");
     }
-
-    res.render('pages/admin-pengajuan', {
-        layout: 'layouts/admin',
-        title: 'Daftar Pengajuan',
-        path: '/admin/pengajuan', // Biar navbar aktif
-        bookings: mockData // Kirim data ke View
-    });
 });
+
+// === ROUTE BARU: HANDLE UPDATE STATUS (TERIMA/TOLAK) ===
+// Ini diperlukan karena form di EJS action-nya ke '/admin/booking/update'
+app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
+    try {
+        const { booking_id, new_status } = req.body;
+        
+        // Ambil ID Admin dari session
+        const adminId = req.session.userId; 
+
+        if (!adminId) {
+            return res.status(401).send("Sesi tidak valid/kadaluarsa.");
+        }
+
+        console.log(`Update Booking ID: ${booking_id} to ${new_status} by Admin ID: ${adminId}`);
+
+        // Konversi status tampilan ke status database
+        let dbStatus = 'pending';
+        if (new_status === 'Disetujui') dbStatus = 'approved';
+        if (new_status === 'Ditolak') dbStatus = 'rejected';
+
+        // Panggil fungsi model dengan parameter adminId
+        await BookingModel.updateStatus(booking_id, dbStatus, adminId);
+
+        // Redirect kembali ke halaman pengajuan
+        res.redirect('/admin/pengajuan');
+
+    } catch (error) {
+        console.error("Error updating booking status:", error);
+        res.status(500).send("Gagal mengupdate status.");
+    }
+});
+
+module.exports = app;
 
 module.exports = app;

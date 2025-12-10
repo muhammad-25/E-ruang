@@ -29,8 +29,22 @@
                             <td><span class="badge badge-menunggu">Menunggu</span></td>
                             <td>
                                 <div class="btn-group">
-                                    <a href="#" class="btn-action btn-blue">Setuju</a>
-                                    <a href="#" class="btn-action btn-red">Tolak</a>
+                                    <button type="button" class="btn-action btn-detail" 
+                                        onclick="openDetailModal(this)"
+                                        data-nim="<%= item.nim %>"
+                                        data-name="<%= item.requester_name %>"
+                                        data-pj="<%= item.pj %>"
+                                        data-room="<%= item.room %>"
+                                        data-date="<%= item.date %>"
+                                        data-time="<%= item.time %>"
+                                        data-count="<%= item.count %>"
+                                        data-desc="<%= item.desc %>">
+                                        <i class="fa-solid fa-eye"></i> Detail
+                                    </button>
+
+                                    <button type="button" class="btn-action btn-blue" onclick="openEditModal('<%= item.id %>')">
+                                        Proses
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -151,7 +165,52 @@
         </form>
     </div>
 </div>
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-box modal-lg"> <button type="button" class="btn-close-modal" onclick="closeDetailModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
 
+        <div class="modal-header-left">
+            <h3 class="modal-title">Detail Peminjaman</h3>
+        </div>
+
+        <div class="detail-content">
+            <div class="detail-row">
+                <span class="label">Peminjam (Akun):</span>
+                <span class="value" id="d-name"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">NIM:</span>
+                <span class="value" id="d-nim"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Penanggung Jawab:</span>
+                <span class="value highlight-text" id="d-pj"></span>
+            </div>
+            <hr class="divider">
+            <div class="detail-row">
+                <span class="label">Ruangan:</span>
+                <span class="value" id="d-room"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Waktu:</span>
+                <span class="value" id="d-datetime"></span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Jumlah Peserta:</span>
+                <span class="value" id="d-count"></span>
+            </div>
+            <div class="detail-row full-width">
+                <span class="label">Tujuan / Deskripsi:</span>
+                <p class="value description-box" id="d-desc"></p>
+            </div>
+        </div>
+
+        <div class="modal-actions" style="justify-content: flex-end;">
+            <button type="button" class="btn-modal btn-modal-tolak" onclick="closeDetailModal()">Tutup</button>
+        </div>
+    </div>
+</div>
 <script>
     // Fungsi Buka Modal
     function openEditModal(bookingId) {
@@ -186,4 +245,32 @@
         }
     }
     */
+   // --- FUNGSI MODAL DETAIL ---
+    function openDetailModal(button) {
+        // Ambil data dari atribut tombol
+        const nim = button.getAttribute('data-nim');
+        const name = button.getAttribute('data-name');
+        const pj = button.getAttribute('data-pj');
+        const room = button.getAttribute('data-room');
+        const date = button.getAttribute('data-date');
+        const time = button.getAttribute('data-time');
+        const count = button.getAttribute('data-count');
+        const desc = button.getAttribute('data-desc');
+
+        // Isi ke dalam elemen modal
+        document.getElementById('d-nim').textContent = nim;
+        document.getElementById('d-name').textContent = name;
+        document.getElementById('d-pj').textContent = pj;
+        document.getElementById('d-room').textContent = room;
+        document.getElementById('d-datetime').textContent = date + ', Pukul ' + time;
+        document.getElementById('d-count').textContent = count + ' Orang';
+        document.getElementById('d-desc').textContent = desc;
+
+        // Tampilkan Modal
+        document.getElementById('detailModal').classList.add('show');
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').classList.remove('show');
+    }
 </script>

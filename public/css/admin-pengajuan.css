@@ -199,3 +199,82 @@
     color: #aaa;
     cursor: pointer;
 }
+
+
+/* --- Tombol Detail --- */
+.btn-detail {
+    background-color: #f1c40f; /* Kuning Orange */
+    color: #fff;
+    border: none;
+    margin-right: 5px; /* Jarak dengan tombol proses */
+}
+
+.btn-detail:hover {
+    background-color: #d4ac0d;
+}
+
+/* --- Modal Detail Styles --- */
+.modal-lg {
+    max-width: 600px; /* Lebih lebar dari modal konfirmasi biasa */
+    width: 90%;
+}
+
+.modal-header-left {
+    text-align: left;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.detail-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    text-align: left; /* Reset text align */
+}
+
+.detail-row {
+    flex: 1 1 45%; /* Dua kolom */
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-row.full-width {
+    flex: 1 1 100%; /* Satu baris penuh untuk deskripsi */
+}
+
+.detail-row .label {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.detail-row .value {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.highlight-text {
+    color: #2980b9; /* Warna biru untuk penanggung jawab */
+    font-weight: bold !important;
+}
+
+.divider {
+    width: 100%;
+    border: 0;
+    border-top: 1px dashed #ddd;
+    margin: 10px 0;
+}
+
+.description-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #555;
+    min-height: 60px;
+}
