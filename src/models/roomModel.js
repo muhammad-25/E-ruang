@@ -155,6 +155,24 @@ module.exports = {
     }
     const [result] = await db.query(sql, [id]);
     return { affectedRows: result.affectedRows };
-  }
+  },
+// ... kode sebelumnya (createRoom, updateRoom, dll) ...
+
+  // [BARU] Ambil statistik jumlah ruangan
+  async getRoomStatistics() {
+    // Query ini menghitung total, yang aktif (1), dan yang tidak aktif (0) sekaligus
+    const sql = `
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
+        SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive
+      FROM rooms
+    `;
+    const rows = await query(sql);
+    // Jika tabel kosong, return 0 semua
+    return rows && rows.length ? rows[0] : { total: 0, active: 0, inactive: 0 };
+  },
+
+// ... pastikan ini ada sebelum penutup kurawal "};" terakhir ...
 };
 

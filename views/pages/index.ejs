@@ -12,18 +12,26 @@
         <div class="icon"></div>
         <div class="text">
             <div class="label">Ruangan Tersedia</div>
-            <div class="value">16</div>
+            <div class="value"><%= stats.active %></div>
         </div>
     </div>
 
+    <div class="stat">
+        <div class="icon"></div>
+        <div class="text">
+            <div class="label">Ruangan Tidak Tersedia</div>
+             <div class="value"><%= stats.inactive %></div>
+        </div>
+    </div>
 
-  <div class="stat">
-      <div class="icon"></div>
-      <div class="text">
-          <div class="label">Ruangan Tidak Tersedia</div>
-          <div class="value">20</div>
-      </div>
-  </div>
+    <div class="stat">
+        <div class="icon"></div>
+        <div class="text">
+            <div class="label">Total Ruangan</div>
+             <div class="value"><%= stats.total %></div>
+        </div>
+    </div>
+</section>
 
 
   <div class="stat">
