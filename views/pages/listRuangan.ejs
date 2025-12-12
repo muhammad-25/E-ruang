@@ -48,34 +48,43 @@
         </div>
       </div>
 
-      <div class="filters-controls">
+      <form action="/listRuangan" method="GET" class="filters-controls">
+  
         <label class="search">
           <span class="search-icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 21l-4.35-4.35" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="11" cy="11" r="6" stroke="#6B7280" stroke-width="2"/>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 21l-4.35-4.35"/>
+              <circle cx="11" cy="11" r="6"/>
             </svg>
           </span>
-          <input type="text" placeholder="Search" />
+          <input 
+            type="text" 
+            name="search" 
+            placeholder="Cari ruangan..." 
+            value="<%= typeof query !== 'undefined' ? query.search : '' %>"
+          />
         </label>
 
-        <select>
-          <option>Gedung</option>
-          <option>Gedung GDS</option>
+        <select name="gedung" onchange="this.form.submit()">
+          <option value="">Semua Gedung</option>
+          <option value="Gedung GDS" <%= (typeof query !== 'undefined' && query.gedung === 'Gedung GDS') ? 'selected' : '' %>>Gedung GDS</option>
+          <option value="Gedung Sertifikasi" <%= (typeof query !== 'undefined' && query.gedung === 'Gedung Sertifikasi') ? 'selected' : '' %>>Gedung Sertifikasi</option>
         </select>
 
-        <select>
-          <option>Kapasitas</option>
-          <option><= 20</option>
-          <option>21 - 50</option>
+        <select name="kapasitas" onchange="this.form.submit()">
+          <option value="">Semua Kapasitas</option>
+          <option value="<= 20" <%= (typeof query !== 'undefined' && query.kapasitas === '<= 20') ? 'selected' : '' %>>&le; 20 Orang</option>
+          <option value="21 - 50" <%= (typeof query !== 'undefined' && query.kapasitas === '21 - 50') ? 'selected' : '' %>>21 - 50 Orang</option>
+          <option value="> 50" <%= (typeof query !== 'undefined' && query.kapasitas === '> 50') ? 'selected' : '' %>>&gt; 50 Orang</option>
         </select>
 
-        <select>
-          <option>Waktu</option>
-          <option>08:00 - 10:00</option>
-          <option>10:00 - 12:00</option>
-        </select>
-      </div>
+        <% if (typeof query !== 'undefined' && (query.search || query.gedung || query.kapasitas)) { %>
+          <a href="/listRuangan" style="font-size: 14px; text-decoration: none; color: #d32f2f; align-self: center; margin-left: 8px;">
+              Reset
+          </a>
+        <% } %>
+
+      </form>
     </div>
   </div>
 

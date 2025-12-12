@@ -15,30 +15,8 @@
         <div class="profile-content-wrapper">
             
             <div class="profile-header">
-                
-                <div class="profile-avatar" style="position: relative; display: inline-block;">
-                    <% if (user.photo) { %>
-                        <img src="/uploads/profiles/<%= user.photo %>" alt="Foto Profil" id="previewImage">
-                    <% } else { %>
-                        <img src="https://ui-avatars.com/api/?name=<%= user.name %>&background=4A90E2&color=fff" alt="Foto Profil" id="previewImage">
-                    <% } %>
-
-                    <form action="/profile/upload-photo" method="POST" enctype="multipart/form-data" id="formUploadFoto">
-                        <label for="inputFoto" style="
-                            position: absolute; bottom: 0; right: 0;
-                            background: #4A90E2; color: white;
-                            width: 32px; height: 32px; border-radius: 50%;
-                            display: flex; align-items: center; justify-content: center;
-                            cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                        ">
-                            <i class="fa-solid fa-camera" style="font-size: 14px;"></i>
-                        </label>
-                        <input type="file" name="foto" id="inputFoto" style="display: none;" onchange="document.getElementById('formUploadFoto').submit()">
-                    </form>
-                </div>
-
-                <div style="margin-left: 15px;"> <h2 style="margin: 0;"><%= user.name %></h2>
-                    </div>
+                <div style="margin-left: 15px;"> <h2 style="margin: 0;"><%= user.name %></h2></div>
+                <a href="/logout" class="logout"> <img src="assets\log-out-svgrepo-com.svg" alt=""> </a>
             </div>
 
             <div class="profile-card">
@@ -67,13 +45,13 @@
 
                         <div class="form-group">
                             <label>NIM / NIDN</label>
-                            <input type="text" value="1234567890" disabled style="cursor: not-allowed; background-color: #f5f5f5;">
+                            <input type="text" value="<%= user.NIM || '-' %>" disabled style="cursor: not-allowed; background-color: #f5f5f5;">
                         </div>
 
                         <div class="form-group">
                             <label>Status</label>
-                            <input type="text" value="Mahasiswa" disabled style="
-                                background-color: #e3f2fd; 
+                            <input type="text" value="<%= user.role_id == 1 ? 'Admin' : 'Mahasiswa' %>" disabled style="
+                                background-color: #e3f2fd;
                                 color: #1565c0; 
                                 font-weight: 600; 
                                 border: 1px solid #90caf9;
@@ -81,20 +59,6 @@
                             ">
                         </div>
 
-                        <div class="form-group">
-                            <label>Program Studi</label>
-                            <select name="prodi">
-                                <option value="Ilmu Komputer" selected>Ilmu Komputer</option>
-                                <option value="Sistem Informasi">Sistem Informasi</option>
-                                <option value="Pendidikan TI">Pendidikan TI</option>
-                                <option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Nomor WhatsApp (Aktif)</label>
-                            <input type="tel" name="phone" placeholder="Contoh: 08123456789" value="">
-                        </div>
                         
                         <button type="submit" class="btn-save">
                             <i class="fa-regular fa-floppy-disk"></i> Simpan Biodata

@@ -15,6 +15,7 @@ const session = require('express-session');
 const roomController = require('./controllers/roomController'); 
 const bookingController = require('./controllers/bookingController');
 const BookingModel = require('./models/bookingModel'); 
+const User = require('./models/users');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -125,30 +126,80 @@ app.get('/', ensureUser, async (req, res) => {
 
 app.get('/history', ensureAuth, bookingController.userHistory);
 
-app.get('/listRuangan',(req, res) => {
-  res.render('pages/listRuangan', { title: 'List Ruangan', user: 'Vaazi' });
+app.get('/listRuangan', ensureUser, async (req, res) => {
+  try {
+    // 1. Ambil query params dari URL
+    const filters = {
+        search: req.query.search || '',
+        gedung: req.query.gedung || '',
+        kapasitas: req.query.kapasitas || ''
+    };
+
+    // 2. Kirim filters ke model
+    const rooms = await RoomModel.listRooms({ 
+        onlyActive: true, 
+        filters: filters 
+    });
+
+    const roomsWithData = await Promise.all(rooms.map(async (room) => {
+      const photos = await RoomPhoto.listPhotosByRoom(room.id);
+      const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
+      const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
+
+      return {
+        ...room, 
+        thumbnail: mainPhoto ? mainPhoto.filename : null, 
+        facilities: facilities || [] 
+      };
+    }));
+
+    res.render('pages/listRuangan', { 
+      title: 'Daftar Ruangan', 
+      user: req.user ? req.user.name : 'User',
+      rooms: roomsWithData,
+      // 3. Kirim balik data filter ke view (agar input tidak reset setelah search)
+      query: filters 
+    });
+
+  } catch (error) {
+    console.error("Error fetching listRuangan data:", error);
+    res.status(500).send("Terjadi kesalahan pada server.");
+  }
 });
 
 app.get('/room/:id', roomController.getRoomDetail);
-app.post('/booking/create', ensureUser, bookingController.processBooking);
+app.get('/profile', ensureAuth, async (req, res) => {
+    try {
+        // 1. Ambil ID user dari session
+        const userId = req.session.userId;
 
-app.get('/profile', (req, res) => {
-    
-    // Kita buat data bohong-bohongan (Dummy)
-    // Biar EJS tidak error saat minta nama/email
-    const userPalsu = {
-        name: "Budi Mahasiswa",
-        email: "budi@mahasiswa.unj.ac.id",
-        role_id: 2 // Anggap aja role mahasiswa
-    };
+        // 2. Cari data lengkap user dari database
+        const userAsli = await User.findById(userId);
 
-    res.render('pages/user-profile', { 
-        title: 'Preview Profil',
-        path: '/profile',
-        user: userPalsu, // <--- INI OBATNYA (Kirim data palsu ke view)
-        layout: 'layouts/main' // Pastikan pakai layout user biasa
-    });
+        // Jika user tidak ditemukan (misal dihapus saat sesi aktif), lempar ke login
+        if (!userAsli) {
+            return res.redirect('/login');
+        }
+
+        // 3. Render halaman dengan data asli
+        res.render('pages/user-profile', { 
+            title: 'Profil Saya',
+            path: '/profile',
+            user: userAsli, // <--- KIRIM DATA ASLI DARI DB
+            layout: 'layouts/main' 
+        });
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        res.status(500).send("Terjadi kesalahan saat memuat profil.");
+    }
 });
+
+// Route untuk submit form biodata
+app.post('/profile/update', ensureAuth, authController.updateProfile);
+
+// Route untuk submit form ganti password
+app.post('/profile/security', ensureAuth, authController.updateSecurity);
 
 // Route Login
 app.get('/login', ensureGuest, authController.showLogin);
@@ -241,10 +292,9 @@ app.get('/admin-settings', ensureAdmin, (req, res) => {
     });
 });
 
-// Nanti kita buat controller khususnya, sementara kita redirect dulu biar gak error 404
 app.post('/admin/settings/profile', ensureAdmin, (req, res) => {
     console.log('Update Profil:', req.body);
-    res.redirect('/admin-settings'); // Balik lagi ke halaman setting
+    res.redirect('/admin-settings'); 
 });
 
 app.post('/admin/settings/general', ensureAdmin, (req, res) => {
@@ -276,27 +326,19 @@ app.delete('/admin/room/delete/:id', ensureAdmin, adminController.deleteRoom);
 
 app.get('/admin/pengajuan', ensureAdmin, async (req, res) => {
     try {
-        // 1. Ambil data asli dari Database
         const rawBookings = await BookingModel.getAllBookings();
 
-        // 2. Mapping data agar sesuai format yang diminta EJS 
-        // (EJS minta: nim, date, time, room, status, id)
         const formattedBookings = rawBookings.map(b => {
             const start = new Date(b.start_datetime);
             const end = new Date(b.end_datetime);
 
-            // Format Tanggal: "25-11-2005"
             const dateStr = start.toLocaleDateString('id-ID', {
                 day: '2-digit', month: '2-digit', year: 'numeric'
             }).replace(/\//g, '-');
 
-            // Format Waktu: "08.00-12.30"
             const timeStart = start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
             const timeEnd = end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
             
-            // Mapping Status DB ke Tampilan
-            // DB: pending, approved, rejected
-            // Tampilan: Menunggu, Disetujui, Ditolak
             let statusDisplay = 'Menunggu';
             if (b.status === 'approved') statusDisplay = 'Disetujui';
             if (b.status === 'rejected') statusDisplay = 'Ditolak';
@@ -331,12 +373,10 @@ app.get('/admin/pengajuan', ensureAdmin, async (req, res) => {
 });
 
 // === ROUTE BARU: HANDLE UPDATE STATUS (TERIMA/TOLAK) ===
-// Ini diperlukan karena form di EJS action-nya ke '/admin/booking/update'
 app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
     try {
         const { booking_id, new_status } = req.body;
-        
-        // Ambil ID Admin dari session
+
         const adminId = req.session.userId; 
 
         if (!adminId) {
@@ -345,7 +385,6 @@ app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
 
         console.log(`Update Booking ID: ${booking_id} to ${new_status} by Admin ID: ${adminId}`);
 
-        // Konversi status tampilan ke status database
         let dbStatus = 'pending';
         if (new_status === 'Disetujui') dbStatus = 'approved';
         if (new_status === 'Ditolak') dbStatus = 'rejected';
@@ -364,4 +403,3 @@ app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
 
 module.exports = app;
 
-module.exports = app;

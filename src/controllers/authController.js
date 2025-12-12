@@ -1,13 +1,9 @@
-// src/controllers/authController.js
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const User = require('../models/users');
 
 const SALT_ROUNDS = 12;
 
-/**
- * Tampilkan halaman register (GET /register)
- */
 exports.showRegister = (req, res) => {
   res.render('pages/register', { 
     errors: [], 
@@ -17,12 +13,8 @@ exports.showRegister = (req, res) => {
   });
 };
 
-/**
- * Proses register (POST /register)
- */
 exports.register = async (req, res) => {
   const errors = validationResult(req);
-  // selalu kirim old supaya ejs aman
   const old = req.body || {};
 
   if (!errors.isEmpty()) {
@@ -59,7 +51,6 @@ exports.register = async (req, res) => {
     });
     console.log("register berhasil")
 
-    // Pastikan kamu sudah pakai express-session di app.js
     if (req.session) {
       req.session.userId = created.id;
       req.session.userName = created.name;
@@ -70,7 +61,6 @@ exports.register = async (req, res) => {
     return res.redirect('/');
   } catch (err) {
     console.error('Register error:', err);
-    // jangan lupa kirim old agar view tidak crash
     return res.status(500).render('pages/register', {
       errors: [{ msg: 'Terjadi kesalahan server. Coba lagi nanti.' }],
       layout: false,
@@ -80,9 +70,6 @@ exports.register = async (req, res) => {
   }
 };
 
-
-
-// tampilkan halaman login (GET /login)
 exports.showLogin = (req, res) => {
   res.render('pages/login', {
     errors: [],
@@ -92,7 +79,6 @@ exports.showLogin = (req, res) => {
   });
 };
 
-// proses login (POST /login)
 exports.login = async (req, res) => {
   const errors = validationResult(req);
   const old = req.body || {};
@@ -129,7 +115,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // regenerasi session untuk mencegah session fixation
     if (req.session && req.session.regenerate) {
       req.session.regenerate(err => {
         if (err) {
@@ -146,10 +131,9 @@ exports.login = async (req, res) => {
         req.session.userRoleId = user.role_id;
         req.session.userEmail = user.email;
 
-        return res.redirect('/'); // atur redirect sesuai kebutuhan (mis. /dashboard)
+        return res.redirect('/');
       });
     } else {
-      // fallback kalau session tidak mendukung regenerate
       req.session.userId = user.id;
       req.session.userName = user.name;
       req.session.userRoleId = user.role_id;
@@ -168,35 +152,26 @@ exports.login = async (req, res) => {
   }
 };
 
-// logout (POST /logout atau GET /logout sesuai preferensi)
+
 exports.logout = (req, res) => {
   if (!req.session) return res.redirect('/login');
 
   req.session.destroy(err => {
     if (err) {
       console.error('Logout error:', err);
-      // tetap redirect meskipun gagal destroy
       return res.redirect('/');
     }
-    // hapus cookie session di client
     res.clearCookie('connect.sid', { path: '/' });
     return res.redirect('/login');
   });
 };
 
-/**
- * Middleware sederhana untuk melindungi route yang butuh login.
- * Gunakan: router.get('/protected', authController.ensureAuth, handler)
- */
+
 exports.ensureAuth = (req, res, next) => {
   if (req.session && req.session.userId) return next();
   return res.redirect('/login');
 };
 
-/**
- * Middleware opsional untuk membuat user tersedia di views (res.locals.currentUser)
- * Pasang di app.js: app.use(authController.attachUser);
- */
 exports.attachUser = async (req, res, next) => {
   if (req.session && req.session.userId) {
     try {
@@ -210,4 +185,62 @@ exports.attachUser = async (req, res, next) => {
     res.locals.currentUser = null;
   }
   next();
+};
+
+
+exports.updateProfile = async (req, res) => {
+  const { name, email } = req.body;
+  const userId = req.session.userId;
+
+  try {
+    await User.updateProfile(userId, { name, email });
+
+    req.session.userName = name;
+    req.session.userEmail = email;
+
+    console.log("Update profile berhasil");
+    return res.redirect('/profile'); 
+    
+  } catch (err) {
+    console.error('Update profile error:', err);
+    return res.status(500).send("Gagal mengupdate profil.");
+  }
+};
+
+exports.updateSecurity = async (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const userId = req.session.userId;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.send('<script>alert("Semua kolom harus diisi!"); window.history.back();</script>');
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.send('<script>alert("Konfirmasi password tidak cocok!"); window.history.back();</script>');
+  }
+
+  if (newPassword.length < 6) {
+    return res.send('<script>alert("Password baru minimal 6 karakter!"); window.history.back();</script>');
+  }
+
+  try {
+
+    const user = await User.findById(userId);
+
+    const match = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!match) {
+      return res.send('<script>alert("Password lama salah!"); window.history.back();</script>');
+    }
+
+    const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await User.updatePassword(userId, newHash);
+
+    console.log("Password berhasil diubah");
+    return res.send('<script>alert("Password berhasil diubah!"); window.location.href="/profile";</script>');
+
+  } catch (err) {
+    console.error('Update password error:', err);
+    return res.status(500).send("Terjadi kesalahan server.");
+  }
 };
