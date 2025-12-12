@@ -195,6 +195,12 @@ app.get('/profile', ensureAuth, async (req, res) => {
     }
 });
 
+// Route untuk submit form biodata
+app.post('/profile/update', ensureAuth, authController.updateProfile);
+
+// Route untuk submit form ganti password
+app.post('/profile/security', ensureAuth, authController.updateSecurity);
+
 // Route Login
 app.get('/login', ensureGuest, authController.showLogin);
 
@@ -258,10 +264,9 @@ app.get('/admin-settings', ensureAdmin, (req, res) => {
     });
 });
 
-// Nanti kita buat controller khususnya, sementara kita redirect dulu biar gak error 404
 app.post('/admin/settings/profile', ensureAdmin, (req, res) => {
     console.log('Update Profil:', req.body);
-    res.redirect('/admin-settings'); // Balik lagi ke halaman setting
+    res.redirect('/admin-settings'); 
 });
 
 app.post('/admin/settings/general', ensureAdmin, (req, res) => {
@@ -293,27 +298,19 @@ app.delete('/admin/room/delete/:id', ensureAdmin, adminController.deleteRoom);
 
 app.get('/admin/pengajuan', ensureAdmin, async (req, res) => {
     try {
-        // 1. Ambil data asli dari Database
         const rawBookings = await BookingModel.getAllBookings();
 
-        // 2. Mapping data agar sesuai format yang diminta EJS 
-        // (EJS minta: nim, date, time, room, status, id)
         const formattedBookings = rawBookings.map(b => {
             const start = new Date(b.start_datetime);
             const end = new Date(b.end_datetime);
 
-            // Format Tanggal: "25-11-2005"
             const dateStr = start.toLocaleDateString('id-ID', {
                 day: '2-digit', month: '2-digit', year: 'numeric'
             }).replace(/\//g, '-');
 
-            // Format Waktu: "08.00-12.30"
             const timeStart = start.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
             const timeEnd = end.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
             
-            // Mapping Status DB ke Tampilan
-            // DB: pending, approved, rejected
-            // Tampilan: Menunggu, Disetujui, Ditolak
             let statusDisplay = 'Menunggu';
             if (b.status === 'approved') statusDisplay = 'Disetujui';
             if (b.status === 'rejected') statusDisplay = 'Ditolak';
@@ -348,12 +345,10 @@ app.get('/admin/pengajuan', ensureAdmin, async (req, res) => {
 });
 
 // === ROUTE BARU: HANDLE UPDATE STATUS (TERIMA/TOLAK) ===
-// Ini diperlukan karena form di EJS action-nya ke '/admin/booking/update'
 app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
     try {
         const { booking_id, new_status } = req.body;
-        
-        // Ambil ID Admin dari session
+
         const adminId = req.session.userId; 
 
         if (!adminId) {
@@ -362,7 +357,6 @@ app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
 
         console.log(`Update Booking ID: ${booking_id} to ${new_status} by Admin ID: ${adminId}`);
 
-        // Konversi status tampilan ke status database
         let dbStatus = 'pending';
         if (new_status === 'Disetujui') dbStatus = 'approved';
         if (new_status === 'Ditolak') dbStatus = 'rejected';
@@ -381,4 +375,3 @@ app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
 
 module.exports = app;
 
-module.exports = app;

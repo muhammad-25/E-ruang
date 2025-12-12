@@ -25,6 +25,23 @@ const User = {
   async findById(id) {
     const [rows] = await pool.query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
     return rows[0];
+  },
+  
+  async updateProfile(id, { name, email }) {
+    await pool.query(
+      'UPDATE users SET name = ?, email = ? WHERE id = ?',
+      [name, email, id]
+    );
+    return true;
+  },
+
+  // Fungsi update password
+  async updatePassword(id, newPasswordHash) {
+    await pool.query(
+      'UPDATE users SET password_hash = ? WHERE id = ?',
+      [newPasswordHash, id]
+    );
+    return true;
   }
 };
 
