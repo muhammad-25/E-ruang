@@ -1,69 +1,47 @@
-<h1 class="header-title">Hallo, Admin</h1>
-        <p class="header-subtitle">Selamat datang di panel pengelolaan peminjaman ruang.</p>
+<div class="stats-container">
+    <div class="card blue">
+        <h3>Peminjaman (bulan ini)</h3>
+        <div class="number"><%= stats.totalMonth %></div>
+    </div>
+    <div class="card red">
+        <h3>Menunggu Pengajuan</h3>
+        <div class="number"><%= stats.totalPending %></div>
+    </div>
+    <div class="card orange">
+        <h3>Ruangan Tersedia</h3>
+        <div class="number"><%= stats.totalAvailableRooms %></div>
+    </div>
+</div>
 
-        <div class="stats-container">
-            <div class="card blue">
-                <h3>Peminjaman (bulan ini)</h3>
-                <div class="number">217</div>
-            </div>
-            <div class="card red">
-                <h3>Menunggu Pengajuan</h3>
-                <div class="number">1</div>
-            </div>
-            <div class="card orange">
-                <h3>Ruangan Tersedia</h3>
-                <div class="number">16</div>
-            </div>
-        </div>
-
-        <div class="recent-requests">
-            <h2 class="section-title">Pengajuan Terbaru</h2>
-            
-            <table>
-                <thead>
+<div class="recent-requests">
+    <h2 class="section-title">Belum diproses</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nama Pemohon</th>
+                <th>Ruang</th>
+                <th>Tanggal</th>
+                <th>Waktu</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (requests.length > 0) { %>
+                <% requests.forEach(req => { %>
                     <tr>
-                        <th>Nama Pemohon</th>
-                        <th>Ruang</th>
-                        <th>Tanggal</th>
-                        <th>Waktu</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Ahmad</td>
-                        <td>GDS 515</td>
-                        <td>12-11-2005</td>
-                        <td>09.00-12.00</td>
+                        <td><%= req.user_name %></td>
+                        <td><%= req.room_name %></td>
+                        <td><%= req.date %></td>
+                        <td><%= req.time %></td>
                         <td><span class="badge pending">Menunggu</span></td>
-                        <td>
-                            <button class="btn btn-approve">Setuju</button>
-                            <button class="btn btn-reject">Tolak</button>
-                        </td>
                     </tr>
-
-                    <tr>
-                        <td>Dr. Budi Santoso</td>
-                        <td>GDS 515</td>
-                        <td>12-11-2005</td>
-                        <td>09.00-12.00</td>
-                        <td><span class="badge approved">Disetujui</span></td>
-                        <td>
-                            <button class="btn btn-edit">Edit</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Dr. Budi Santoso</td>
-                        <td>GDS 515</td>
-                        <td>12-11-2005</td>
-                        <td>09.00-12.00</td>
-                        <td><span class="badge rejected">Ditolak</span></td>
-                        <td>
-                            <button class="btn btn-edit">Edit</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 20px;">Tidak ada pengajuan yang perlu diproses.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>

@@ -1,7 +1,7 @@
-// FILE: models/bookingModel.js
+
 const db = require('../../database');
 
-// ... (kode query wrapper dan checkAvailability tetap sama) ...
+
 async function query(sql, params = []) {
   if (typeof db.execute === 'function') {
     const [rows] = await db.execute(sql, params);
@@ -15,9 +15,9 @@ async function query(sql, params = []) {
 }
 
 module.exports = {
-  // ... (fungsi checkAvailability dan createBooking biarkan saja) ...
+
   async checkAvailability(roomId, startDateTime, endDateTime) {
-    // ... kode lama ...
+
     const sql = `
       SELECT id FROM bookings 
       WHERE room_id = ? 
@@ -32,7 +32,7 @@ module.exports = {
   },
 
   async createBooking(data) {
-     // ... kode lama ...
+ 
      const sql = `
       INSERT INTO bookings (
         requester_id, 
@@ -57,7 +57,7 @@ module.exports = {
       data.attendees_count || 0 
     ];
     
-    // ... eksekusi ...
+
     if (typeof db.execute === 'function') {
         const [result] = await db.execute(sql, params);
         return result;
@@ -66,7 +66,6 @@ module.exports = {
       return result;
   },
 
-  // --- TAMBAHKAN INI ---
   async getAllBookings() {
   const sql = `
     SELECT 
@@ -93,7 +92,7 @@ module.exports = {
 },
 
   async updateStatus(bookingId, status, adminId) {
-    // Kita update status, approved_by (ID Admin), dan approved_at (Waktu Sekarang)
+
     const sql = `
       UPDATE bookings 
       SET 
@@ -105,8 +104,43 @@ module.exports = {
     return await query(sql, [status, adminId, bookingId]);
   },
 
+  async getDashboardStats() {
+
+  const sqlMonth = `SELECT COUNT(*) as total FROM bookings WHERE MONTH(start_datetime) = MONTH(NOW()) AND YEAR(start_datetime) = YEAR(NOW())`;
+  
+
+  const sqlPending = `SELECT COUNT(*) as total FROM bookings WHERE status = 'pending'`;
+  
+
+  const sqlRooms = `SELECT COUNT(*) as total FROM rooms WHERE is_active = 1`;
+
+  const [resMonth] = await query(sqlMonth);
+  const [resPending] = await query(sqlPending);
+  const [resRooms] = await query(sqlRooms);
+
+  return {
+    totalMonth: resMonth.total,
+    totalPending: resPending.total,
+    totalAvailableRooms: resRooms.total
+  };
+},
+
+async getRecentPendingBookings(limit = 5) {
+    const sql = `
+    SELECT 
+      b.id, b.start_datetime, b.end_datetime, b.status,
+      u.name as user_name, r.name as room_name
+    FROM bookings b
+    JOIN users u ON b.requester_id = u.id
+    JOIN rooms r ON b.room_id = r.id
+    WHERE b.status = 'pending'
+    ORDER BY b.created_at DESC
+    LIMIT ?
+    `;
+    return await query(sql, [limit]);
+  },
   async getBookingsByUserId(userId) {
-     // ... kode lama ...
+
      const sql = `
       SELECT 
         b.id,

@@ -190,14 +190,42 @@ app.get('/logout', authController.logout);
 // app.post('/logout', authController.logout);
 
 
-// Route Dashboard Admin
-app.get('/admin-dashboard', ensureAdmin ,(req, res) => {
-    res.render('pages/admin-dashboard', { 
-        layout: "layouts/admin", 
-        title: 'Admin Dashboard',
-        path: '/admin-dashboard'
-    });
 
+
+app.get('/admin-dashboard', ensureAdmin, async (req, res) => {
+    try {
+        
+        const stats = await BookingModel.getDashboardStats();
+
+        
+        const recentRequestsRaw = await BookingModel.getRecentPendingBookings(5);
+
+        
+        const recentRequests = recentRequestsRaw.map(b => {
+            const start = new Date(b.start_datetime);
+            const end = new Date(b.end_datetime);
+
+            return {
+                id: b.id,
+                user_name: b.user_name,
+                room_name: b.room_name,
+                date: start.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-'),
+                time: `${start.getHours().toString().padStart(2, '0')}.${start.getMinutes().toString().padStart(2, '0')}-${end.getHours().toString().padStart(2, '0')}.${end.getMinutes().toString().padStart(2, '0')}`
+            };
+        });
+
+        res.render('pages/admin-dashboard', { 
+            layout: "layouts/admin", 
+            title: 'Admin Dashboard',
+            path: '/admin-dashboard',
+            stats: stats,            
+            requests: recentRequests 
+        });
+
+    } catch (error) {
+        console.error("Error loading Admin Dashboard:", error);
+        res.status(500).send("Terjadi kesalahan server.");
+    }
 });
 
 app.get('/edit', ensureAdmin, adminController.viewEditKelas);
