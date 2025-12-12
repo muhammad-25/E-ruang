@@ -1,9 +1,6 @@
-// -----------------------------
-// FILE: models/roomFacilities.js
 
 const db = require('../../database'); 
 
-// --- TAMBAHKAN FUNGSI HELPER INI ---
 async function query(sql, params = []) {
   if (typeof db.execute === 'function') {
     const [rows] = await db.execute(sql, params);
@@ -15,10 +12,8 @@ async function query(sql, params = []) {
   }
   throw new Error('Database client error');
 }
-// ------------------------------------
 
 const RoomFacilities = {
-  // add single mapping
   async addFacilityToRoom(roomId, facilityId) {
     const sql = 'INSERT INTO room_facilities (room_id, facility_id, created_at) VALUES (?, ?, NOW())';
     if (typeof db.execute === 'function') {
@@ -40,8 +35,6 @@ const RoomFacilities = {
   },
 
   async getFacilitiesByRoom(roomId) {
-    // Perhatikan: di DB kolom nama fasilitas adalah 'nama', bukan 'name'
-    // Saya ubah ORDER BY f.name menjadi ORDER BY f.nama sesuai SQL dump kamu
     const sql = `SELECT f.* FROM facilities f
       JOIN room_facilities rf ON rf.facility_id = f.id
       WHERE rf.room_id = ? ORDER BY f.nama ASC`;
@@ -55,7 +48,6 @@ const RoomFacilities = {
     return await query(sql, [facilityId]);
   },
 
-  // Replace all facilities for a room with a given array of facilityIds
   async replaceFacilitiesForRoom(roomId, facilityIds = []) {
     if (typeof db.getConnection === 'function') {
       const conn = await db.getConnection();

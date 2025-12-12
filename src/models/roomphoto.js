@@ -1,6 +1,3 @@
-// FILE: models/roomphoto.js
-// FIXED: Disesuaikan dengan tabel `room_photos` di e-ruang (2).sql
-
 const db = require('../../database');
 
 async function query(sql, params = []) {
@@ -16,9 +13,7 @@ async function query(sql, params = []) {
 }
 
 module.exports = {
-  // Ambil semua foto
   async listPhotos({ roomId = null } = {}) {
-    // FIXED: Nama tabel `room_photos` dan kolom `is_main`
     let sql = 'SELECT * FROM room_photos';
     const params = [];
     if (roomId !== null) {
@@ -38,18 +33,13 @@ module.exports = {
     return rows && rows.length ? rows[0] : null;
   },
 
-  // FIXED: Fungsi Create disesuaikan dengan kolom DB
   async createPhoto(data) {
-    // Tabel: room_photos
-    // Kolom tersedia: id, room_id, filename, is_main, uploaded_by, uploaded_at
-    
     const sql = `INSERT INTO room_photos (room_id, filename, is_main, uploaded_at)
       VALUES (?, ?, ?, NOW())`;
       
     const params = [
       data.room_id || null,
       data.filename || null,
-      // Map data.is_primary (dari controller) ke is_main (database)
       (data.is_primary === 1 || data.is_primary === true || data.is_main === 1) ? 1 : 0
     ];
 
@@ -71,16 +61,12 @@ module.exports = {
     return { affectedRows: result.affectedRows };
   },
 
-  // Set satu foto sebagai main (primary)
   async setPrimaryPhoto(roomId, photoId) {
-    // Gunakan transaksi jika memungkinkan
     if (typeof db.getConnection === 'function') {
       const conn = await db.getConnection();
       try {
         await conn.beginTransaction();
-        // Reset semua jadi 0
         await conn.execute('UPDATE room_photos SET is_main = 0 WHERE room_id = ?', [roomId]);
-        // Set yang dipilih jadi 1
         await conn.execute('UPDATE room_photos SET is_main = 1 WHERE id = ? AND room_id = ?', [photoId, roomId]);
         await conn.commit();
         return { success: true };
@@ -91,7 +77,6 @@ module.exports = {
         conn.release();
       }
     }
-    // Fallback tanpa transaksi
     await query('UPDATE room_photos SET is_main = 0 WHERE room_id = ?', [roomId]);
     await query('UPDATE room_photos SET is_main = 1 WHERE id = ? AND room_id = ?', [photoId, roomId]);
     return { success: true };

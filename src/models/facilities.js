@@ -1,10 +1,4 @@
-// -----------------------------
-// FILE: models/facilities.js
-// Model untuk tabel `facilities` (master list of facilities)
-
 const db = require('../../database'); 
-
-// 1. Tambahkan Helper Query (Penting agar tidak error "query is not defined")
 async function query(sql, params = []) {
   if (typeof db.execute === 'function') {
     const [rows] = await db.execute(sql, params);
@@ -19,7 +13,6 @@ async function query(sql, params = []) {
 
 module.exports = {
   async listFacilities() {
-    // FIX: Mengganti 'ORDER BY name' menjadi 'ORDER BY nama'
     return await query('SELECT * FROM facilities ORDER BY nama ASC');
   },
 
@@ -30,9 +23,7 @@ module.exports = {
 
   // data: { name, description }
   async createFacility(data) {
-    // FIX: Mengganti kolom insert '(name, ...)' menjadi '(nama, ...)'
     const sql = 'INSERT INTO facilities (nama, description, created_at) VALUES (?, ?, NOW())';
-    // Kita tetap terima input 'data.name' dari controller, tapi masukkan ke kolom 'nama'
     const params = [data.name || data.nama || null, data.description || null];
     
     if (typeof db.execute === 'function') {
@@ -46,10 +37,8 @@ module.exports = {
   async updateFacility(id, data) {
     const sets = [];
     const params = [];
-    
-    // Cek input 'name' atau 'nama'
     if (data.name !== undefined || data.nama !== undefined) {
-        sets.push('nama = ?'); // FIX: update kolom 'nama'
+        sets.push('nama = ?');
         params.push(data.name || data.nama);
     }
     

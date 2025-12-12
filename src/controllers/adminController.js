@@ -1,6 +1,5 @@
 // FILE: controllers/addller.js
 
-// Import semua model yang dibutuhkan
 const RoomModel = require('../models/roomModel');
 const RoomFacilities = require('../models/roomFacilities'); // Perhatikan exportnya di file kamu
 const RoomPhoto = require('../models/roomphoto');
@@ -9,8 +8,6 @@ const RoomSchedule = require('../models/roomSchedule');
 module.exports = {
   // Menampilkan halaman tambah kelas (GET)
   viewTambahKelas: async (req, res) => {
-    // Kita butuh list fasilitas untuk ditampilkan di view (opsional jika view hardcode)
-    // Tapi di view kamu sepertinya hardcode button, jadi render biasa saja
     res.render('pages/tambahKelas', { 
         layout: "layouts/admin", 
         title: 'Tambah Kelas' 
@@ -28,7 +25,7 @@ module.exports = {
             room_number, 
             description, 
             capacity, 
-            facilities, // UBAH: Ambil 'facilities' (dari checkbox name="facilities[]")
+            facilities, 
             schedule_days,      
             schedule_start, 
             schedule_end 
@@ -55,20 +52,16 @@ module.exports = {
             throw new Error('Gagal menyimpan data ruangan utama.');
             }
 
-            // 3. Simpan Fasilitas (LOGIKA BARU)
-            // Cek apakah user mencentang minimal satu fasilitas
+            // 3. Simpan Fasilitas
             if (facilities) {
-            // Pastikan data berbentuk Array. 
-            // (Jika user cuma centang 1, HTML kadang kirim string, bukan array. Kita convert paksa jadi array)
             const facilityIds = Array.isArray(facilities) ? facilities : [facilities];
 
             for (const fid of facilityIds) {
-                // Parse ke integer biar aman
+                // Parse ke integer
                 const facilityIdInt = parseInt(fid);
                 
                 // Simpan ke DB hanya jika valid number
                 if (!isNaN(facilityIdInt)) {
-                // Mengakses model sesuai struktur export Anda
                 await RoomFacilities.RoomFacilities.addFacilityToRoom(newRoomId, facilityIdInt);
                 }
             }
@@ -109,7 +102,6 @@ module.exports = {
                 }
             }
             }
-
             // Redirect Sukses
             res.redirect('/add'); 
 
@@ -124,15 +116,12 @@ module.exports = {
         // Ambil semua ruangan
         const rooms = await RoomModel.listRooms();
 
-        // Kita perlu melengkapi data ruangan dengan Foto Utama & Fasilitas
-        // Menggunakan Promise.all agar efisien
         const roomsWithData = await Promise.all(rooms.map(async (room) => {
             // Ambil foto
             const photos = await RoomPhoto.listPhotosByRoom(room.id);
             const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
             
             // Ambil fasilitas
-            // Akses model sesuai struktur export di file roomFacilities.js kamu
             const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
 
             return {
@@ -159,10 +148,8 @@ module.exports = {
       const { id } = req.params;
       try {
           // Hapus data (Logic penghapusan relasi foto/fasilitas biasanya ditangani DB cascade 
-          // atau harus dihapus manual satu persatu. Untuk sekarang kita panggil model deleteRoom)
           await RoomModel.deleteRoom(id);
-          
-          // Kirim respon JSON agar bisa ditangkap fetch di frontend
+
           res.json({ success: true, message: 'Ruangan berhasil dihapus' });
       } catch (error) {
           console.error("Error deleting room:", error);
@@ -180,30 +167,18 @@ module.exports = {
           return res.redirect('/admin-DaftarRuangan');
         }
 
-        // 1. Ambil Data Ruangan
         const room = await RoomModel.getRoomById(roomId);
         if (!room) {
           console.log('!!! Ruangan tidak ditemukan untuk ID:', roomId);
           return res.redirect('/admin-DaftarRuangan');
         }
 
-        // 2. Ambil Fasilitas 
         const allFacilities = await require('../models/facilities').listFacilities();
         
-        // --- PERBAIKAN DI SINI ---
-        // Gunakan RoomFacilities.RoomFacilities (karena struktur export model Anda nested)
         const facilitiesData = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(roomId);
-        // -------------------------
 
-        const currentFacilities = facilitiesData.map(f => f.id); // Perhatikan: biasanya id fasilitas ada di kolom 'id' fasilitas atau 'facility_id' tergantung query join. 
-        // Karena di model querynya "SELECT f.*", maka gunakan f.id
-
-        // 3. Ambil Foto
-        // Gunakan variable RoomPhoto yang sudah di-require di atas, tidak perlu require ulang
+        const currentFacilities = facilitiesData.map(f => f.id);  
         const photos = await RoomPhoto.listPhotosByRoom(roomId);
-
-        // 4. Ambil Jadwal
-        // Gunakan variable RoomSchedule yang sudah di-require di atas
         const rawSchedules = await RoomSchedule.getSchedulesByRoom(roomId); 
         
         // Pengelompokan Jadwal

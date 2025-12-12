@@ -1,13 +1,3 @@
-// Model untuk tabel `rooms` dari database e-ruang (MySQL).
-// Fungsi yang ada:
-//  - listRooms()            -> ambil semua ruangan
-//  - getRoomById(id)        -> ambil 1 ruangan berdasarkan id
-//  - createRoom(data)       -> tambah ruangan baru
-//  - updateRoom(id, data)   -> edit ruangan
-//  - deleteRoom(id)         -> hapus ruangan (hard delete)
-//  - softDeleteRoom(id)     -> non-aktifkan ruangan (set is_active = 0)
-
-
 const db = require('../../database'); 
 const { buildRoomFilters } = require('../utils/utils');
 
@@ -32,7 +22,6 @@ module.exports = {
       sql += ' AND is_active = 1';
     }
 
-    // [BARU] Gunakan logic dari utils
     const filterLogic = buildRoomFilters(filters);
     sql += filterLogic.whereClause;
     params.push(...filterLogic.params);
@@ -48,7 +37,6 @@ module.exports = {
     return rows && rows.length ? rows[0] : null;
   },
 
-  // Tambah ruangan baru
   async createRoom(data) {
     const sql = `INSERT INTO rooms
       (code, name, gedung, nomor_ruang, deskripsi, capacity, is_active, created_at, updated_at)
@@ -83,7 +71,6 @@ module.exports = {
       WHERE id = ?`;
 
     const params = [
-      // data.code || null,  <-- HAPUS BARIS INI (Parameter ke-1)
       data.name || null,
       data.gedung || null,
       data.nomor_ruang || null,
@@ -124,26 +111,15 @@ module.exports = {
     return { affectedRows: result.affectedRows };
   },
 
-  // Hapus ruangan (hard delete)
-  // FILE: src/models/roomModel.js
-
-// ... kode atas ...
-
-  // Hapus ruangan (hard delete) diperbarui
   async deleteRoom(id) {
-    // 1. Hapus Booking dulu (PENTING: Ini yang bikin error)
     await query('DELETE FROM bookings WHERE room_id = ?', [id]);
-    
-    // 2. Hapus Jadwal
+
     await query('DELETE FROM room_schedules WHERE room_id = ?', [id]);
-    
-    // 3. Hapus Foto
+
     await query('DELETE FROM room_photos WHERE room_id = ?', [id]);
-    
-    // 4. Hapus Relasi Fasilitas
+
     await query('DELETE FROM room_facilities WHERE room_id = ?', [id]);
 
-    // 5. Baru hapus Ruangannya
     const sql = 'DELETE FROM rooms WHERE id = ?';
     
     if (typeof db.execute === 'function') {
@@ -154,8 +130,6 @@ module.exports = {
     return { affectedRows: result.affectedRows };
   },
 
-
-  // Soft delete: set is_active = 0
   async softDeleteRoom(id) {
     const sql = 'UPDATE rooms SET is_active = 0, updated_at = NOW() WHERE id = ?';
     if (typeof db.execute === 'function') {
@@ -165,11 +139,8 @@ module.exports = {
     const [result] = await db.query(sql, [id]);
     return { affectedRows: result.affectedRows };
   },
-// ... kode sebelumnya (createRoom, updateRoom, dll) ...
 
-  // [BARU] Ambil statistik jumlah ruangan
   async getRoomStatistics() {
-    // Query ini menghitung total, yang aktif (1), dan yang tidak aktif (0) sekaligus
     const sql = `
       SELECT 
         COUNT(*) as total,
@@ -178,10 +149,8 @@ module.exports = {
       FROM rooms
     `;
     const rows = await query(sql);
-    // Jika tabel kosong, return 0 semua
     return rows && rows.length ? rows[0] : { total: 0, active: 0, inactive: 0 };
   },
 
-// ... pastikan ini ada sebelum penutup kurawal "};" terakhir ...
 };
 

@@ -1,7 +1,6 @@
 
 const db = require('../../database');
 
-
 async function query(sql, params = []) {
   if (typeof db.execute === 'function') {
     const [rows] = await db.execute(sql, params);
@@ -56,7 +55,6 @@ module.exports = {
       data.end_datetime,
       data.attendees_count || 0 
     ];
-    
 
     if (typeof db.execute === 'function') {
         const [result] = await db.execute(sql, params);
@@ -92,7 +90,6 @@ module.exports = {
 },
 
   async updateStatus(bookingId, status, adminId) {
-
     const sql = `
       UPDATE bookings 
       SET 
@@ -140,7 +137,6 @@ async getRecentPendingBookings(limit = 5) {
     return await query(sql, [limit]);
   },
   async getBookingsByUserId(userId) {
-
      const sql = `
       SELECT 
         b.id,

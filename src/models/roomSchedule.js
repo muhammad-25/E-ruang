@@ -14,7 +14,6 @@ async function query(sql, params = []) {
 }
 
 module.exports = {
-  // Menambah jadwal baru
   async createSchedule(data) {
     const sql = `INSERT INTO room_schedules 
       (room_id, hari, jam_mulai, jam_selesai, created_at) 
@@ -34,15 +33,10 @@ module.exports = {
     const [result] = await db.query(sql, params);
     return result;
   },
-
-  // **FUNGSI BARU UNTUK MEMPERBAIKI ERROR INI**
-  // Mengambil semua jadwal berdasarkan room_id
   async getSchedulesByRoom(roomId) {
     const sql = 'SELECT * FROM room_schedules WHERE room_id = ? ORDER BY FIELD(hari, "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"), jam_mulai ASC';
     return await query(sql, [roomId]);
   },
-
-  // Hapus jadwal berdasarkan room_id (berguna saat update)
   async deleteSchedulesByRoom(roomId) {
     const sql = 'DELETE FROM room_schedules WHERE room_id = ?';
     if (typeof db.execute === 'function') {
