@@ -9,6 +9,7 @@
 
 
 const db = require('../../database'); 
+const { buildRoomFilters } = require('../utils/utils');
 
 async function query(sql, params = []) {
   if (typeof db.execute === 'function') {
@@ -23,13 +24,21 @@ async function query(sql, params = []) {
 }
 
 module.exports = {
-  async listRooms({ onlyActive = false } = {}) {
-    let sql = 'SELECT * FROM rooms';
+  async listRooms({ onlyActive = false, filters = {} } = {}) {
+    let sql = 'SELECT * FROM rooms WHERE 1=1'; // Gunakan 1=1 agar mudah menyambung AND
     const params = [];
+
     if (onlyActive) {
-      sql += ' WHERE is_active = 1';
+      sql += ' AND is_active = 1';
     }
+
+    // [BARU] Gunakan logic dari utils
+    const filterLogic = buildRoomFilters(filters);
+    sql += filterLogic.whereClause;
+    params.push(...filterLogic.params);
+
     sql += ' ORDER BY name ASC';
+    
     return await query(sql, params);
   },
 

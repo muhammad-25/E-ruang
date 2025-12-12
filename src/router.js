@@ -15,6 +15,7 @@ const session = require('express-session');
 const roomController = require('./controllers/roomController'); 
 const bookingController = require('./controllers/bookingController');
 const BookingModel = require('./models/bookingModel'); 
+const User = require('./models/users');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -125,29 +126,73 @@ app.get('/', ensureUser, async (req, res) => {
 
 app.get('/history', ensureAuth, bookingController.userHistory);
 
-app.get('/listRuangan',(req, res) => {
-  res.render('pages/listRuangan', { title: 'List Ruangan', user: 'Vaazi' });
+app.get('/listRuangan', ensureUser, async (req, res) => {
+  try {
+    // 1. Ambil query params dari URL
+    const filters = {
+        search: req.query.search || '',
+        gedung: req.query.gedung || '',
+        kapasitas: req.query.kapasitas || ''
+    };
+
+    // 2. Kirim filters ke model
+    const rooms = await RoomModel.listRooms({ 
+        onlyActive: true, 
+        filters: filters 
+    });
+
+    const roomsWithData = await Promise.all(rooms.map(async (room) => {
+      const photos = await RoomPhoto.listPhotosByRoom(room.id);
+      const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
+      const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
+
+      return {
+        ...room, 
+        thumbnail: mainPhoto ? mainPhoto.filename : null, 
+        facilities: facilities || [] 
+      };
+    }));
+
+    res.render('pages/listRuangan', { 
+      title: 'Daftar Ruangan', 
+      user: req.user ? req.user.name : 'User',
+      rooms: roomsWithData,
+      // 3. Kirim balik data filter ke view (agar input tidak reset setelah search)
+      query: filters 
+    });
+
+  } catch (error) {
+    console.error("Error fetching listRuangan data:", error);
+    res.status(500).send("Terjadi kesalahan pada server.");
+  }
 });
 
 app.get('/room/:id', roomController.getRoomDetail);
-app.post('/booking/create', ensureUser, bookingController.processBooking);
+app.get('/profile', ensureAuth, async (req, res) => {
+    try {
+        // 1. Ambil ID user dari session
+        const userId = req.session.userId;
 
-app.get('/profile', (req, res) => {
-    
-    // Kita buat data bohong-bohongan (Dummy)
-    // Biar EJS tidak error saat minta nama/email
-    const userPalsu = {
-        name: "Budi Mahasiswa",
-        email: "budi@mahasiswa.unj.ac.id",
-        role_id: 2 // Anggap aja role mahasiswa
-    };
+        // 2. Cari data lengkap user dari database
+        const userAsli = await User.findById(userId);
 
-    res.render('pages/user-profile', { 
-        title: 'Preview Profil',
-        path: '/profile',
-        user: userPalsu, // <--- INI OBATNYA (Kirim data palsu ke view)
-        layout: 'layouts/main' // Pastikan pakai layout user biasa
-    });
+        // Jika user tidak ditemukan (misal dihapus saat sesi aktif), lempar ke login
+        if (!userAsli) {
+            return res.redirect('/login');
+        }
+
+        // 3. Render halaman dengan data asli
+        res.render('pages/user-profile', { 
+            title: 'Profil Saya',
+            path: '/profile',
+            user: userAsli, // <--- KIRIM DATA ASLI DARI DB
+            layout: 'layouts/main' 
+        });
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        res.status(500).send("Terjadi kesalahan saat memuat profil.");
+    }
 });
 
 // Route Login

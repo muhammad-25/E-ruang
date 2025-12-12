@@ -6,13 +6,14 @@
 
   <div class="menu">
     <a href="/">Beranda</a>
-    <a href="#">Daftar Ruangan</a>
+    <a href="listRuangan">Ruangan</a>
     <a href="/history">Riwayat</a>
   </div> 
 
   <div class="buttons">
     <% if (isLoggedIn) { %>
-      <a href="/logout"><button class="btn login">Log Out</button></a>
+      
+      <a href="/profile"><button class="btn login">Profil</button></a>
       
     <% } else { %>
       <a href="/register"><button class="btn">Register</button></a>

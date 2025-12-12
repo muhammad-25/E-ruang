@@ -8,6 +8,14 @@
     font-family: 'Poppins', sans-serif;
 }
 
+.logout {
+    width: 40px;
+}
+
+.logout img {
+    width: 40px;
+}
+
 /* Wrapper agar konten tidak terlalu lebar di layar besar */
 .profile-content-wrapper {
     max-width: 1000px; /* Batas lebar maksimal agar rapi */
@@ -22,6 +30,7 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     margin-bottom: 25px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 20px;
 }
