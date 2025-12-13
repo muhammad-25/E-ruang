@@ -12,14 +12,17 @@ module.exports = {
       const { room_id, date, start, end, name, note } = req.body;
       const requesterId = req.session.userId; 
 
+      // Validasi: Pastikan user login (Safety check)
       if (!requesterId) {
         return res.redirect('/login?error=Sesi habis, silakan login kembali.');
       }
 
+      // 1. Validasi Input Dasar
       if (!room_id || !date || !start || !end || !name) {
         return res.redirect(`/room/${room_id}?error=Mohon lengkapi semua data formulir.`);
       }
 
+      // Gabungkan Date dan Time
       const startDateTimeStr = `${date} ${start}:00`;
       const endDateTimeStr = `${date} ${end}:00`;
 
@@ -27,22 +30,27 @@ module.exports = {
       const endObj = new Date(endDateTimeStr);
       const now = new Date();
 
+      // 2. Validasi Waktu
       if (startObj < now) {
         return res.redirect(`/room/${room_id}?error=Tidak dapat meminjam ruangan di waktu yang sudah lewat.`);
       }
       if (endObj <= startObj) {
         return res.redirect(`/room/${room_id}?error=Jam selesai harus lebih akhir dari jam mulai.`);
       }
+
+      // 3. Ambil Kapasitas Ruangan
       const room = await RoomModel.getRoomById(room_id);
       if (!room) {
         return res.redirect('/?error=Ruangan tidak ditemukan.');
       }
-    
+      
+      // 4. Cek Bentrok
       const isBooked = await BookingModel.checkAvailability(room_id, startDateTimeStr, endDateTimeStr);
       if (isBooked) {
         return res.redirect(`/room/${room_id}?error=Ruangan sudah dipesan pada jam tersebut.`);
       }
 
+      // 5. Simpan ke Database
       const bookingData = {
         requester_id: requesterId,
         room_id: room_id,
@@ -55,14 +63,17 @@ module.exports = {
 
       console.log('Data yang akan disimpan:', bookingData);
 
+      // Eksekusi Simpan
       await BookingModel.createBooking(bookingData);
       
       console.log('--- BOOKING BERHASIL DISIMPAN ---');
 
+      // 6. Sukses
       return res.redirect(`/room/${room_id}?success=Permintaan peminjaman berhasil dikirim. Menunggu persetujuan Admin.`);
 
     } catch (error) {
       console.error('CRITICAL BOOKING ERROR:', error);
+      // Redirect dengan pesan error yang jelas agar user tahu terjadi kesalahan sistem
       return res.redirect(`/room/${req.body.room_id || ''}?error=Gagal menyimpan data ke database (Server Error).`);
     }
   },
@@ -73,17 +84,21 @@ module.exports = {
         return res.redirect('/login');
       }
 
+      // 1. Ambil data dari Model
       const bookingsRaw = await BookingModel.getBookingsByUserId(userId);
 
+      // 2. Format data agar sesuai dengan struktur 'mockBookings' di frontend
       const formattedBookings = bookingsRaw.map(b => {
         const start = new Date(b.start_datetime);
         const end = new Date(b.end_datetime);
         const now = new Date();
 
+        // Format Tanggal (contoh: 15 Nov 2025)
         const dateStr = start.toLocaleDateString('id-ID', {
           day: 'numeric', month: 'short', year: 'numeric'
         });
 
+        // Format Jam (contoh: 09:00 - 11:00)
         const timeStr = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')} - ${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
 
         // Hitung Durasi (Jam)
@@ -104,8 +119,11 @@ module.exports = {
                 frontendStatus = 'upcoming';
             }
         } else {
+            // Jika DB bilang rejected/cancelled
             frontendStatus = 'cancelled';
         }
+
+        // Gambar Default jika kosong
         const imagePath = b.room_image 
           ? `/uploads/rooms/${b.room_image}` 
           : 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1080&q=80'; // Placeholder
