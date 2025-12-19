@@ -1,6 +1,6 @@
 <header class="hero">
     <div class="container">
-        <h1>Selamat Datang, user</h1>
+        <h1>Selamat Datang <%= currentUser ? currentUser.name : '' %></h1>
         <p>Selamat datang di E-Ruang</p>
     </div>
 </header>

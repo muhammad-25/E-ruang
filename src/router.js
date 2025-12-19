@@ -75,8 +75,16 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 
+// --- TAMBAHKAN BARIS INI ---
+// Middleware ini akan mencari data user dari DB berdasarkan session
+// dan menyimpannya ke res.locals.currentUser agar bisa dipakai di EJS
+app.use(authController.attachUser); 
+// ---------------------------
+
 app.use((req, res, next) => {
   if (req.session && req.session.userId) {
+    res.locals.isLoggedIn = true;
+// ... dst ...
     res.locals.isLoggedIn = true;
     res.locals.user = req.session; 
   } else {
@@ -91,18 +99,15 @@ app.use((req, res, next) => {
 // Cari bagian ini di router.js
 app.get('/', ensureUser, async (req, res) => {
   try {
-    // 1. Ambil data ruangan (kode lama kamu)
     const rooms = await RoomModel.listRooms({ onlyActive: true });
-    
-    // 2. [BARU] Ambil Statistik Ruangan
     const stats = await RoomModel.getRoomStatistics();
 
-    // 3. Proses data ruangan (kode lama kamu)
     const roomsWithData = await Promise.all(rooms.map(async (room) => {
+      // ... (logika foto & fasilitas) ...
       const photos = await RoomPhoto.listPhotosByRoom(room.id);
       const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
       const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
-
+      
       return {
         ...room, 
         thumbnail: mainPhoto ? mainPhoto.filename : null, 
@@ -110,12 +115,11 @@ app.get('/', ensureUser, async (req, res) => {
       };
     }));
 
-    // 4. Render View dengan data tambahan 'stats'
     res.render('pages/index', { 
       title: 'Beranda', 
-      user: req.user ? req.user.name : 'User',
+      // user: ... (HAPUS BARIS INI agar tidak menimpa currentUser)
       rooms: roomsWithData,
-      stats: stats // <--- KIRIM STATISTIK KE SINI
+      stats: stats
     });
 
   } catch (error) {
@@ -134,7 +138,8 @@ app.get('/listRuangan', ensureUser, async (req, res) => {
         gedung: req.query.gedung || '',
         kapasitas: req.query.kapasitas || ''
     };
-
+    // 2. [BARU] Ambil Statistik Ruangan
+    const stats = await RoomModel.getRoomStatistics();
     // 2. Kirim filters ke model
     const rooms = await RoomModel.listRooms({ 
         onlyActive: true, 
@@ -158,7 +163,8 @@ app.get('/listRuangan', ensureUser, async (req, res) => {
       user: req.user ? req.user.name : 'User',
       rooms: roomsWithData,
       // 3. Kirim balik data filter ke view (agar input tidak reset setelah search)
-      query: filters 
+      query: filters, 
+      stats: stats
     });
 
   } catch (error) {
