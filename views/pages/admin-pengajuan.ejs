@@ -212,42 +212,23 @@
     </div>
 </div>
 <script>
-    // Fungsi Buka Modal
     function openEditModal(bookingId) {
-        // 1. Simpan ID booking ke dalam input tersembunyi
         document.getElementById('modalBookingId').value = bookingId;
-        
-        // 2. Munculkan Modal (Tambah class 'show')
+
         document.getElementById('editModal').classList.add('show');
     }
 
-    // Fungsi Tutup Modal
     function closeModal() {
         document.getElementById('editModal').classList.remove('show');
     }
 
-    // Fungsi Submit (Saat tombol Setuju/Tolak ditekan)
     function submitStatus(status) {
-        // 1. Isi input status dengan pilihan admin
         document.getElementById('modalNewStatus').value = status;
-        
-        // 2. Kirim Form
         document.getElementById('formStatusUpdate').submit();
     }
 
-    // Opsional: Tutup modal kalau klik area gelap (background)
-    // Hapus kode ini jika kamu ingin mewajibkan user memilih tombol
-    /*
-    window.onclick = function(event) {
-        const modal = document.getElementById('editModal');
-        if (event.target == modal) {
-            closeModal();
-        }
-    }
-    */
-   // --- FUNGSI MODAL DETAIL ---
+
     function openDetailModal(button) {
-        // Ambil data dari atribut tombol
         const nim = button.getAttribute('data-nim');
         const name = button.getAttribute('data-name');
         const pj = button.getAttribute('data-pj');
@@ -256,8 +237,6 @@
         const time = button.getAttribute('data-time');
         const count = button.getAttribute('data-count');
         const desc = button.getAttribute('data-desc');
-
-        // Isi ke dalam elemen modal
         document.getElementById('d-nim').textContent = nim;
         document.getElementById('d-name').textContent = name;
         document.getElementById('d-pj').textContent = pj;
@@ -266,7 +245,6 @@
         document.getElementById('d-count').textContent = count + ' Orang';
         document.getElementById('d-desc').textContent = desc;
 
-        // Tampilkan Modal
         document.getElementById('detailModal').classList.add('show');
     }
 

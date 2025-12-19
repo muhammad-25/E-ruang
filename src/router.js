@@ -90,10 +90,10 @@ app.use((req, res, next) => {
 
 app.get('/', ensureUser, async (req, res) => {
   try {
-    const rooms = await RoomModel.listRooms({ onlyActive: true });
+    const allRooms = await RoomModel.listRooms({ onlyActive: true });
+    const limitedRooms = allRooms.slice(0, 3); 
     const stats = await RoomModel.getRoomStatistics();
-
-    const roomsWithData = await Promise.all(rooms.map(async (room) => {
+    const roomsWithData = await Promise.all(limitedRooms.map(async (room) => {
       const photos = await RoomPhoto.listPhotosByRoom(room.id);
       const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
       const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
@@ -107,7 +107,7 @@ app.get('/', ensureUser, async (req, res) => {
 
     res.render('pages/index', { 
       title: 'Beranda', 
-      rooms: roomsWithData,
+      rooms: roomsWithData, // Data yang dikirim ke view sudah dibatasi 3
       stats: stats
     });
 
