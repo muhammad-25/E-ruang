@@ -14,9 +14,6 @@ module.exports = {
     });
   },
 
-  // Proses Simpan Kelas (POST)
-  // adminController.js
-
     storeClass: async (req, res) => {
         try {
             const { 
@@ -57,17 +54,12 @@ module.exports = {
             const facilityIds = Array.isArray(facilities) ? facilities : [facilities];
 
             for (const fid of facilityIds) {
-                // Parse ke integer
                 const facilityIdInt = parseInt(fid);
-                
-                // Simpan ke DB hanya jika valid number
                 if (!isNaN(facilityIdInt)) {
                 await RoomFacilities.RoomFacilities.addFacilityToRoom(newRoomId, facilityIdInt);
                 }
             }
             }
-
-            // 4. Simpan Foto (Tidak berubah)
             if (req.files && req.files.length > 0) {
             for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
@@ -80,8 +72,6 @@ module.exports = {
                 await RoomPhoto.createPhoto(photoData);
             }
             }
-
-            // 5. Simpan Jadwal (Tidak berubah)
             if (schedule_days && Array.isArray(schedule_days)) {
             for (let i = 0; i < schedule_days.length; i++) {
                 const daysArray = schedule_days[i].split(','); 
@@ -102,8 +92,7 @@ module.exports = {
                 }
             }
             }
-            // Redirect Sukses
-            res.redirect('/add'); 
+            res.redirect('/admin-DaftarRuangan');
 
         } catch (error) {
             console.error('Error adding class:', error);
@@ -113,15 +102,11 @@ module.exports = {
 
     viewDaftarRuangan: async (req, res) => {
     try {
-        // Ambil semua ruangan
         const rooms = await RoomModel.listRooms();
 
         const roomsWithData = await Promise.all(rooms.map(async (room) => {
-            // Ambil foto
             const photos = await RoomPhoto.listPhotosByRoom(room.id);
             const mainPhoto = photos.find(p => p.is_main === 1) || photos[0];
-            
-            // Ambil fasilitas
             const facilities = await RoomFacilities.RoomFacilities.getFacilitiesByRoom(room.id);
 
             return {
@@ -147,7 +132,6 @@ module.exports = {
   deleteRoom: async (req, res) => {
       const { id } = req.params;
       try {
-          // Hapus data (Logic penghapusan relasi foto/fasilitas biasanya ditangani DB cascade 
           await RoomModel.deleteRoom(id);
 
           res.json({ success: true, message: 'Ruangan berhasil dihapus' });
@@ -180,8 +164,7 @@ module.exports = {
         const currentFacilities = facilitiesData.map(f => f.id);  
         const photos = await RoomPhoto.listPhotosByRoom(roomId);
         const rawSchedules = await RoomSchedule.getSchedulesByRoom(roomId); 
-        
-        // Pengelompokan Jadwal
+
         const groupedSchedules = {};
         rawSchedules.forEach(schedule => {
             const key = `${schedule.jam_mulai}-${schedule.jam_selesai}`;
@@ -190,10 +173,9 @@ module.exports = {
                     id: schedule.id, 
                     jam_mulai: schedule.jam_mulai,
                     jam_selesai: schedule.jam_selesai,
-                    days: [] // Ganti 'hari' jadi 'days' agar sesuai dengan EJS (sch.days.includes)
+                    days: [] 
                 };
             }
-            // Pastikan push ke 'days' bukan 'hari' karena di EJS viewEditKelas baris 15 pakai 'sch.days'
             groupedSchedules[key].days.push(schedule.hari);
         });
         const scheduleList = Object.values(groupedSchedules);
@@ -205,9 +187,9 @@ module.exports = {
             title: 'Edit Kelas',
             room: room,                   
             allFacilities: allFacilities, 
-            currentFacilities: currentFacilities, // Array of IDs
+            currentFacilities: currentFacilities, 
             photos: photos, 
-            facilities: currentFacilities, // Tambahkan ini karena EJS baris 9 pakai variabel 'facilities' untuk cek includes
+            facilities: currentFacilities, 
             schedules: scheduleList       
         });
 
@@ -217,38 +199,29 @@ module.exports = {
     }
   },
 
-  // 2. PROSES UPDATE DATA (POST)
   updateClass: async (req, res) => {
     try {
-        // Ambil ID dari body (hidden input) atau query, kita asumsikan dikirim via hidden input
         const { 
-            id, // Pastikan ada input hidden name="id" di form EJS
+            id, 
             name, building, room_number, description, capacity, 
-            facilities, // Checkbox facilities
+            facilities, 
             schedule_days, schedule_start, schedule_end 
         } = req.body;
 
-        // A. Update Data Utama Ruangan
         const updateData = {
             name, 
             gedung: building, 
             nomor_ruang: room_number, 
             deskripsi: description, 
             capacity: parseInt(capacity) || 0
-            // Code ruangan biasanya tidak diubah agar konsisten, atau bisa digenerate ulang
         };
         await RoomModel.updateRoom(id, updateData);
 
-        // B. Update Fasilitas (Hapus lama -> Insert baru)
-        // Jika user tidak centang apapun, facilities undefined, jadi kirim array kosong
         const newFacilities = facilities ? (Array.isArray(facilities) ? facilities : [facilities]) : [];
         await RoomFacilities.RoomFacilities.replaceFacilitiesForRoom(id, newFacilities);
 
-        // C. Update Jadwal (Hapus lama -> Insert baru)
-        // Hapus semua jadwal lama
         await RoomSchedule.deleteSchedulesByRoom(id);
         
-        // Insert jadwal baru (Logika sama seperti storeClass)
         if (schedule_days && Array.isArray(schedule_days)) {
             for (let i = 0; i < schedule_days.length; i++) {
                 const daysArray = schedule_days[i].split(','); 
@@ -269,8 +242,6 @@ module.exports = {
                 }
             }
         }
-
-        // D. Update Foto (Opsional: Tambah foto baru)
         if (req.files && req.files.length > 0) {
             for (let i = 0; i < req.files.length; i++) {
                 const file = req.files[i];
@@ -278,13 +249,13 @@ module.exports = {
                     room_id: id,
                     filename: file.filename, 
                     url: `/uploads/rooms/${file.filename}`, 
-                    is_main: 0 // Foto baru jadi sekunder dulu
+                    is_main: 0 
                 };
                 await RoomPhoto.createPhoto(photoData);
             }
         }
 
-        res.redirect('/admin-DaftarRuangan'); // Selesai, kembali ke list
+        res.redirect('/admin-DaftarRuangan'); 
 
     } catch (error) {
         console.error('Error updateClass:', error);
