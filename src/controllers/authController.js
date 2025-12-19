@@ -244,3 +244,50 @@ exports.updateSecurity = async (req, res) => {
     return res.status(500).send("Terjadi kesalahan server.");
   }
 };
+
+
+// ... kode sebelumnya ...
+
+exports.updateAdminSecurity = async (req, res) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  const userId = req.session.userId;
+
+  // 1. Validasi Input Dasar
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return res.send('<script>alert("Semua kolom harus diisi!"); window.history.back();</script>');
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.send('<script>alert("Konfirmasi password tidak cocok!"); window.history.back();</script>');
+  }
+
+  if (newPassword.length < 6) {
+    return res.send('<script>alert("Password baru minimal 6 karakter!"); window.history.back();</script>');
+  }
+
+  try {
+    // 2. Ambil data user dari DB
+    const user = await User.findById(userId);
+
+    // 3. Cek Password Lama
+    const match = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!match) {
+      return res.send('<script>alert("Password lama salah!"); window.history.back();</script>');
+    }
+
+    // 4. Hash Password Baru
+    const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    // 5. Update ke Database
+    await User.updatePassword(userId, newHash);
+
+    console.log(`Admin ID ${userId} berhasil mengubah password.`);
+    
+    // 6. Redirect kembali ke halaman Admin Settings
+    return res.send('<script>alert("Password Admin berhasil diubah!"); window.location.href="/admin-settings";</script>');
+
+  } catch (err) {
+    console.error('Update admin password error:', err);
+    return res.status(500).send('<script>alert("Terjadi kesalahan server."); window.history.back();</script>');
+  }
+};

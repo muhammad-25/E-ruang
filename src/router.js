@@ -292,28 +292,14 @@ app.post('/edit/update', ensureAdmin, upload.array('photos', 3), adminController
 // 1. Route untuk Menampilkan Halaman Pengaturan
 app.get('/admin-settings', ensureAdmin, (req, res) => {
     res.render('pages/admin-settings', { 
-        layout: "layouts/admin", // PENTING: Agar sidebar admin tetap muncul
-        title: 'Pengaturan Akun',
-        user: req.session, // Mengirim data session (nama/email) ke form
+        layout: "layouts/admin", 
+        title: 'Pengaturan Admin',
+        user: req.session, 
         path: '/admin-settings'
     });
 });
 
-// Nanti kita buat controller khususnya, sementara kita redirect dulu biar gak error 404
-app.post('/admin/settings/profile', ensureAdmin, (req, res) => {
-    console.log('Update Profil:', req.body);
-    res.redirect('/admin-settings'); // Balik lagi ke halaman setting
-});
-
-app.post('/admin/settings/general', ensureAdmin, (req, res) => {
-    console.log('Update Info Umum:', req.body);
-    res.redirect('/admin-settings');
-});
-
-app.post('/admin/settings/security', ensureAdmin, (req, res) => {
-    console.log('Update Password:', req.body);
-    res.redirect('/admin-settings');
-});
+app.post('/admin/settings/security', ensureAdmin, authController.updateAdminSecurity);
 
 app.get('/add', ensureAdmin ,adminController.viewTambahKelas);
 app.post('/add', upload.array('photos', 3), adminController.storeClass);
@@ -419,5 +405,7 @@ app.post('/admin/booking/update', ensureAdmin, async (req, res) => {
         res.status(500).send("Gagal mengupdate status.");
     }
 });
+
+module.exports = app;
 
 module.exports = app;
