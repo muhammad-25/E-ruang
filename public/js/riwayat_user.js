@@ -1,11 +1,19 @@
 const mockBookings = window.serverBookingsData || [];
 
-// Mapping status ke class CSS yang kita buat
+// 1. UPDATE CONFIG: Tambahkan status pending, approved, rejected
 const statusConfig = {
+    // Status berdasarkan Waktu
     completed: { label: "Selesai", className: "badge-completed" },
-    ongoing: { label: "Berlangsung", className: "badge-ongoing" },
-    cancelled: { label: "Dibatalkan", className: "badge-cancelled" },
-    upcoming: { label: "Akan Datang", className: "badge-upcoming" }
+    ongoing:   { label: "Sedang Berlangsung", className: "badge-ongoing" },
+    
+    // Status berdasarkan Database (Prioritas)
+    pending:   { label: "Menunggu Konfirmasi", className: "badge-pending" }, // Kuning
+    approved:  { label: "Disetujui", className: "badge-approved" },          // Teal/Hijau
+    rejected:  { label: "Ditolak", className: "badge-rejected" },            // Merah
+    cancelled: { label: "Dibatalkan", className: "badge-cancelled" },        // Merah
+    
+    // Fallback
+    upcoming:  { label: "Akan Datang", className: "badge-upcoming" }
 };
 
 // --- STATE & VARIABLES ---
@@ -23,8 +31,34 @@ const btnGrid = document.getElementById('btn-grid');
 
 // --- FUNCTIONS ---
 
-function renderBadge(status) {
-    const config = statusConfig[status];
+/**
+ * Logika Utama Penentuan Status:
+ * Menggabungkan status database (dbStatus) dan status waktu (status frontend)
+ */
+function getDisplayStatus(booking) {
+    // 1. Jika status DB adalah Rejected/Cancelled, tampilkan itu langsung
+    if (booking.dbStatus === 'rejected') return 'rejected';
+    if (booking.dbStatus === 'cancelled') return 'cancelled';
+
+    // 2. Jika status DB masih Pending, tampilkan "Menunggu Konfirmasi" (abaikan waktu)
+    if (booking.dbStatus === 'pending') return 'pending';
+
+    // 3. Jika status DB Approved:
+    if (booking.dbStatus === 'approved') {
+        // Cek waktu dari controller (upcoming/ongoing/completed)
+        if (booking.status === 'completed') return 'completed';
+        if (booking.status === 'ongoing') return 'ongoing';
+        
+        // Jika belum mulai dan sudah diapprove -> "Disetujui"
+        return 'approved'; 
+    }
+
+    // Default fallback
+    return booking.status || 'upcoming';
+}
+
+function renderBadge(displayStatusKey) {
+    const config = statusConfig[displayStatusKey] || statusConfig['upcoming'];
     return `<div class="badge ${config.className}">
         ${config.label}
     </div>`;
@@ -32,8 +66,10 @@ function renderBadge(status) {
 
 function renderTimelineItem(booking, index, total) {
     const isLast = index === total - 1;
-    // Gunakan class CSS .timeline-line
     const line = !isLast ? `<div class="timeline-line"></div>` : '';
+    
+    // Hitung status yang akan ditampilkan
+    const displayStatus = getDisplayStatus(booking);
 
     return `
         <div class="relative">
@@ -52,7 +88,6 @@ function renderTimelineItem(booking, index, total) {
 
                         <div class="card-image-container">
                             <img src="${booking.roomImage}" alt="${booking.roomName}" class="card-image">
-
                         </div>
 
                         <div class="p-6" style="flex: 1;">
@@ -61,9 +96,9 @@ function renderTimelineItem(booking, index, total) {
                                     <h3 class="text-lg font-semibold mb-1">${booking.roomName}</h3>
                                     <p style="color: var(--color-slate-600);">${booking.purpose}</p>
                                 </div>
-                            <div class="absolute" style="top: 0.75rem; right: 0.75rem;">
-                                ${renderBadge(booking.status)}
-                            </div>                                
+                                <div class="absolute" style="top: 0.75rem; right: 0.75rem;">
+                                    ${renderBadge(displayStatus)}
+                                </div>                                
                             </div>
 
                             <div class="grid-2-col-responsive">
@@ -116,6 +151,8 @@ function renderTimelineItem(booking, index, total) {
 }
 
 function renderGridItem(booking) {
+    const displayStatus = getDisplayStatus(booking);
+
     return `
         <div class="card group">
             <div class="p-0">
@@ -128,7 +165,7 @@ function renderGridItem(booking) {
                         <p class="text-sm" style="color: rgba(255,255,255,0.9);">${booking.location}</p>
                     </div>
                     <div class="absolute" style="top: 0.75rem; right: 0.75rem;">
-                        ${renderBadge(booking.status)}
+                        ${renderBadge(displayStatus)}
                     </div>
                 </div>
 
@@ -156,25 +193,47 @@ function renderGridItem(booking) {
 }
 
 function renderBookings() {
-    // Filter logic
+    const q = searchQuery.toLowerCase().trim();
+
     const filtered = mockBookings.filter(booking => {
-        const matchesSearch = booking.roomName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                booking.purpose.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = filterStatus === "all" || booking.status === filterStatus;
+        // Ambil display status untuk pencarian teks juga
+        const currentStatusKey = getDisplayStatus(booking);
+        const statusLabel = statusConfig[currentStatusKey].label.toLowerCase();
+
+        // Safety check null
+        const roomName = (booking.roomName || '').toLowerCase();
+        const purpose = (booking.purpose || '').toLowerCase();
+        const location = (booking.location || '').toLowerCase();
+        const date = (booking.date || '').toLowerCase();
+
+        const matchesSearch = 
+            roomName.includes(q) || 
+            purpose.includes(q) || 
+            location.includes(q) || 
+            date.includes(q) ||
+            statusLabel.includes(q);
+
+        // Logic Filter Dropdown
+        let matchesStatus = false;
+        if (filterStatus === "all") {
+            matchesStatus = true;
+        } else {
+            // Kita cocokkan filterStatus dengan currentStatusKey
+            matchesStatus = (currentStatusKey === filterStatus);
+        }
+
         return matchesSearch && matchesStatus;
     });
 
-    // Empty state check
     if (filtered.length === 0) {
         container.innerHTML = '';
-        container.className = ''; // Remove layout classes
-        emptyState.classList.add('show');
+        container.className = ''; 
+        if (emptyState) emptyState.classList.add('show');
         return;
     } else {
-        emptyState.classList.remove('show');
+        if (emptyState) emptyState.classList.remove('show');
     }
 
-    // Render view logic
     if (currentView === 'timeline') {
         container.className = 'timeline-layout';
         container.innerHTML = filtered.map((b, i) => renderTimelineItem(b, i, filtered.length)).join('');
@@ -183,14 +242,13 @@ function renderBookings() {
         container.innerHTML = filtered.map(b => renderGridItem(b)).join('');
     }
 
-    // Re-initialize icons
-    lucide.createIcons();
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 }
 
 function setView(view) {
     currentView = view;
-    
-    // Toggle Active Classes
     if (view === 'timeline') {
         btnTimeline.classList.add('active');
         btnGrid.classList.remove('active');
@@ -198,21 +256,24 @@ function setView(view) {
         btnGrid.classList.add('active');
         btnTimeline.classList.remove('active');
     }
-
     renderBookings();
 }
 
 // --- EVENT LISTENERS ---
-searchInput.addEventListener('input', (e) => {
-    searchQuery = e.target.value;
-    renderBookings();
-});
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderBookings();
+    });
+}
 
-statusFilter.addEventListener('change', (e) => {
-    filterStatus = e.target.value;
-    renderBookings();
-});
+if (statusFilter) {
+    statusFilter.addEventListener('change', (e) => {
+        filterStatus = e.target.value;
+        renderBookings();
+    });
+}
 
 // --- INITIAL RENDER ---
-lucide.createIcons();
+if (window.lucide) window.lucide.createIcons();
 renderBookings();

@@ -67,16 +67,9 @@
 
         <select name="gedung" onchange="this.form.submit()">
           <option value="">Semua Gedung</option>
-          <option value="Gedung GDS" <%= (typeof query !== 'undefined' && query.gedung === 'Gedung GDS') ? 'selected' : '' %>>Gedung GDS</option>
-          <option value="Gedung Sertifikasi" <%= (typeof query !== 'undefined' && query.gedung === 'Gedung Sertifikasi') ? 'selected' : '' %>>Gedung Sertifikasi</option>
+          <!-- <option value="Gedung GDS" <%= (typeof query !== 'undefined' && query.gedung === 'Gedung GDS') ? 'selected' : '' %>>Gedung GDS</option> -->
         </select>
 
-        <select name="kapasitas" onchange="this.form.submit()">
-          <option value="">Semua Kapasitas</option>
-          <option value="<= 20" <%= (typeof query !== 'undefined' && query.kapasitas === '<= 20') ? 'selected' : '' %>>&le; 20 Orang</option>
-          <option value="21 - 50" <%= (typeof query !== 'undefined' && query.kapasitas === '21 - 50') ? 'selected' : '' %>>21 - 50 Orang</option>
-          <option value="> 50" <%= (typeof query !== 'undefined' && query.kapasitas === '> 50') ? 'selected' : '' %>>&gt; 50 Orang</option>
-        </select>
 
         <% if (typeof query !== 'undefined' && (query.search || query.gedung || query.kapasitas)) { %>
           <a href="/listRuangan" style="font-size: 14px; text-decoration: none; color: #d32f2f; align-self: center; margin-left: 8px;">

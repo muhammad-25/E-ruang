@@ -38,7 +38,42 @@
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* --- Tambahkan ini di dalam :root (paling atas) --- */
+:root {
+    /* ... variabel warna yang sudah ada ... */
+    
+    /* Tambahan Warna Kuning untuk Pending */
+    --bg-yellow-soft: rgba(234, 179, 8, 0.1);
+    --text-yellow: #ca8a04;
+    --border-yellow: rgba(234, 179, 8, 0.2);
+    
+    /* Tambahan Warna Teal/Biru Kehijauan untuk Approved */
+    --bg-teal-soft: rgba(20, 184, 166, 0.1);
+    --text-teal: #0f766e;
+    --border-teal: rgba(20, 184, 166, 0.2);
+}
 
+/* ... kode css lainnya ... */
+
+/* --- Cari bagian .badge-upcoming dan TAMBAHKAN class ini di bawahnya --- */
+
+.badge-pending { 
+    background-color: var(--bg-yellow-soft); 
+    color: var(--text-yellow); 
+    border-color: var(--border-yellow); 
+}
+
+.badge-approved { 
+    background-color: var(--bg-teal-soft); 
+    color: var(--text-teal); 
+    border-color: var(--border-teal); 
+}
+
+.badge-rejected { 
+    background-color: var(--bg-red-soft); 
+    color: var(--text-red); 
+    border-color: var(--border-red); 
+}
 
 
 
