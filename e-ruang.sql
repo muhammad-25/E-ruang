@@ -61,6 +61,40 @@ INSERT INTO `bookings` (`id`, `requester_id`, `room_id`, `Penanggung_jawab`, `de
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `chat_threads`
+-- Chat admin tidak bergantung pada bookings; satu user memiliki satu thread utama.
+--
+
+CREATE TABLE `chat_threads` (
+  `id` bigint(20) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `admin_id` int(11) DEFAULT NULL,
+  `status` enum('open','closed') NOT NULL DEFAULT 'open',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `chat_messages`
+-- sender_id dapat berisi user atau admin; penerima pesan ditentukan dari thread.
+--
+
+CREATE TABLE `chat_messages` (
+  `id` bigint(20) NOT NULL,
+  `thread_id` bigint(20) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `message_text` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `read_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `facilities`
 --
 
@@ -273,6 +307,24 @@ ALTER TABLE `bookings`
   ADD KEY `idx_bookings_status` (`status`);
 
 --
+-- Indeks untuk tabel `chat_threads`
+--
+ALTER TABLE `chat_threads`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_chat_threads_user` (`user_id`),
+  ADD KEY `idx_chat_threads_admin` (`admin_id`),
+  ADD KEY `idx_chat_threads_status` (`status`);
+
+--
+-- Indeks untuk tabel `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_chat_messages_thread_time` (`thread_id`,`created_at`),
+  ADD KEY `idx_chat_messages_sender` (`sender_id`),
+  ADD KEY `idx_chat_messages_unread` (`thread_id`,`is_read`,`created_at`);
+
+--
 -- Indeks untuk tabel `facilities`
 --
 ALTER TABLE `facilities`
@@ -337,6 +389,18 @@ ALTER TABLE `bookings`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT untuk tabel `chat_threads`
+--
+ALTER TABLE `chat_threads`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT untuk tabel `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT untuk tabel `facilities`
 --
 ALTER TABLE `facilities`
@@ -389,6 +453,20 @@ ALTER TABLE `bookings`
   ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`requester_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`),
   ADD CONSTRAINT `bookings_ibfk_3` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Ketidakleluasaan untuk tabel `chat_threads`
+--
+ALTER TABLE `chat_threads`
+  ADD CONSTRAINT `chat_threads_admin_fk` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `chat_threads_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Ketidakleluasaan untuk tabel `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD CONSTRAINT `chat_messages_sender_fk` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `chat_messages_thread_fk` FOREIGN KEY (`thread_id`) REFERENCES `chat_threads` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `room_facilities`
