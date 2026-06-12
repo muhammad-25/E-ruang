@@ -279,6 +279,15 @@ app.get('/admin-settings', ensureAdmin, (req, res) => {
     });
 });
 
+app.get('/admin/chat', ensureAdmin, (req, res) => {
+    res.render('pages/admin-chat', { 
+        layout: "layouts/admin", 
+        title: 'Chat Admin',
+        user: req.session, 
+        path: '/admin/chat'
+    });
+});
+
 app.post('/admin/settings/security', ensureAdmin, authController.updateAdminSecurity);
 
 app.get('/add', ensureAdmin ,adminController.viewTambahKelas);

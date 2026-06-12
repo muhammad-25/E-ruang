@@ -1,0 +1,440 @@
+<link rel="stylesheet" href="/css/admin-chat.css">
+
+<div class="admin-chat-container">
+    <div class="chat-dashboard-header">
+        <h2>Pesan Masuk (Chat Admin)</h2>
+        <p>Kelola dan tanggapi pertanyaan dari pengguna secara langsung.</p>
+    </div>
+
+    <div class="chat-dashboard-card">
+        <!-- Sidebar: User List -->
+        <div class="chat-sidebar">
+            <div class="chat-search-wrap">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Cari nama user..." />
+            </div>
+            
+            <div class="user-list" id="userList">
+                <!-- User items populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Chat Area: Conversation View -->
+        <div class="chat-area" id="chatArea">
+            <!-- Empty State -->
+            <div class="chat-empty-state" id="chatEmptyState">
+                <div class="empty-icon-wrapper">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <h3>Mulai Percakapan</h3>
+                <p>Pilih salah satu user di panel kiri untuk melihat riwayat pesan dan mulai mengirim balasan.</p>
+            </div>
+
+            <!-- Active Chat State (Hidden by default) -->
+            <div class="chat-active-state" id="chatActiveState" style="display: none;">
+                <div class="active-chat-header">
+                    <div class="active-user-info">
+                        <div class="active-user-avatar" id="activeUserAvatar">U</div>
+                        <div class="active-user-details">
+                            <h4 id="activeUserName">Nama User</h4>
+                            <span class="active-user-status"><span class="dot"></span> Online</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-chat-messages" id="adminChatMessages">
+                    <!-- Message history populated dynamically -->
+                </div>
+
+                <div class="admin-chat-input-bar">
+                    <form id="adminChatForm" onsubmit="handleAdminSubmit(event)" class="admin-chat-form">
+                        <input 
+                            type="text" 
+                            id="adminChatInput" 
+                            class="admin-chat-input-field" 
+                            placeholder="Tulis balasan..." 
+                            autocomplete="off"
+                            required
+                        />
+                        <button type="submit" class="admin-chat-send-btn">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mock Users & Default Conversations
+    const mockUsers = [
+        { id: '991', name: 'Budi Santoso', email: 'budi@mail.com', initial: 'B' },
+        { id: '992', name: 'Siti Aminah', email: 'siti@mail.com', initial: 'S' },
+        { id: '993', name: 'John Doe', email: 'john@mail.com', initial: 'J' }
+    ];
+
+    let activeUserId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeAdminChatStorage();
+        loadUserList();
+        
+        // Listen to storage events for real-time synchronization from User tab
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'eruang_chat_messages') {
+                loadUserList();
+                if (activeUserId) {
+                    renderAdminMessages();
+                }
+            }
+        });
+    });
+
+    // Initialize local storage with default conversations if empty
+    function initializeAdminChatStorage() {
+        let messages = [];
+        const existing = localStorage.getItem('eruang_chat_messages');
+        if (existing) {
+            messages = JSON.parse(existing);
+        }
+
+        // Add mock chats if not already present
+        const now = new Date();
+        const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+        const halfHourAgo = new Date(now.getTime() - 30 * 60 * 1000);
+        
+        const defaultMockMessages = [
+            // Budi Santoso
+            {
+                id: 'mock-b1',
+                sender: 'user',
+                text: 'Halo Admin, saya ingin menanyakan perihal status pengajuan Aula GDS saya.',
+                timestamp: hourAgo.toISOString(),
+                userId: '991',
+                userName: 'Budi Santoso'
+            },
+            {
+                id: 'mock-b2',
+                sender: 'admin',
+                text: 'Halo Budi, silakan sebutkan ID pengajuannya atau tanggal pemesanan agar kami bantu cek.',
+                timestamp: new Date(hourAgo.getTime() + 5 * 60 * 1000).toISOString(),
+                userId: '991',
+                userName: 'Budi Santoso'
+            },
+            {
+                id: 'mock-b3',
+                sender: 'user',
+                text: 'ID pengajuan saya #10245 untuk hari Rabu besok kak.',
+                timestamp: new Date(hourAgo.getTime() + 10 * 60 * 1000).toISOString(),
+                userId: '991',
+                userName: 'Budi Santoso'
+            },
+            
+            // Siti Aminah
+            {
+                id: 'mock-s1',
+                sender: 'user',
+                text: 'Permisi Admin, apakah ruangan Lab Komputer 2 besok pagi AC-nya sudah bisa digunakan?',
+                timestamp: halfHourAgo.toISOString(),
+                userId: '992',
+                userName: 'Siti Aminah'
+            },
+            {
+                id: 'mock-s2',
+                sender: 'admin',
+                text: 'Halo Siti, benar AC sudah selesai diservis kemarin sore dan siap digunakan besok.',
+                timestamp: new Date(halfHourAgo.getTime() + 3 * 60 * 1000).toISOString(),
+                userId: '992',
+                userName: 'Siti Aminah'
+            },
+
+            // John Doe
+            {
+                id: 'mock-j1',
+                sender: 'user',
+                text: 'Terima kasih banyak atas persetujuannya untuk peminjaman ruang Rapat Utama.',
+                timestamp: now.toISOString(),
+                userId: '993',
+                userName: 'John Doe'
+            }
+        ];
+
+        // Only insert mock messages that don't already exist (by checking IDs)
+        defaultMockMessages.forEach(defaultMsg => {
+            if (!messages.some(m => m.id === defaultMsg.id)) {
+                // Also double check if there are already user-created messages for that mock user
+                // If there are no messages at all for this user, we populate mock messages
+                const hasExistingForUser = messages.some(m => m.userId === defaultMsg.userId);
+                if (!hasExistingForUser) {
+                    messages.push(defaultMsg);
+                }
+            }
+        });
+
+        localStorage.setItem('eruang_chat_messages', JSON.stringify(messages));
+    }
+
+    // Load User List (combines mock users and any real logged in users who have sent messages)
+    function loadUserList() {
+        const userListContainer = document.getElementById('userList');
+        if (!userListContainer) return;
+
+        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
+        
+        // Scan for all unique users in chat messages
+        const chatUsersMap = new Map();
+        
+        // Populate standard mock users
+        mockUsers.forEach(u => {
+            chatUsersMap.set(u.id, {
+                id: u.id,
+                name: u.name,
+                initial: u.initial,
+                lastMsg: '',
+                lastTimestamp: new Date(0)
+            });
+        });
+
+        // Scan messages for other users (e.g. real logged-in users)
+        allMessages.forEach(msg => {
+            if (msg.userId) {
+                // If we don't have this user, add them
+                if (!chatUsersMap.has(msg.userId)) {
+                    chatUsersMap.set(msg.userId, {
+                        id: msg.userId,
+                        name: msg.userName || 'User',
+                        initial: (msg.userName || 'U').charAt(0).toUpperCase(),
+                        lastMsg: '',
+                        lastTimestamp: new Date(0)
+                    });
+                }
+                
+                // Track last message
+                const userObj = chatUsersMap.get(msg.userId);
+                const msgTime = new Date(msg.timestamp);
+                if (msgTime > userObj.lastTimestamp) {
+                    userObj.lastMsg = msg.text;
+                    userObj.lastTimestamp = msgTime;
+                }
+            }
+        });
+
+        // Convert Map to Array and sort by last message timestamp (most recent first)
+        const userList = Array.from(chatUsersMap.values()).sort((a, b) => b.lastTimestamp - a.lastTimestamp);
+
+        userListContainer.innerHTML = '';
+
+        userList.forEach(user => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `user-item ${activeUserId === user.id ? 'active' : ''}`;
+            itemDiv.onclick = () => selectUser(user.id, user.name, user.initial);
+            
+            // Format timestamp for display
+            let timeStr = '';
+            if (user.lastTimestamp.getTime() > 0) {
+                timeStr = formatTime(user.lastTimestamp.toISOString());
+            }
+
+            const truncatedMsg = user.lastMsg.length > 35 ? user.lastMsg.substring(0, 35) + '...' : user.lastMsg;
+
+            itemDiv.innerHTML = `
+                <div class="user-avatar-wrapper">
+                    <div class="user-item-avatar">${user.initial}</div>
+                    <span class="user-status-dot"></span>
+                </div>
+                <div class="user-item-details">
+                    <div class="user-item-header">
+                        <span class="user-item-name">${escapeHTML(user.name)}</span>
+                        <span class="user-item-time">${timeStr}</span>
+                    </div>
+                    <p class="user-item-msg">${escapeHTML(truncatedMsg || 'Belum ada pesan')}</p>
+                </div>
+            `;
+
+            userListContainer.appendChild(itemDiv);
+        });
+    }
+
+    // Filter Users in list via search input
+    function filterUsers() {
+        const query = document.getElementById('userSearch').value.toLowerCase();
+        const items = document.querySelectorAll('.user-item');
+        
+        items.forEach(item => {
+            const name = item.querySelector('.user-item-name').innerText.toLowerCase();
+            if (name.includes(query)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    // Select User Conversation
+    function selectUser(userId, name, initial) {
+        activeUserId = userId;
+        
+        // Hide empty state and show active state
+        document.getElementById('chatEmptyState').style.display = 'none';
+        document.getElementById('chatActiveState').style.display = 'flex';
+        
+        // Update header details
+        document.getElementById('activeUserName').innerText = name;
+        document.getElementById('activeUserAvatar').innerText = initial;
+        
+        // Update active class on items
+        document.querySelectorAll('.user-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Re-render and load user list (to set active class)
+        loadUserList();
+        renderAdminMessages();
+        
+        // Focus on input
+        setTimeout(() => {
+            document.getElementById('adminChatInput').focus();
+            scrollToBottom();
+        }, 100);
+    }
+
+    // Render messages for currently selected user
+    function renderAdminMessages() {
+        const messagesContainer = document.getElementById('adminChatMessages');
+        if (!messagesContainer || !activeUserId) return;
+
+        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
+        
+        // Filter messages belonging to the selected user
+        const activeMessages = allMessages.filter(m => m.userId === activeUserId);
+        
+        messagesContainer.innerHTML = '';
+        
+        activeMessages.forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `admin-msg ${msg.sender === 'admin' ? 'sent' : 'received'}`;
+            
+            const timeStr = formatTime(msg.timestamp);
+            
+            msgDiv.innerHTML = `
+                <div class="admin-msg-bubble">
+                    ${escapeHTML(msg.text)}
+                </div>
+                <div class="admin-msg-time">${timeStr}</div>
+            `;
+            
+            messagesContainer.appendChild(msgDiv);
+        });
+
+        scrollToBottom();
+    }
+
+    // Handle Admin Message Submission
+    function handleAdminSubmit(e) {
+        e.preventDefault();
+        const input = document.getElementById('adminChatInput');
+        const text = input.value.trim();
+        if (!text || !activeUserId) return;
+
+        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
+        
+        // Find user name of active conversion
+        let activeName = 'User';
+        const activeItem = mockUsers.find(u => u.id === activeUserId);
+        if (activeItem) {
+            activeName = activeItem.name;
+        } else {
+            // Find in messages
+            const existingMsg = allMessages.find(m => m.userId === activeUserId);
+            if (existingMsg) {
+                activeName = existingMsg.userName || 'User';
+            }
+        }
+
+        const newAdminMessage = {
+            id: 'admin-reply-' + Date.now(),
+            sender: 'admin',
+            text: text,
+            timestamp: new Date().toISOString(),
+            userId: activeUserId,
+            userName: activeName
+        };
+
+        allMessages.push(newAdminMessage);
+        localStorage.setItem('eruang_chat_messages', JSON.stringify(allMessages));
+
+        input.value = '';
+        renderAdminMessages();
+        loadUserList();
+
+        // Simulate reply from the user if it's one of our mock users
+        if (mockUsers.some(u => u.id === activeUserId)) {
+            simulateUserReply();
+        }
+    }
+
+    // Simulate User Reply for Mock Users
+    function simulateUserReply() {
+        const uId = activeUserId;
+        setTimeout(() => {
+            // Check if active user is still the same mock user
+            if (activeUserId !== uId) return;
+
+            const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
+            const activeMock = mockUsers.find(u => u.id === uId);
+            if (!activeMock) return;
+
+            const userReplies = [
+                "Baik kak, terima kasih banyak informasinya!",
+                "Siap kak, akan segera saya tindak lanjuti.",
+                "Terima kasih atas respons cepatnya, Admin.",
+                "Oke kak, nanti saya infokan lagi ya kalau ada kendala.",
+                "Sempurna kak, terima kasih ya!"
+            ];
+            
+            const randomReply = userReplies[Math.floor(Math.random() * userReplies.length)];
+
+            const newUserMessage = {
+                id: 'user-sim-' + Date.now(),
+                sender: 'user',
+                text: randomReply,
+                timestamp: new Date().toISOString(),
+                userId: uId,
+                userName: activeMock.name
+            };
+
+            allMessages.push(newUserMessage);
+            localStorage.setItem('eruang_chat_messages', JSON.stringify(allMessages));
+            
+            if (activeUserId === uId) {
+                renderAdminMessages();
+            }
+            loadUserList();
+        }, 2000);
+    }
+
+    // Scroll chat messages to bottom
+    function scrollToBottom() {
+        const container = document.getElementById('adminChatMessages');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    // Utility: Format Timestamp (HH:MM)
+    function formatTime(isoString) {
+        const d = new Date(isoString);
+        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
+    }
+
+    // Utility: Escape HTML to prevent XSS
+    function escapeHTML(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+</script>

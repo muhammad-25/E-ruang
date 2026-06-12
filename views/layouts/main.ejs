@@ -6,8 +6,10 @@
   <title><%= title || 'My EJS App' %></title>
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/index.css" />
-
-
+  <% if (isLoggedIn && user && user.userRoleId != 1) { %>
+    <link rel="stylesheet" href="/css/chat.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <% } %>
 </head>
 <body>
   <!-- navigation (partial) -->
@@ -20,6 +22,9 @@
 
   <%- include('../partials/footer') %>
 
+  <% if (isLoggedIn && user && user.userRoleId != 1) { %>
+    <%- include('../partials/userChatBubble') %>
+  <% } %>
 
    <script src="/js/js.js"></script>
 </body>
