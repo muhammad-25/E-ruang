@@ -1,14 +1,11 @@
 <!-- User Chat Bubble & Panel -->
 <div class="user-chat-container" id="userChatContainer">
-    <!-- Bubble Button -->
     <button class="chat-bubble-btn" id="chatBubbleBtn" onclick="toggleChatPanel()">
         <i class="fa-solid fa-comments"></i>
         <span class="chat-bubble-badge" id="chatBadge" style="display: none;">0</span>
     </button>
 
-    <!-- Chat Panel -->
     <div class="chat-panel" id="chatPanel">
-        <!-- Header -->
         <div class="chat-header">
             <div class="chat-admin-info">
                 <div class="chat-avatar-wrapper">
@@ -17,7 +14,7 @@
                 </div>
                 <div class="chat-admin-meta">
                     <h4 class="chat-admin-title">Admin E-Ruang</h4>
-                    <p class="chat-admin-subtitle">Online • Siap membantu</p>
+                    <p class="chat-admin-subtitle">Online - Siap membantu</p>
                 </div>
             </div>
             <button class="chat-close-btn" onclick="toggleChatPanel()">
@@ -25,19 +22,15 @@
             </button>
         </div>
 
-        <!-- Messages Area -->
-        <div class="chat-messages" id="chatMessages">
-            <!-- Messages will be populated dynamically by JS -->
-        </div>
+        <div class="chat-messages" id="chatMessages"></div>
 
-        <!-- Input Box -->
         <div class="chat-input-area">
             <form id="chatForm" onsubmit="handleUserSubmit(event)" class="chat-input-form">
-                <input 
-                    type="text" 
-                    id="chatInput" 
-                    class="chat-input-field" 
-                    placeholder="Tulis pesan..." 
+                <input
+                    type="text"
+                    id="chatInput"
+                    class="chat-input-field"
+                    placeholder="Tulis pesan..."
                     autocomplete="off"
                     required
                 />
@@ -49,69 +42,90 @@
     </div>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
-    // Config & Session Data
     const chatUser = {
-        id: '<%= user.userId %>',
-        name: '<%= user.userName %>',
-        email: '<%= user.userEmail %>'
+        id: <%- JSON.stringify(user.userId || null) %>,
+        name: <%- JSON.stringify(user.userName || 'User') %>,
+        email: <%- JSON.stringify(user.userEmail || '') %>
     };
 
+    let chatSocket = null;
+    let activeConversation = null;
+    let chatMessagesState = [];
     let isChatOpen = false;
     let unreadCount = 0;
 
-    // Initialize Chat
     document.addEventListener("DOMContentLoaded", () => {
-        initializeChatStorage();
-        renderChatMessages();
-        
-        // Listen for message updates from other tabs (like Admin Chat page)
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'eruang_chat_messages') {
-                const oldMessages = JSON.parse(e.oldValue || '[]');
-                const newMessages = JSON.parse(e.newValue || '[]');
-                
-                // If new messages added
-                if (newMessages.length > oldMessages.length) {
-                    renderChatMessages();
-                    
-                    // If chat panel is closed and the last message is from admin, show badge
-                    const lastMsg = newMessages[newMessages.length - 1];
-                    if (!isChatOpen && lastMsg && lastMsg.sender === 'admin' && lastMsg.userId === chatUser.id) {
-                        incrementBadge();
-                    }
-                }
-            }
-        });
+        loadInitialChat();
+        connectUserChatSocket();
     });
 
-    // Initialize LocalStorage for Chat
-    function initializeChatStorage() {
-        const existing = localStorage.getItem('eruang_chat_messages');
-        if (!existing) {
-            const initialMessages = [
-                {
-                    id: 'init-' + Date.now(),
-                    sender: 'admin',
-                    text: `Halo ${chatUser.name}! Ada yang bisa kami bantu mengenai peminjaman ruangan di E-Ruang?`,
-                    timestamp: new Date().toISOString(),
-                    userId: chatUser.id,
-                    userName: chatUser.name
-                }
-            ];
-            localStorage.setItem('eruang_chat_messages', JSON.stringify(initialMessages));
+    async function loadInitialChat() {
+        try {
+            const response = await fetch('/api/chat/me');
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (!data.success) return;
+
+            activeConversation = data.conversation;
+            chatMessagesState = data.messages || [];
+            unreadCount = activeConversation.unread_count || 0;
+            updateBadge();
+            renderChatMessages();
+        } catch (err) {
+            console.error('Gagal memuat chat:', err);
         }
     }
 
-    // Toggle panel visibility
+    function connectUserChatSocket() {
+        if (!window.io) return;
+
+        chatSocket = io();
+
+        chatSocket.on('chat:ready', (payload) => {
+            activeConversation = payload.conversation;
+            chatMessagesState = payload.messages || [];
+            unreadCount = activeConversation.unread_count || 0;
+            updateBadge();
+            renderChatMessages();
+        });
+
+        chatSocket.on('chat:message', (payload) => {
+            if (!payload || !payload.message) return;
+            if (activeConversation && payload.message.thread_id !== activeConversation.thread_id) return;
+
+            upsertMessage(payload.message);
+            if (payload.conversation) activeConversation = payload.conversation;
+            renderChatMessages();
+
+            if (payload.message.sender_type === 'admin') {
+                if (isChatOpen) {
+                    markConversationRead();
+                } else {
+                    unreadCount += 1;
+                    updateBadge();
+                }
+            }
+        });
+
+        chatSocket.on('chat:conversation_updated', (payload) => {
+            if (!payload || !payload.message) return;
+            if (activeConversation && payload.message.thread_id !== activeConversation.thread_id) return;
+            upsertMessage(payload.message);
+            renderChatMessages();
+        });
+    }
+
     function toggleChatPanel() {
         const panel = document.getElementById('chatPanel');
         isChatOpen = !isChatOpen;
-        
+
         if (isChatOpen) {
             panel.classList.add('open');
             clearBadge();
-            // Focus on input
+            markConversationRead();
             setTimeout(() => {
                 document.getElementById('chatInput').focus();
                 scrollToBottom();
@@ -121,151 +135,122 @@
         }
     }
 
-    // Render Messages
     function renderChatMessages() {
         const messagesContainer = document.getElementById('chatMessages');
         if (!messagesContainer) return;
 
-        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
-        
-        // Filter messages belonging to this user
-        const userMessages = allMessages.filter(m => m.userId === chatUser.id);
-        
         messagesContainer.innerHTML = '';
-        
-        userMessages.forEach(msg => {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `chat-msg ${msg.sender === 'user' ? 'sent' : 'received'}`;
-            
-            const timeStr = formatTime(msg.timestamp);
-            
-            msgDiv.innerHTML = `
+
+        if (chatMessagesState.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'chat-msg received';
+            emptyDiv.innerHTML = `
                 <div class="chat-msg-bubble">
-                    ${escapeHTML(msg.text)}
+                    Halo ${escapeHTML(chatUser.name)}! Ada yang bisa kami bantu mengenai peminjaman ruangan di E-Ruang?
                 </div>
-                <div class="chat-msg-time">${timeStr}</div>
+                <div class="chat-msg-time">${formatTime(new Date().toISOString())}</div>
             `;
-            
+            messagesContainer.appendChild(emptyDiv);
+            return;
+        }
+
+        chatMessagesState.forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${msg.sender_type === 'user' ? 'sent' : 'received'}`;
+            msgDiv.innerHTML = `
+                <div class="chat-msg-bubble">${escapeHTML(msg.message_text)}</div>
+                <div class="chat-msg-time">${formatTime(msg.created_at)}</div>
+            `;
             messagesContainer.appendChild(msgDiv);
         });
-        
-        if (isChatOpen) {
-            scrollToBottom();
-        }
+
+        if (isChatOpen) scrollToBottom();
     }
 
-    // Handle User Message Submission
-    function handleUserSubmit(e) {
+    async function handleUserSubmit(e) {
         e.preventDefault();
         const input = document.getElementById('chatInput');
         const text = input.value.trim();
         if (!text) return;
-        
-        // Add to Storage
-        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
-        
-        const newMessage = {
-            id: 'msg-' + Date.now(),
-            sender: 'user',
-            text: text,
-            timestamp: new Date().toISOString(),
-            userId: chatUser.id,
-            userName: chatUser.name
-        };
-        
-        allMessages.push(newMessage);
-        localStorage.setItem('eruang_chat_messages', JSON.stringify(allMessages));
-        
-        // Clear input and re-render
+
         input.value = '';
-        renderChatMessages();
-        
-        // Trigger simulation reply (only if Admin page is not open)
-        // We can simulate an admin reply after 1.5 seconds if there's no reply from admin
-        simulateAdminReply(text);
-    }
 
-    // Simulate Admin Response (Frontend-only interactivity)
-    function simulateAdminReply(userText) {
-        // Only auto-reply if the user has sent a message and we wait 1.5s
-        setTimeout(() => {
-            const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
-            const userMessages = allMessages.filter(m => m.userId === chatUser.id);
-            const lastMsg = userMessages[userMessages.length - 1];
-            
-            // If the last message is still the user's message, reply.
-            // If the admin already replied (e.g. from the admin dashboard), don't send the automated response.
-            if (lastMsg && lastMsg.sender === 'user') {
-                let adminReplyText = "Baik, terima kasih atas pertanyaannya. Harap tunggu sebentar, kami sedang mengecek status pengajuan atau permohonan Anda.";
-                
-                // Custom replies based on keywords
-                const lowerText = userText.toLowerCase();
-                if (lowerText.includes('halo') || lowerText.includes('siang') || lowerText.includes('pagi') || lowerText.includes('sore') || lowerText.includes('malam')) {
-                    adminReplyText = `Halo ${chatUser.name}! Ada yang bisa kami bantu?`;
-                } else if (lowerText.includes('ruang') || lowerText.includes('gedung') || lowerText.includes('pinjam') || lowerText.includes('aula')) {
-                    adminReplyText = "Untuk peminjaman ruangan, silakan buat pengajuan melalui dashboard. Apakah Anda sudah membuat pengajuan sebelumnya?";
-                } else if (lowerText.includes('batal') || lowerText.includes('cancel')) {
-                    adminReplyText = "Pembatalan peminjaman dapat dilakukan langsung di menu Riwayat selambat-lambatnya 24 jam sebelum pemakaian.";
-                } else if (lowerText.includes('terima kasih') || lowerText.includes('thanks') || lowerText.includes('oke')) {
-                    adminReplyText = "Sama-sama! Jika ada hal lain yang ingin ditanyakan, jangan ragu untuk menghubungi kami kembali.";
+        if (chatSocket && chatSocket.connected) {
+            chatSocket.emit('chat:message', { message_text: text }, (response) => {
+                if (response && response.success && response.message) {
+                    upsertMessage(response.message);
+                    renderChatMessages();
                 }
+            });
+            return;
+        }
 
-                const newAdminMsg = {
-                    id: 'admin-msg-' + Date.now(),
-                    sender: 'admin',
-                    text: adminReplyText,
-                    timestamp: new Date().toISOString(),
-                    userId: chatUser.id,
-                    userName: chatUser.name
-                };
-                
-                allMessages.push(newAdminMsg);
-                localStorage.setItem('eruang_chat_messages', JSON.stringify(allMessages));
+        try {
+            const response = await fetch('/api/chat/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message_text: text })
+            });
+            const data = await response.json();
+            if (data.success && data.message) {
+                upsertMessage(data.message);
                 renderChatMessages();
-                
-                if (!isChatOpen) {
-                    incrementBadge();
-                }
             }
-        }, 2000);
-    }
-
-    // Badge Helpers
-    function incrementBadge() {
-        unreadCount++;
-        const badge = document.getElementById('chatBadge');
-        if (badge) {
-            badge.innerText = unreadCount;
-            badge.style.display = 'flex';
+        } catch (err) {
+            console.error('Gagal mengirim pesan:', err);
         }
     }
 
-    function clearBadge() {
-        unreadCount = 0;
+    function upsertMessage(message) {
+        const index = chatMessagesState.findIndex(item => Number(item.id) === Number(message.id));
+        if (index >= 0) {
+            chatMessagesState[index] = message;
+        } else {
+            chatMessagesState.push(message);
+        }
+        chatMessagesState.sort((a, b) => Number(a.id) - Number(b.id));
+    }
+
+    function markConversationRead() {
+        if (!activeConversation) return;
+
+        if (chatSocket && chatSocket.connected) {
+            chatSocket.emit('chat:read', { thread_id: activeConversation.thread_id });
+        } else {
+            fetch(`/api/chat/conversations/${activeConversation.thread_id}/read`, { method: 'POST' }).catch(() => {});
+        }
+    }
+
+    function updateBadge() {
         const badge = document.getElementById('chatBadge');
-        if (badge) {
+        if (!badge) return;
+
+        if (unreadCount > 0 && !isChatOpen) {
+            badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+            badge.style.display = 'flex';
+        } else {
             badge.style.display = 'none';
             badge.innerText = '0';
         }
     }
 
-    // Scroll chat area to bottom
-    function scrollToBottom() {
-        const container = document.getElementById('chatMessages');
-        if (container) {
-            container.scrollTop = container.scrollHeight;
-        }
+    function clearBadge() {
+        unreadCount = 0;
+        updateBadge();
     }
 
-    // Utility: Format Timestamp (HH:MM)
+    function scrollToBottom() {
+        const container = document.getElementById('chatMessages');
+        if (container) container.scrollTop = container.scrollHeight;
+    }
+
     function formatTime(isoString) {
         const d = new Date(isoString);
         return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
     }
 
-    // Utility: Escape HTML to prevent XSS
     function escapeHTML(str) {
-        return str
+        return String(str || '')
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')

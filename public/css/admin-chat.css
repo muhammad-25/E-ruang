@@ -82,6 +82,13 @@
     overflow-y: auto;
 }
 
+.chat-list-empty {
+    padding: 24px 20px;
+    color: #718096;
+    font-size: 13px;
+    text-align: center;
+}
+
 /* Individual User Item */
 .user-item {
     display: flex;
@@ -178,6 +185,21 @@
 
 .user-item.active .user-item-msg {
     color: #4a5568;
+}
+
+.user-unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    margin-left: 6px;
+    border-radius: 999px;
+    background-color: #e53e3e;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
 }
 
 /* --- CHAT AREA: CONVERSATION VIEW --- */

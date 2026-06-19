@@ -18,3 +18,21 @@ exports.ensureAdmin = (req, res, next) => {
   if (req.session && req.session.userRoleId != "1") return res.redirect('/');
   return next();
 };
+
+exports.ensureApiAuth = (req, res, next) => {
+  if (req.session && req.session.userId) return next();
+
+  return res.status(401).json({
+    success: false,
+    message: 'Silakan login terlebih dahulu.',
+  });
+};
+
+exports.ensureApiAdmin = (req, res, next) => {
+  if (req.session && req.session.userRoleId == "1") return next();
+
+  return res.status(403).json({
+    success: false,
+    message: 'Akses admin diperlukan.',
+  });
+};

@@ -70,6 +70,7 @@ CREATE TABLE `chat_threads` (
   `user_id` int(11) NOT NULL,
   `admin_id` int(11) DEFAULT NULL,
   `status` enum('open','closed') NOT NULL DEFAULT 'open',
+  `last_message_at` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -313,7 +314,8 @@ ALTER TABLE `chat_threads`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_chat_threads_user` (`user_id`),
   ADD KEY `idx_chat_threads_admin` (`admin_id`),
-  ADD KEY `idx_chat_threads_status` (`status`);
+  ADD KEY `idx_chat_threads_status` (`status`),
+  ADD KEY `idx_chat_threads_last_message` (`last_message_at`);
 
 --
 -- Indeks untuk tabel `chat_messages`

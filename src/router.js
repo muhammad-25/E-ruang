@@ -6,16 +6,17 @@ const adminController = require('./controllers/adminController');
 const bodyParser = require("body-parser")
 const multer = require('multer');
 const { body } = require('express-validator');
-const { ensureGuest, ensureUser, ensureAdmin, ensureAuth } = require('./middlewares/authMiddlewares');
+const { ensureGuest, ensureUser, ensureAdmin, ensureAuth, ensureApiAuth, ensureApiAdmin } = require('./middlewares/authMiddlewares');
 const authController = require("./controllers/authController")
  const RoomModel = require('./models/roomModel');
 const RoomPhoto = require('./models/roomphoto');
 const RoomFacilities = require('./models/roomFacilities');
-const session = require('express-session');
+const { sessionMiddleware } = require('./config/session');
 const roomController = require('./controllers/roomController'); 
 const bookingController = require('./controllers/bookingController');
 const BookingModel = require('./models/bookingModel'); 
 const User = require('./models/users');
+const chatController = require('./controllers/chatController');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -58,18 +59,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ======== SESSION SETUP ========
 
-const sessionOptions = {
-  name: 'connect.sid',
-  secret: process.env.SESSION_SECRET || 'rahasia_development', 
-  resave: false,               
-  saveUninitialized: false,     
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24, 
-    httpOnly: true,
-  }
-};
-
-app.use(session(sessionOptions));
+app.use(sessionMiddleware);
 
 
 app.use(authController.attachUser); 
@@ -228,6 +218,13 @@ app.post(
 // ---------- LOGOUT ----------
 app.get('/logout', authController.logout);
 // app.post('/logout', authController.logout);
+
+// ---------- CHAT API FALLBACK / INITIAL LOAD ----------
+app.get('/api/chat/me', ensureApiAuth, chatController.getMyConversation);
+app.get('/api/chat/conversations', ensureApiAuth, ensureApiAdmin, chatController.listConversations);
+app.get('/api/chat/conversations/:threadId/messages', ensureApiAuth, chatController.getMessages);
+app.post('/api/chat/messages', ensureApiAuth, chatController.sendMessage);
+app.post('/api/chat/conversations/:threadId/read', ensureApiAuth, chatController.markRead);
 
 
 app.get('/admin-dashboard', ensureAdmin, async (req, res) => {

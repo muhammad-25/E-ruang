@@ -7,21 +7,16 @@
     </div>
 
     <div class="chat-dashboard-card">
-        <!-- Sidebar: User List -->
         <div class="chat-sidebar">
             <div class="chat-search-wrap">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Cari nama user..." />
             </div>
-            
-            <div class="user-list" id="userList">
-                <!-- User items populated dynamically -->
-            </div>
+
+            <div class="user-list" id="userList"></div>
         </div>
 
-        <!-- Chat Area: Conversation View -->
         <div class="chat-area" id="chatArea">
-            <!-- Empty State -->
             <div class="chat-empty-state" id="chatEmptyState">
                 <div class="empty-icon-wrapper">
                     <i class="fa-solid fa-comments"></i>
@@ -30,7 +25,6 @@
                 <p>Pilih salah satu user di panel kiri untuk melihat riwayat pesan dan mulai mengirim balasan.</p>
             </div>
 
-            <!-- Active Chat State (Hidden by default) -->
             <div class="chat-active-state" id="chatActiveState" style="display: none;">
                 <div class="active-chat-header">
                     <div class="active-user-info">
@@ -42,17 +36,15 @@
                     </div>
                 </div>
 
-                <div class="admin-chat-messages" id="adminChatMessages">
-                    <!-- Message history populated dynamically -->
-                </div>
+                <div class="admin-chat-messages" id="adminChatMessages"></div>
 
                 <div class="admin-chat-input-bar">
                     <form id="adminChatForm" onsubmit="handleAdminSubmit(event)" class="admin-chat-form">
-                        <input 
-                            type="text" 
-                            id="adminChatInput" 
-                            class="admin-chat-input-field" 
-                            placeholder="Tulis balasan..." 
+                        <input
+                            type="text"
+                            id="adminChatInput"
+                            class="admin-chat-input-field"
+                            placeholder="Tulis balasan..."
                             autocomplete="off"
                             required
                         />
@@ -66,189 +58,106 @@
     </div>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
-    // Mock Users & Default Conversations
-    const mockUsers = [
-        { id: '991', name: 'Budi Santoso', email: 'budi@mail.com', initial: 'B' },
-        { id: '992', name: 'Siti Aminah', email: 'siti@mail.com', initial: 'S' },
-        { id: '993', name: 'John Doe', email: 'john@mail.com', initial: 'J' }
-    ];
-
-    let activeUserId = null;
+    let adminSocket = null;
+    let conversationsState = [];
+    let activeThreadId = null;
+    let activeConversation = null;
+    const messagesByThread = new Map();
 
     document.addEventListener("DOMContentLoaded", () => {
-        initializeAdminChatStorage();
-        loadUserList();
-        
-        // Listen to storage events for real-time synchronization from User tab
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'eruang_chat_messages') {
-                loadUserList();
-                if (activeUserId) {
-                    renderAdminMessages();
-                }
-            }
-        });
+        loadConversations();
+        connectAdminSocket();
     });
 
-    // Initialize local storage with default conversations if empty
-    function initializeAdminChatStorage() {
-        let messages = [];
-        const existing = localStorage.getItem('eruang_chat_messages');
-        if (existing) {
-            messages = JSON.parse(existing);
+    async function loadConversations() {
+        try {
+            const response = await fetch('/api/chat/conversations');
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (!data.success) return;
+
+            conversationsState = data.conversations || [];
+            loadUserList();
+        } catch (err) {
+            console.error('Gagal memuat percakapan:', err);
         }
-
-        // Add mock chats if not already present
-        const now = new Date();
-        const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-        const halfHourAgo = new Date(now.getTime() - 30 * 60 * 1000);
-        
-        const defaultMockMessages = [
-            // Budi Santoso
-            {
-                id: 'mock-b1',
-                sender: 'user',
-                text: 'Halo Admin, saya ingin menanyakan perihal status pengajuan Aula GDS saya.',
-                timestamp: hourAgo.toISOString(),
-                userId: '991',
-                userName: 'Budi Santoso'
-            },
-            {
-                id: 'mock-b2',
-                sender: 'admin',
-                text: 'Halo Budi, silakan sebutkan ID pengajuannya atau tanggal pemesanan agar kami bantu cek.',
-                timestamp: new Date(hourAgo.getTime() + 5 * 60 * 1000).toISOString(),
-                userId: '991',
-                userName: 'Budi Santoso'
-            },
-            {
-                id: 'mock-b3',
-                sender: 'user',
-                text: 'ID pengajuan saya #10245 untuk hari Rabu besok kak.',
-                timestamp: new Date(hourAgo.getTime() + 10 * 60 * 1000).toISOString(),
-                userId: '991',
-                userName: 'Budi Santoso'
-            },
-            
-            // Siti Aminah
-            {
-                id: 'mock-s1',
-                sender: 'user',
-                text: 'Permisi Admin, apakah ruangan Lab Komputer 2 besok pagi AC-nya sudah bisa digunakan?',
-                timestamp: halfHourAgo.toISOString(),
-                userId: '992',
-                userName: 'Siti Aminah'
-            },
-            {
-                id: 'mock-s2',
-                sender: 'admin',
-                text: 'Halo Siti, benar AC sudah selesai diservis kemarin sore dan siap digunakan besok.',
-                timestamp: new Date(halfHourAgo.getTime() + 3 * 60 * 1000).toISOString(),
-                userId: '992',
-                userName: 'Siti Aminah'
-            },
-
-            // John Doe
-            {
-                id: 'mock-j1',
-                sender: 'user',
-                text: 'Terima kasih banyak atas persetujuannya untuk peminjaman ruang Rapat Utama.',
-                timestamp: now.toISOString(),
-                userId: '993',
-                userName: 'John Doe'
-            }
-        ];
-
-        // Only insert mock messages that don't already exist (by checking IDs)
-        defaultMockMessages.forEach(defaultMsg => {
-            if (!messages.some(m => m.id === defaultMsg.id)) {
-                // Also double check if there are already user-created messages for that mock user
-                // If there are no messages at all for this user, we populate mock messages
-                const hasExistingForUser = messages.some(m => m.userId === defaultMsg.userId);
-                if (!hasExistingForUser) {
-                    messages.push(defaultMsg);
-                }
-            }
-        });
-
-        localStorage.setItem('eruang_chat_messages', JSON.stringify(messages));
     }
 
-    // Load User List (combines mock users and any real logged in users who have sent messages)
+    function connectAdminSocket() {
+        if (!window.io) return;
+
+        adminSocket = io();
+
+        adminSocket.on('chat:conversations', (payload) => {
+            conversationsState = payload.conversations || [];
+            loadUserList();
+        });
+
+        adminSocket.on('chat:conversation_updated', (payload) => {
+            if (!payload || !payload.conversation) return;
+            upsertConversation(payload.conversation);
+            loadUserList();
+        });
+
+        adminSocket.on('chat:message', (payload) => {
+            if (!payload || !payload.message) return;
+            if (Number(payload.message.thread_id) !== Number(activeThreadId)) return;
+
+            upsertConversation(payload.conversation);
+            upsertThreadMessage(activeThreadId, payload.message);
+            renderAdminMessages();
+            markActiveConversationRead();
+            loadUserList();
+        });
+
+        adminSocket.on('chat:conversation_read', (payload) => {
+            if (!payload || Number(payload.thread_id) !== Number(activeThreadId)) return;
+            loadConversations();
+        });
+    }
+
     function loadUserList() {
         const userListContainer = document.getElementById('userList');
         if (!userListContainer) return;
 
-        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
-        
-        // Scan for all unique users in chat messages
-        const chatUsersMap = new Map();
-        
-        // Populate standard mock users
-        mockUsers.forEach(u => {
-            chatUsersMap.set(u.id, {
-                id: u.id,
-                name: u.name,
-                initial: u.initial,
-                lastMsg: '',
-                lastTimestamp: new Date(0)
-            });
-        });
-
-        // Scan messages for other users (e.g. real logged-in users)
-        allMessages.forEach(msg => {
-            if (msg.userId) {
-                // If we don't have this user, add them
-                if (!chatUsersMap.has(msg.userId)) {
-                    chatUsersMap.set(msg.userId, {
-                        id: msg.userId,
-                        name: msg.userName || 'User',
-                        initial: (msg.userName || 'U').charAt(0).toUpperCase(),
-                        lastMsg: '',
-                        lastTimestamp: new Date(0)
-                    });
-                }
-                
-                // Track last message
-                const userObj = chatUsersMap.get(msg.userId);
-                const msgTime = new Date(msg.timestamp);
-                if (msgTime > userObj.lastTimestamp) {
-                    userObj.lastMsg = msg.text;
-                    userObj.lastTimestamp = msgTime;
-                }
-            }
-        });
-
-        // Convert Map to Array and sort by last message timestamp (most recent first)
-        const userList = Array.from(chatUsersMap.values()).sort((a, b) => b.lastTimestamp - a.lastTimestamp);
-
+        const searchValue = (document.getElementById('userSearch')?.value || '').toLowerCase();
         userListContainer.innerHTML = '';
 
-        userList.forEach(user => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = `user-item ${activeUserId === user.id ? 'active' : ''}`;
-            itemDiv.onclick = () => selectUser(user.id, user.name, user.initial);
-            
-            // Format timestamp for display
-            let timeStr = '';
-            if (user.lastTimestamp.getTime() > 0) {
-                timeStr = formatTime(user.lastTimestamp.toISOString());
-            }
+        const filtered = conversationsState
+            .filter(item => (item.user_name || '').toLowerCase().includes(searchValue))
+            .sort((a, b) => new Date(b.last_message_at || b.updated_at) - new Date(a.last_message_at || a.updated_at));
 
-            const truncatedMsg = user.lastMsg.length > 35 ? user.lastMsg.substring(0, 35) + '...' : user.lastMsg;
+        if (filtered.length === 0) {
+            userListContainer.innerHTML = '<div class="chat-list-empty">Belum ada percakapan.</div>';
+            return;
+        }
+
+        filtered.forEach(conversation => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `user-item ${Number(activeThreadId) === Number(conversation.thread_id) ? 'active' : ''}`;
+            itemDiv.onclick = () => selectConversation(conversation.thread_id);
+
+            const initial = (conversation.user_name || 'U').charAt(0).toUpperCase();
+            const lastText = conversation.last_message_text || 'Belum ada pesan';
+            const truncatedMsg = lastText.length > 35 ? lastText.substring(0, 35) + '...' : lastText;
+            const unreadBadge = conversation.unread_count > 0
+                ? `<span class="user-unread-badge">${conversation.unread_count > 99 ? '99+' : conversation.unread_count}</span>`
+                : '';
 
             itemDiv.innerHTML = `
                 <div class="user-avatar-wrapper">
-                    <div class="user-item-avatar">${user.initial}</div>
+                    <div class="user-item-avatar">${initial}</div>
                     <span class="user-status-dot"></span>
                 </div>
                 <div class="user-item-details">
                     <div class="user-item-header">
-                        <span class="user-item-name">${escapeHTML(user.name)}</span>
-                        <span class="user-item-time">${timeStr}</span>
+                        <span class="user-item-name">${escapeHTML(conversation.user_name || 'User')}</span>
+                        <span class="user-item-time">${conversation.last_message_at ? formatTime(conversation.last_message_at) : ''}</span>
                     </div>
-                    <p class="user-item-msg">${escapeHTML(truncatedMsg || 'Belum ada pesan')}</p>
+                    <p class="user-item-msg">${escapeHTML(truncatedMsg)} ${unreadBadge}</p>
                 </div>
             `;
 
@@ -256,181 +165,181 @@
         });
     }
 
-    // Filter Users in list via search input
     function filterUsers() {
-        const query = document.getElementById('userSearch').value.toLowerCase();
-        const items = document.querySelectorAll('.user-item');
-        
-        items.forEach(item => {
-            const name = item.querySelector('.user-item-name').innerText.toLowerCase();
-            if (name.includes(query)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
-        });
+        loadUserList();
     }
 
-    // Select User Conversation
-    function selectUser(userId, name, initial) {
-        activeUserId = userId;
-        
-        // Hide empty state and show active state
+    async function selectConversation(threadId) {
+        activeThreadId = threadId;
+        activeConversation = conversationsState.find(item => Number(item.thread_id) === Number(threadId)) || null;
+
         document.getElementById('chatEmptyState').style.display = 'none';
         document.getElementById('chatActiveState').style.display = 'flex';
-        
-        // Update header details
-        document.getElementById('activeUserName').innerText = name;
-        document.getElementById('activeUserAvatar').innerText = initial;
-        
-        // Update active class on items
-        document.querySelectorAll('.user-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        // Re-render and load user list (to set active class)
+
+        updateActiveHeader();
         loadUserList();
-        renderAdminMessages();
-        
-        // Focus on input
-        setTimeout(() => {
-            document.getElementById('adminChatInput').focus();
-            scrollToBottom();
-        }, 100);
+
+        if (adminSocket && adminSocket.connected) {
+            adminSocket.emit('chat:join', { thread_id: threadId }, (response) => {
+                if (response && response.success) {
+                    activeConversation = response.conversation || activeConversation;
+                    messagesByThread.set(Number(threadId), response.messages || []);
+                    renderAdminMessages();
+                    markActiveConversationRead();
+                    focusInput();
+                }
+            });
+        } else {
+            await loadMessagesByHttp(threadId);
+            markActiveConversationRead();
+            focusInput();
+        }
     }
 
-    // Render messages for currently selected user
+    async function loadMessagesByHttp(threadId) {
+        try {
+            const response = await fetch(`/api/chat/conversations/${threadId}/messages`);
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (!data.success) return;
+
+            activeConversation = data.conversation || activeConversation;
+            messagesByThread.set(Number(threadId), data.messages || []);
+            renderAdminMessages();
+        } catch (err) {
+            console.error('Gagal memuat pesan:', err);
+        }
+    }
+
+    function updateActiveHeader() {
+        if (!activeConversation) return;
+
+        const initial = (activeConversation.user_name || 'U').charAt(0).toUpperCase();
+        document.getElementById('activeUserName').innerText = activeConversation.user_name || 'User';
+        document.getElementById('activeUserAvatar').innerText = initial;
+    }
+
     function renderAdminMessages() {
         const messagesContainer = document.getElementById('adminChatMessages');
-        if (!messagesContainer || !activeUserId) return;
+        if (!messagesContainer || !activeThreadId) return;
 
-        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
-        
-        // Filter messages belonging to the selected user
-        const activeMessages = allMessages.filter(m => m.userId === activeUserId);
-        
+        const activeMessages = messagesByThread.get(Number(activeThreadId)) || [];
         messagesContainer.innerHTML = '';
-        
+
         activeMessages.forEach(msg => {
             const msgDiv = document.createElement('div');
-            msgDiv.className = `admin-msg ${msg.sender === 'admin' ? 'sent' : 'received'}`;
-            
-            const timeStr = formatTime(msg.timestamp);
-            
+            msgDiv.className = `admin-msg ${msg.sender_type === 'admin' ? 'sent' : 'received'}`;
             msgDiv.innerHTML = `
-                <div class="admin-msg-bubble">
-                    ${escapeHTML(msg.text)}
-                </div>
-                <div class="admin-msg-time">${timeStr}</div>
+                <div class="admin-msg-bubble">${escapeHTML(msg.message_text)}</div>
+                <div class="admin-msg-time">${formatTime(msg.created_at)}</div>
             `;
-            
             messagesContainer.appendChild(msgDiv);
         });
 
         scrollToBottom();
     }
 
-    // Handle Admin Message Submission
-    function handleAdminSubmit(e) {
+    async function handleAdminSubmit(e) {
         e.preventDefault();
         const input = document.getElementById('adminChatInput');
         const text = input.value.trim();
-        if (!text || !activeUserId) return;
-
-        const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
-        
-        // Find user name of active conversion
-        let activeName = 'User';
-        const activeItem = mockUsers.find(u => u.id === activeUserId);
-        if (activeItem) {
-            activeName = activeItem.name;
-        } else {
-            // Find in messages
-            const existingMsg = allMessages.find(m => m.userId === activeUserId);
-            if (existingMsg) {
-                activeName = existingMsg.userName || 'User';
-            }
-        }
-
-        const newAdminMessage = {
-            id: 'admin-reply-' + Date.now(),
-            sender: 'admin',
-            text: text,
-            timestamp: new Date().toISOString(),
-            userId: activeUserId,
-            userName: activeName
-        };
-
-        allMessages.push(newAdminMessage);
-        localStorage.setItem('eruang_chat_messages', JSON.stringify(allMessages));
+        if (!text || !activeThreadId) return;
 
         input.value = '';
-        renderAdminMessages();
-        loadUserList();
 
-        // Simulate reply from the user if it's one of our mock users
-        if (mockUsers.some(u => u.id === activeUserId)) {
-            simulateUserReply();
+        if (adminSocket && adminSocket.connected) {
+            adminSocket.emit('chat:message', { thread_id: activeThreadId, message_text: text }, (response) => {
+                if (response && response.success && response.message) {
+                    upsertThreadMessage(activeThreadId, response.message);
+                    renderAdminMessages();
+                }
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/chat/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ thread_id: activeThreadId, message_text: text })
+            });
+            const data = await response.json();
+            if (data.success && data.message) {
+                upsertThreadMessage(activeThreadId, data.message);
+                renderAdminMessages();
+                loadConversations();
+            }
+        } catch (err) {
+            console.error('Gagal mengirim pesan:', err);
         }
     }
 
-    // Simulate User Reply for Mock Users
-    function simulateUserReply() {
-        const uId = activeUserId;
-        setTimeout(() => {
-            // Check if active user is still the same mock user
-            if (activeUserId !== uId) return;
+    function upsertConversation(conversation) {
+        if (!conversation) return;
 
-            const allMessages = JSON.parse(localStorage.getItem('eruang_chat_messages') || '[]');
-            const activeMock = mockUsers.find(u => u.id === uId);
-            if (!activeMock) return;
+        const index = conversationsState.findIndex(item => Number(item.thread_id) === Number(conversation.thread_id));
+        if (index >= 0) {
+            conversationsState[index] = conversation;
+        } else {
+            conversationsState.push(conversation);
+        }
 
-            const userReplies = [
-                "Baik kak, terima kasih banyak informasinya!",
-                "Siap kak, akan segera saya tindak lanjuti.",
-                "Terima kasih atas respons cepatnya, Admin.",
-                "Oke kak, nanti saya infokan lagi ya kalau ada kendala.",
-                "Sempurna kak, terima kasih ya!"
-            ];
-            
-            const randomReply = userReplies[Math.floor(Math.random() * userReplies.length)];
-
-            const newUserMessage = {
-                id: 'user-sim-' + Date.now(),
-                sender: 'user',
-                text: randomReply,
-                timestamp: new Date().toISOString(),
-                userId: uId,
-                userName: activeMock.name
-            };
-
-            allMessages.push(newUserMessage);
-            localStorage.setItem('eruang_chat_messages', JSON.stringify(allMessages));
-            
-            if (activeUserId === uId) {
-                renderAdminMessages();
-            }
-            loadUserList();
-        }, 2000);
+        if (Number(activeThreadId) === Number(conversation.thread_id)) {
+            activeConversation = conversation;
+            updateActiveHeader();
+        }
     }
 
-    // Scroll chat messages to bottom
+    function upsertThreadMessage(threadId, message) {
+        const key = Number(threadId);
+        const list = messagesByThread.get(key) || [];
+        const index = list.findIndex(item => Number(item.id) === Number(message.id));
+
+        if (index >= 0) {
+            list[index] = message;
+        } else {
+            list.push(message);
+        }
+
+        list.sort((a, b) => Number(a.id) - Number(b.id));
+        messagesByThread.set(key, list);
+    }
+
+    function markActiveConversationRead() {
+        if (!activeThreadId) return;
+
+        const activeIndex = conversationsState.findIndex(item => Number(item.thread_id) === Number(activeThreadId));
+        if (activeIndex >= 0) {
+            conversationsState[activeIndex].unread_count = 0;
+        }
+
+        if (adminSocket && adminSocket.connected) {
+            adminSocket.emit('chat:read', { thread_id: activeThreadId });
+        } else {
+            fetch(`/api/chat/conversations/${activeThreadId}/read`, { method: 'POST' }).catch(() => {});
+        }
+    }
+
+    function focusInput() {
+        setTimeout(() => {
+            document.getElementById('adminChatInput').focus();
+            scrollToBottom();
+        }, 100);
+    }
+
     function scrollToBottom() {
         const container = document.getElementById('adminChatMessages');
-        if (container) {
-            container.scrollTop = container.scrollHeight;
-        }
+        if (container) container.scrollTop = container.scrollHeight;
     }
 
-    // Utility: Format Timestamp (HH:MM)
     function formatTime(isoString) {
         const d = new Date(isoString);
         return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
     }
 
-    // Utility: Escape HTML to prevent XSS
     function escapeHTML(str) {
-        return str
+        return String(str || '')
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
