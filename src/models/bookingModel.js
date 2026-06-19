@@ -30,6 +30,28 @@ module.exports = {
     return rows.length > 0;
   },
 
+  async getCalendarBookings(roomId, rangeStart, rangeEnd) {
+    const sql = `
+      SELECT
+        b.id,
+        b.status,
+        b.description,
+        b.penanggung_jawab,
+        DATE_FORMAT(b.start_datetime, '%Y-%m-%dT%H:%i:%s') AS start_datetime,
+        DATE_FORMAT(b.end_datetime, '%Y-%m-%dT%H:%i:%s') AS end_datetime,
+        u.name AS requester_name
+      FROM bookings b
+      LEFT JOIN users u ON b.requester_id = u.id
+      WHERE b.room_id = ?
+        AND b.status IN ('approved', 'pending')
+        AND b.start_datetime < ?
+        AND b.end_datetime > ?
+      ORDER BY b.start_datetime ASC
+    `;
+
+    return await query(sql, [roomId, rangeEnd, rangeStart]);
+  },
+
   async createBooking(data) {
  
      const sql = `

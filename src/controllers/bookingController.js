@@ -1,6 +1,46 @@
 // FILE: controllers/bookingController.js
 const BookingModel = require('../models/bookingModel');
 const RoomModel = require('../models/roomModel');
+const RoomSchedule = require('../models/roomSchedule');
+
+function normalizeTime(value) {
+  if (!value) return null;
+  if (typeof value === 'string') return value.slice(0, 5);
+  if (value instanceof Date) {
+    return `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
+  }
+  return String(value).slice(0, 5);
+}
+
+function timeToMinutes(value) {
+  const [hour, minute] = String(value || '00:00').split(':').map(Number);
+  return (hour || 0) * 60 + (minute || 0);
+}
+
+function dayName(date) {
+  return ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][date.getDay()];
+}
+
+function isWithinOperatingHours(startObj, endObj, schedules) {
+  const requestDay = dayName(startObj);
+  const requestStart = startObj.getHours() * 60 + startObj.getMinutes();
+  const requestEnd = endObj.getHours() * 60 + endObj.getMinutes();
+
+  return schedules.some((schedule) => {
+    if (schedule.hari !== requestDay) return false;
+    const open = timeToMinutes(normalizeTime(schedule.jam_mulai));
+    const close = timeToMinutes(normalizeTime(schedule.jam_selesai));
+    return requestStart >= open && requestEnd <= close && requestEnd > requestStart;
+  });
+}
+
+function getFallbackSchedules() {
+  return ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map((hari) => ({
+    hari,
+    jam_mulai: '07:00',
+    jam_selesai: '21:00'
+  }));
+}
 
 module.exports = {
   processBooking: async (req, res) => {
@@ -42,6 +82,12 @@ module.exports = {
       const room = await RoomModel.getRoomById(room_id);
       if (!room) {
         return res.redirect('/?error=Ruangan tidak ditemukan.');
+      }
+
+      const schedulesRaw = await RoomSchedule.getSchedulesByRoom(room_id);
+      const schedules = schedulesRaw.length ? schedulesRaw : getFallbackSchedules();
+      if (!isWithinOperatingHours(startObj, endObj, schedules)) {
+        return res.redirect(`/room/${room_id}?error=Waktu peminjaman berada di luar jam operasional ruangan.`);
       }
       
       // 4. Cek Bentrok

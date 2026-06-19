@@ -1,161 +1,207 @@
 <link rel="stylesheet" href="/css/detail_ruangan.css" />
 
-<div class="wrap">
-    <div class="grid">
-        <main>
-        <div class="card">
-            <div class="media" id="media">
-                <% 
-                   // Helper URL Gambar
-                   const mainImgUrl = mainPhoto ? `/uploads/rooms/${mainPhoto.filename}` : 'https://placehold.co/800x600?text=No+Image';
-                %>
-                <img id="mainImg" src="<%= mainImgUrl %>" alt="<%= room.name %>">
-                
-                <div class="thumbs" id="thumbs">
-                    <% if (photos && photos.length > 0) { %>
-                        <% photos.forEach((photo, index) => { %>
-                            <div class="thumb <%= (mainPhoto && photo.id === mainPhoto.id) ? 'active' : '' %>" 
-                                 data-src="/uploads/rooms/<%= photo.filename %>">
-                                <img src="/uploads/rooms/<%= photo.filename %>" alt="thumb-<%= index %>">
-                            </div>
-                        <% }); %>
-                    <% } %>
-                </div>
-            </div>
+<%
+  const mainImgUrl = mainPhoto ? `/uploads/rooms/${mainPhoto.filename}` : 'https://placehold.co/800x600?text=No+Image';
+  const activeSchedules = schedules || [];
+  const scheduleText = activeSchedules.length
+    ? activeSchedules.map((item) => `${item.hari} ${item.jam_mulai}-${item.jam_selesai}`).join(', ')
+    : '07:00-21:00';
+%>
 
-            <div class="content">
-            <div class="title">
-                <div>
-                <h1><%= room.name %></h1>
-                <div class="sub">
-                    Gedung <%= room.gedung %> • Kode: <%= room.code || room.nomor_ruang %>
-                </div>
-                </div>
+<div class="room-detail-page">
+  <section class="room-hero">
+    <div class="room-gallery" id="media">
+      <img id="mainImg" src="<%= mainImgUrl %>" alt="<%= room.name %>">
 
-                <div style="text-align:right">
-                <div class="muted">Kapasitas</div>
-                <div style="font-weight:700"><%= room.capacity %> orang</div>
-                </div>
-            </div>
-
-            <div class="meta">
-                <div class="m">Jam Operasional: 07:00 — 21:00</div>
-                <div class="m">Status: <%= room.is_active ? 'Aktif' : 'Non-Aktif' %></div> 
-                <div class="m">Verifikasi: Manual oleh Admin</div>
-            </div>
-
-            <div class="two">
-                <div>
-                <h3 style="margin:0 0 8px 0">Fasilitas</h3>
-                <ul class="list">
-                    <% if (facilities && facilities.length > 0) { %>
-                        <% facilities.forEach(item => { %>
-                            <li>• <%= item.nama || item.name %></li> 
-                        <% }) %>
-                    <% } else { %>
-                        <li>• Tidak ada data fasilitas</li>
-                    <% } %>
-                </ul>
-                </div>
-
-                <div>
-                <h3 style="margin:0 0 8px 0">Deskripsi</h3>
-                <div class="list">
-                    <%= room.deskripsi || 'Belum ada deskripsi untuk ruangan ini.' %>
-                </div>
-                </div>
-            </div>
-
-            <div class="cta-row">
-                <a href="#booking" class="btn primary">Pesan Sekarang</a>
-            </div>
-
-            <div style="margin-top:14px;display:flex;gap:12px">
-                <div class="card" style="padding:12px;border-radius:10px;flex:1;background:#fbfbfe"> 
-                <strong>Aturan Peminjaman</strong>
-                <div class="muted" style="margin-top:8px">• Harap jaga kebersihan • Tidak memindah peralatan • Gunakan waktu sesuai izin</div>
-                </div>
-
-                <div class="card" style="padding:12px;border-radius:10px;flex:1;background:#fbfbfe">
-                <strong>Catatan Ketersediaan</strong>
-                <div class="muted" style="margin-top:8px">Lihat kalender pada bagian pemesanan untuk slot kosong. Sistem menolak tabrakan jadwal secara otomatis.</div>
-                </div>
-            </div>
-
-            </div>
+      <% if (photos && photos.length > 0) { %>
+        <div class="thumbs" id="thumbs" aria-label="Galeri foto ruangan">
+          <% photos.forEach((photo, index) => { %>
+            <button
+              type="button"
+              class="thumb <%= (mainPhoto && photo.id === mainPhoto.id) ? 'active' : '' %>"
+              data-src="/uploads/rooms/<%= photo.filename %>"
+              aria-label="Lihat foto ruangan <%= index + 1 %>">
+              <img src="/uploads/rooms/<%= photo.filename %>" alt="Foto ruangan <%= index + 1 %>">
+            </button>
+          <% }); %>
         </div>
-
-        <div class="foot-cta">
-            <div>
-            <div style="font-weight:700">Butuh konfirmasi cepat?</div>
-            <div class="muted">Hubungi admin ruang jika perlu verifikasi mendesak.</div>
-            </div>
-            <div><a href="#contact" class="btn" style="color:var(--muted);background:var(--card);border:1px solid #e7eafc;padding:10px 14px;border-radius:10px">Hubungi Admin</a></div>
-        </div>
-        </main>
-
-        <aside class="aside">
-        <div class="panel" id="booking">
-            <div style="font-weight:700;margin-bottom:8px">Formulir Peminjaman</div>
-
-            <script>
-                // Script sederhana untuk mengambil parameter URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const errorMsg = urlParams.get('error');
-                const successMsg = urlParams.get('success');
-
-                if (errorMsg) {
-                    document.write(`<div style="background:#fee2e2; color:#991b1b; padding:10px; border-radius:6px; margin-bottom:10px; font-size:0.9rem;">⚠️ ${errorMsg}</div>`);
-                    // Opsional: Hapus parameter dari URL agar bersih saat direfresh
-                    window.history.replaceState(null, null, window.location.pathname);
-                }
-                if (successMsg) {
-                    document.write(`<div style="background:#dcfce7; color:#166534; padding:10px; border-radius:6px; margin-bottom:10px; font-size:0.9rem;">✅ ${successMsg}</div>`);
-                    window.history.replaceState(null, null, window.location.pathname);
-                }
-            </script>
-            
-            <form id="bookingForm" action="/booking/create" method="POST">
-                <input type="hidden" name="room_id" value="<%= room.id %>">
-
-                <div class="row">
-                    <label for="date">Tanggal</label>
-                    <input id="date" name="date" type="date" required />
-                </div>
-
-                <div style="display:flex;gap:8px">
-                    <div style="flex:1" class="row">
-                    <label for="start">Mulai</label>
-                    <input id="start" name="start" type="time" required />
-                    </div>
-                    <div style="flex:1" class="row">
-                    <label for="end">Selesai</label>
-                    <input id="end" name="end" type="time" required />
-                    </div>
-                </div>
-
-                <div class="row">
-                    <label for="name">Penanggung Jawab</label>
-                    <input id="name" name="name" type="text" value="<%= typeof user !== 'object' ? '' : user.name %>" placeholder="Nama / NIM / Organisasi" required />
-                </div>
-
-                <div class="row">
-                    <label for="note">Catatan (opsional)</label>
-                    <textarea id="note" name="note" rows="3" placeholder="Keperluan acara..."></textarea>
-                </div>
-
-                <div id="msg"></div>
-                <button type="submit">Kirim Permintaan</button>
-                <div class="small-info">Setelah dikirim, admin akan memverifikasi. Anda akan menerima notifikasi di dashboard atau email.</div>
-            </form>
-
-            <div class="similar">
-                <h4 style="margin:12px 0 8px 0">Info Ruangan</h4>
-                <div class="muted">ID Ruangan: #<%= room.id %></div>
-            </div>
-        </div>
-        </aside>
+      <% } %>
     </div>
+
+    <div class="room-summary">
+      <div class="room-kicker">Detail Ruangan</div>
+      <h1><%= room.name %></h1>
+      <p><%= room.deskripsi || 'Ruangan ini tersedia untuk kegiatan akademik dan dapat diajukan melalui sistem E-Ruang.' %></p>
+
+      <div class="summary-grid">
+        <div>
+          <span>Gedung</span>
+          <strong><%= room.gedung || '-' %></strong>
+        </div>
+        <div>
+          <span>Nomor Ruang</span>
+          <strong><%= room.nomor_ruang || room.code || '-' %></strong>
+        </div>
+        <div>
+          <span>Kapasitas</span>
+          <strong><%= room.capacity || 0 %> orang</strong>
+        </div>
+        <div>
+          <span>Jam Operasional</span>
+          <strong><%= activeSchedules[0] ? `${activeSchedules[0].jam_mulai}-${activeSchedules[0].jam_selesai}` : '07:00-21:00' %></strong>
+        </div>
+      </div>
+
+      <div class="facility-list" aria-label="Fasilitas ruangan">
+        <% if (facilities && facilities.length > 0) { %>
+          <% facilities.forEach((item) => { %>
+            <span><%= item.nama || item.name %></span>
+          <% }); %>
+        <% } else { %>
+          <span>Fasilitas belum tercatat</span>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="availability-shell"
+    id="kalender-ketersediaan"
+    data-room-id="<%= room.id %>"
+    data-is-logged-in="<%= isLoggedIn ? 'true' : 'false' %>">
+    <div class="calendar-main">
+      <div class="calendar-toolbar">
+        <div>
+          <span class="section-label">Kalender Ketersediaan</span>
+          <h2>Jadwal <%= room.name %></h2>
+          <p>Pilih slot kosong pada kalender untuk mengisi formulir peminjaman secara otomatis.</p>
+        </div>
+
+        <div class="calendar-actions">
+          <label class="room-select-label" for="roomSelector">Pilih Ruangan</label>
+          <select id="roomSelector" class="room-select" aria-label="Pilih ruangan">
+            <% (rooms || []).forEach((item) => { %>
+              <option value="<%= item.id %>" <%= Number(item.id) === Number(room.id) ? 'selected' : '' %>>
+                <%= item.name %> - <%= item.gedung || 'Gedung' %>
+              </option>
+            <% }); %>
+          </select>
+
+          <div class="view-toggle" role="group" aria-label="Navigasi tampilan kalender">
+            <button type="button" class="view-btn" data-view="timeGridDay">Hari</button>
+            <button type="button" class="view-btn active" data-view="timeGridWeek">Minggu</button>
+            <button type="button" class="view-btn" data-view="dayGridMonth">Bulan</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-status loading" id="calendarLoading">Memuat ketersediaan ruangan...</div>
+      <div class="calendar-status error" id="calendarError" hidden>Gagal memuat kalender. Silakan coba beberapa saat lagi.</div>
+      <div class="calendar-status empty" id="calendarEmpty" hidden>Tidak ada peminjaman pada rentang ini. Slot dalam jam operasional dapat diajukan.</div>
+
+      <div class="calendar-card">
+        <div id="availabilityCalendar"></div>
+      </div>
+    </div>
+
+    <aside class="booking-side">
+      <div class="legend-card">
+        <h3>Legend Status</h3>
+        <div class="legend-item">
+          <span class="legend-dot empty"></span>
+          <div>
+            <strong>Kosong</strong>
+            <p>Slot dalam jam operasional dan dapat diklik.</p>
+          </div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot approved"></span>
+          <div>
+            <strong>Terisi</strong>
+            <p>Peminjaman sudah disetujui admin.</p>
+          </div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot pending"></span>
+          <div>
+            <strong>Menunggu Persetujuan</strong>
+            <p>Pengajuan sedang diproses admin.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="booking-panel" id="booking">
+        <div class="panel-heading">
+          <span>Form Booking</span>
+          <strong><%= room.name %></strong>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="form-alert error"><%= error %></div>
+        <% } %>
+
+        <div id="queryAlert" class="form-alert" hidden></div>
+        <div id="loginNotice" class="form-alert info" hidden>
+          Silakan login terlebih dahulu untuk mengajukan peminjaman ruangan.
+          <a href="/login?redirect=/room/<%= room.id %>">Login</a>
+        </div>
+
+        <form id="bookingForm" action="/booking/create" method="POST">
+          <input type="hidden" id="room_id" name="room_id" value="<%= room.id %>">
+
+          <div class="row">
+            <label for="date">Tanggal</label>
+            <input id="date" name="date" type="date" required />
+          </div>
+
+          <div class="time-row">
+            <div class="row">
+              <label for="start">Jam Mulai</label>
+              <input id="start" name="start" type="time" required />
+            </div>
+            <div class="row">
+              <label for="end">Jam Selesai</label>
+              <input id="end" name="end" type="time" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="name">Penanggung Jawab</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              value="<%= currentUser && currentUser.name ? currentUser.name : '' %>"
+              placeholder="Nama / NIM / organisasi"
+              required />
+          </div>
+
+          <div class="row">
+            <label for="note">Catatan</label>
+            <textarea id="note" name="note" rows="3" placeholder="Keperluan peminjaman"></textarea>
+          </div>
+
+          <div id="msg" aria-live="polite"></div>
+          <button type="submit" class="submit-booking">Kirim Permintaan</button>
+          <p class="small-info">Pengajuan akan berstatus Menunggu Persetujuan sampai diverifikasi admin.</p>
+        </form>
+      </div>
+
+      <div class="schedule-note">
+        <strong>Jam operasional lengkap</strong>
+        <p><%= scheduleText %></p>
+      </div>
+    </aside>
+  </section>
 </div>
 
+<script>
+  window.roomCalendarConfig = {
+    roomId: <%- JSON.stringify(room.id) %>,
+    isLoggedIn: <%- JSON.stringify(Boolean(isLoggedIn)) %>,
+    schedules: <%- JSON.stringify(activeSchedules) %>
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales-all.global.min.js"></script>
 <script src="/js/detail_ruangan.js"></script>

@@ -148,6 +148,7 @@ app.get('/listRuangan', ensureUser, async (req, res) => {
   }
 });
 
+app.get('/api/rooms/:id/availability', roomController.getRoomAvailability);
 app.get('/room/:id', roomController.getRoomDetail);
 app.post('/booking/create', ensureUser, bookingController.processBooking);
 
