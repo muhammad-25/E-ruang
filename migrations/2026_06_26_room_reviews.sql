@@ -2,7 +2,7 @@
 
 CREATE TABLE IF NOT EXISTS `room_reviews` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `booking_id` int(11) NOT NULL,
+  `booking_id` bigint(20) NOT NULL,
   `room_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `rating` tinyint unsigned NOT NULL,

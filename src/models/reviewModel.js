@@ -10,7 +10,7 @@ const ReviewModel = {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS room_reviews (
         id INT(11) NOT NULL AUTO_INCREMENT,
-        booking_id INT(11) NOT NULL,
+        booking_id BIGINT(20) NOT NULL,
         room_id INT(11) NOT NULL,
         user_id INT(11) NOT NULL,
         rating TINYINT UNSIGNED NOT NULL,
