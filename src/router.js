@@ -17,6 +17,7 @@ const bookingController = require('./controllers/bookingController');
 const BookingModel = require('./models/bookingModel'); 
 const User = require('./models/users');
 const chatController = require('./controllers/chatController');
+const reviewController = require('./controllers/reviewController');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -151,8 +152,12 @@ app.get('/listRuangan', ensureUser, async (req, res) => {
 app.get('/api/rooms/:id/availability', roomController.getRoomAvailability);
 app.get('/room/:id', roomController.getRoomDetail);
 app.post('/booking/create', ensureUser, bookingController.processBooking);
+<<<<<<< HEAD
 app.post('/booking/:id/cancel', ensureAuth, bookingController.cancelBooking);
 app.post('/booking/:id/reschedule', ensureAuth, bookingController.rescheduleBooking);
+=======
+app.post('/room/:id/reviews', ensureAuth, reviewController.create);
+>>>>>>> feat/ulasan
 
 app.get('/profile', ensureAuth, async (req, res) => {
     try {
@@ -355,6 +360,10 @@ app.get('/admin/pengajuan', ensureAdmin, async (req, res) => {
         res.status(500).send("Terjadi kesalahan server saat mengambil data pengajuan.");
     }
 });
+
+app.get('/admin/reviews', ensureAdmin, reviewController.adminIndex);
+app.post('/admin/reviews/:id/visibility', ensureAdmin, reviewController.updateVisibility);
+app.post('/admin/reviews/:id/delete', ensureAdmin, reviewController.delete);
 
 // === ROUTE BARU: HANDLE UPDATE STATUS (TERIMA/TOLAK) ===
 app.post('/admin/booking/update', ensureAdmin, async (req, res) => {

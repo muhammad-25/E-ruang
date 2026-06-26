@@ -1,0 +1,126 @@
+.reviews-admin-container {
+  padding: 30px;
+  background-color: #F4F6F9;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+}
+
+.reviews-admin-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  padding: 25px;
+}
+
+.reviews-admin-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.reviews-admin-header h2 {
+  margin: 0 0 6px;
+  color: #333;
+  font-size: 22px;
+}
+
+.reviews-admin-header p,
+.reviews-admin-header span,
+.reviews-table small {
+  color: #888;
+  font-size: 13px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.reviews-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.reviews-table th {
+  text-align: left;
+  padding: 10px 15px;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 1px solid #eee;
+}
+
+.reviews-table td {
+  background: #ffffff;
+  padding: 15px;
+  color: #333;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+
+.reviews-table strong,
+.reviews-table small {
+  display: block;
+}
+
+.comment-cell {
+  min-width: 260px;
+  line-height: 1.5;
+}
+
+.rating-stars {
+  color: #f59e0b;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.review-badge {
+  display: inline-block;
+  min-width: 96px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.review-badge.visible {
+  background: #E5F9ED;
+  color: #2ECC71;
+  border: 1px solid #C8E6C9;
+}
+
+.review-badge.hidden {
+  background: #FFF4E5;
+  color: #FF9F43;
+  border: 1px solid #FFE0B2;
+}
+
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-review-action {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.btn-blue { background: #4A90E2; }
+.btn-red { background: #FF6B6B; }
+
+.empty-review-row {
+  text-align: center;
+  color: #aaa;
+  padding: 30px;
+  font-style: italic;
+}

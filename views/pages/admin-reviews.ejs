@@ -1,0 +1,71 @@
+<link rel="stylesheet" href="/css/admin-ulasan.css">
+
+<div class="reviews-admin-container">
+  <div class="reviews-admin-card">
+    <div class="reviews-admin-header">
+      <div>
+        <h2>Moderasi Ulasan</h2>
+        <p>Lihat, sembunyikan, tampilkan, atau hapus ulasan ruangan yang masuk.</p>
+      </div>
+      <span><%= reviews.length %> ulasan</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="reviews-table">
+        <thead>
+          <tr>
+            <th>Pengguna</th>
+            <th>Ruangan</th>
+            <th>Rating</th>
+            <th>Komentar</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (reviews.length > 0) { %>
+            <% reviews.forEach((review) => { %>
+              <tr>
+                <td>
+                  <strong><%= review.user_name %></strong>
+                  <small>NIM: <%= review.user_nim || '-' %></small>
+                </td>
+                <td>
+                  <strong><%= review.room_name %></strong>
+                  <small><%= review.gedung || '-' %></small>
+                  <small><%= review.booking_date %></small>
+                </td>
+                <td>
+                  <span class="rating-stars"><%= '★'.repeat(review.rating) %><%= '☆'.repeat(5 - review.rating) %></span>
+                </td>
+                <td class="comment-cell"><%= review.comment %></td>
+                <td>
+                  <span class="review-badge <%= Number(review.is_visible) === 1 ? 'visible' : 'hidden' %>">
+                    <%= Number(review.is_visible) === 1 ? 'Tampil' : 'Disembunyikan' %>
+                  </span>
+                </td>
+                <td>
+                  <div class="review-actions">
+                    <form action="/admin/reviews/<%= review.id %>/visibility" method="POST">
+                      <input type="hidden" name="action" value="<%= Number(review.is_visible) === 1 ? 'hide' : 'show' %>">
+                      <button type="submit" class="btn-review-action btn-blue">
+                        <%= Number(review.is_visible) === 1 ? 'Sembunyikan' : 'Tampilkan' %>
+                      </button>
+                    </form>
+                    <form action="/admin/reviews/<%= review.id %>/delete" method="POST" onsubmit="return confirm('Hapus ulasan ini?')">
+                      <button type="submit" class="btn-review-action btn-red">Hapus</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" class="empty-review-row">Belum ada ulasan yang masuk.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

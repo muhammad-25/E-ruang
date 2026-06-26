@@ -5,6 +5,7 @@ const http = require('http');
 const { sessionMiddleware } = require('./src/config/session');
 const ChatModel = require('./src/models/chatModel');
 const BookingModel = require('./src/models/bookingModel');
+const ReviewModel = require('./src/models/reviewModel');
 const { initializeChatSocket } = require('./src/socket');
 const { startBookingReminderScheduler } = require('./src/schedulers/bookingReminderScheduler');
 
@@ -23,6 +24,10 @@ Promise.all([
   .catch((err) => {
     console.error('Gagal memastikan schema pendukung:', err);
   });
+
+ReviewModel.ensureSchema().catch((err) => {
+  console.error('Gagal memastikan schema ulasan:', err);
+});
 
 server.listen(port, () => {
   console.log(`E-ruang listening on port ${port}`)
