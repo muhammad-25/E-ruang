@@ -41,6 +41,13 @@
 </div>
 
 <div class="container py-8">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="history-alert error"><%= error %></div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="history-alert success"><%= success %></div>
+    <% } %>
+
     <div class="view-toggle-container">
         <button 
             onclick="setView('timeline')" 
@@ -68,6 +75,34 @@
         </div>
         <h3 class="font-semibold" style="margin-bottom: 0.5rem;">Tidak ada hasil</h3>
         <p style="color: var(--color-slate-600);">Coba ubah filter atau kata kunci pencarian Anda</p>
+    </div>
+</div>
+
+<div class="history-modal-overlay" id="rescheduleModal">
+    <div class="history-modal">
+        <button type="button" class="history-modal-close" onclick="closeRescheduleModal()">x</button>
+        <h3>Ubah Jadwal</h3>
+        <p id="rescheduleRoomName" class="history-modal-subtitle"></p>
+        <form id="rescheduleForm" method="POST">
+            <div class="history-form-row">
+                <label for="rescheduleDate">Tanggal</label>
+                <input id="rescheduleDate" name="date" type="date" required>
+            </div>
+            <div class="history-time-row">
+                <div class="history-form-row">
+                    <label for="rescheduleStart">Jam Mulai</label>
+                    <input id="rescheduleStart" name="start" type="time" required>
+                </div>
+                <div class="history-form-row">
+                    <label for="rescheduleEnd">Jam Selesai</label>
+                    <input id="rescheduleEnd" name="end" type="time" required>
+                </div>
+            </div>
+            <div class="history-modal-actions">
+                <button type="button" class="btn-history secondary" onclick="closeRescheduleModal()">Batal</button>
+                <button type="submit" class="btn-history primary">Simpan</button>
+            </div>
+        </form>
     </div>
 </div>
 

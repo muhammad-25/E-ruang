@@ -64,6 +64,28 @@ function renderBadge(displayStatusKey) {
     </div>`;
 }
 
+function renderBookingActions(booking) {
+    if (!booking.canCancel && !booking.canReschedule) return '';
+
+    const rescheduleButton = booking.canReschedule
+        ? `<button type="button" class="btn-history secondary" onclick="openRescheduleModal(${booking.id})">
+            <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+            Ubah Jadwal
+        </button>`
+        : '';
+
+    const cancelButton = booking.canCancel
+        ? `<form method="POST" action="/booking/${booking.id}/cancel" onsubmit="return confirm('Batalkan peminjaman ini?');">
+            <button type="submit" class="btn-history danger">
+                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                Batalkan
+            </button>
+        </form>`
+        : '';
+
+    return `<div class="history-actions">${rescheduleButton}${cancelButton}</div>`;
+}
+
 function renderTimelineItem(booking, index, total) {
     const isLast = index === total - 1;
     const line = !isLast ? `<div class="timeline-line"></div>` : '';
@@ -142,6 +164,7 @@ function renderTimelineItem(booking, index, total) {
                                     </div>
                                 </div>
                             </div>
+                            ${renderBookingActions(booking)}
                         </div>
                     </div>
                 </div>
@@ -186,6 +209,7 @@ function renderGridItem(booking) {
                             ${booking.participants} peserta
                         </div>
                     </div>
+                    ${renderBookingActions(booking)}
                 </div>
             </div>
         </div>
@@ -258,6 +282,30 @@ function setView(view) {
     }
     renderBookings();
 }
+
+function openRescheduleModal(bookingId) {
+    const booking = mockBookings.find((item) => Number(item.id) === Number(bookingId));
+    const modal = document.getElementById('rescheduleModal');
+    const form = document.getElementById('rescheduleForm');
+
+    if (!booking || !modal || !form) return;
+
+    form.action = `/booking/${booking.id}/reschedule`;
+    document.getElementById('rescheduleRoomName').textContent = `${booking.roomName} - ${booking.date}, ${booking.time}`;
+    document.getElementById('rescheduleDate').value = booking.dateValue || '';
+    document.getElementById('rescheduleStart').value = booking.startTime || '';
+    document.getElementById('rescheduleEnd').value = booking.endTime || '';
+
+    modal.classList.add('show');
+}
+
+function closeRescheduleModal() {
+    const modal = document.getElementById('rescheduleModal');
+    if (modal) modal.classList.remove('show');
+}
+
+window.openRescheduleModal = openRescheduleModal;
+window.closeRescheduleModal = closeRescheduleModal;
 
 // --- EVENT LISTENERS ---
 if (searchInput) {

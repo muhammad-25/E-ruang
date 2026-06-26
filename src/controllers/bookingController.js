@@ -42,6 +42,18 @@ function getFallbackSchedules() {
   }));
 }
 
+function formatDateTimeForDb(date, time) {
+  return `${date} ${time}:00`;
+}
+
+function isAtLeastHoursBefore(dateTime, hours) {
+  return dateTime.getTime() - Date.now() >= hours * 60 * 60 * 1000;
+}
+
+function redirectWithHistoryError(res, message) {
+  return res.redirect(`/history?error=${encodeURIComponent(message)}`);
+}
+
 module.exports = {
   processBooking: async (req, res) => {
     try {
@@ -63,8 +75,8 @@ module.exports = {
       }
 
       // Gabungkan Date dan Time
-      const startDateTimeStr = `${date} ${start}:00`;
-      const endDateTimeStr = `${date} ${end}:00`;
+      const startDateTimeStr = formatDateTimeForDb(date, start);
+      const endDateTimeStr = formatDateTimeForDb(date, end);
 
       const startObj = new Date(startDateTimeStr);
       const endObj = new Date(endDateTimeStr);
@@ -145,7 +157,9 @@ module.exports = {
         });
 
         // Format Jam (contoh: 09:00 - 11:00)
-        const timeStr = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')} - ${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+        const startTimeValue = `${start.getHours().toString().padStart(2, '0')}:${start.getMinutes().toString().padStart(2, '0')}`;
+        const endTimeValue = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+        const timeStr = `${startTimeValue} - ${endTimeValue}`;
 
         // Hitung Durasi (Jam)
         const durationMs = end - start;
@@ -185,7 +199,12 @@ module.exports = {
           purpose: b.purpose || 'Tidak ada keterangan',
           status: frontendStatus, // status hasil kalkulasi waktu
           dbStatus: b.db_status, // status asli dari DB (pending/approved)
-          participants: b.participants
+          participants: b.participants,
+          dateValue: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`,
+          startTime: startTimeValue,
+          endTime: endTimeValue,
+          canCancel: ['pending', 'approved'].includes(b.db_status) && isAtLeastHoursBefore(start, 24),
+          canReschedule: ['pending', 'approved'].includes(b.db_status) && isAtLeastHoursBefore(start, 48)
         };
       });
 
@@ -193,12 +212,118 @@ module.exports = {
       res.render('pages/history', { 
         title: 'Riwayat Peminjaman',
         user: req.session, // Data user untuk navbar
+        error: req.query.error || '',
+        success: req.query.success || '',
         bookingsData: JSON.stringify(formattedBookings) // KITA KIRIM SEBAGAI STRING JSON
       });
 
     } catch (error) {
       console.error('Error fetching history:', error);
       res.status(500).send('Terjadi kesalahan server saat mengambil data riwayat.');
+    }
+  },
+
+  cancelBooking: async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const bookingId = req.params.id;
+
+      if (!userId) {
+        return res.redirect('/login');
+      }
+
+      const booking = await BookingModel.getBookingForUser(bookingId, userId);
+      if (!booking) {
+        return redirectWithHistoryError(res, 'Data peminjaman tidak ditemukan.');
+      }
+
+      if (!['pending', 'approved'].includes(booking.status)) {
+        return redirectWithHistoryError(res, 'Peminjaman dengan status ini tidak dapat dibatalkan.');
+      }
+
+      const startObj = new Date(booking.start_datetime);
+      if (!isAtLeastHoursBefore(startObj, 24)) {
+        return redirectWithHistoryError(res, 'Pembatalan hanya dapat dilakukan maksimal H-1 sebelum jadwal mulai.');
+      }
+
+      const result = await BookingModel.cancelBooking(bookingId, userId);
+      if (!result || result.affectedRows === 0) {
+        return redirectWithHistoryError(res, 'Gagal membatalkan peminjaman. Silakan muat ulang halaman.');
+      }
+
+      return res.redirect('/history?success=Peminjaman berhasil dibatalkan.');
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      return redirectWithHistoryError(res, 'Terjadi kesalahan server saat membatalkan peminjaman.');
+    }
+  },
+
+  rescheduleBooking: async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const bookingId = req.params.id;
+      const { date, start, end } = req.body;
+
+      if (!userId) {
+        return res.redirect('/login');
+      }
+
+      const booking = await BookingModel.getBookingForUser(bookingId, userId);
+      if (!booking) {
+        return redirectWithHistoryError(res, 'Data peminjaman tidak ditemukan.');
+      }
+
+      if (!['pending', 'approved'].includes(booking.status)) {
+        return redirectWithHistoryError(res, 'Peminjaman dengan status ini tidak dapat diubah jadwalnya.');
+      }
+
+      const oldStartObj = new Date(booking.start_datetime);
+      if (!isAtLeastHoursBefore(oldStartObj, 48)) {
+        return redirectWithHistoryError(res, 'Perubahan jadwal hanya dapat dilakukan maksimal H-2 sebelum jadwal mulai.');
+      }
+
+      if (!date || !start || !end) {
+        return redirectWithHistoryError(res, 'Tanggal, jam mulai, dan jam selesai wajib diisi.');
+      }
+
+      const startDateTimeStr = formatDateTimeForDb(date, start);
+      const endDateTimeStr = formatDateTimeForDb(date, end);
+      const startObj = new Date(startDateTimeStr);
+      const endObj = new Date(endDateTimeStr);
+
+      if (startObj < new Date()) {
+        return redirectWithHistoryError(res, 'Tidak dapat mengubah jadwal ke waktu yang sudah lewat.');
+      }
+
+      if (endObj <= startObj) {
+        return redirectWithHistoryError(res, 'Jam selesai harus lebih akhir dari jam mulai.');
+      }
+
+      const schedulesRaw = await RoomSchedule.getSchedulesByRoom(booking.room_id);
+      const schedules = schedulesRaw.length ? schedulesRaw : getFallbackSchedules();
+      if (!isWithinOperatingHours(startObj, endObj, schedules)) {
+        return redirectWithHistoryError(res, 'Waktu baru berada di luar jam operasional ruangan.');
+      }
+
+      const isBooked = await BookingModel.checkAvailabilityExcludingBooking(
+        booking.room_id,
+        startDateTimeStr,
+        endDateTimeStr,
+        bookingId
+      );
+      if (isBooked) {
+        return redirectWithHistoryError(res, 'Ruangan sudah dipesan pada jadwal baru tersebut.');
+      }
+
+      const result = await BookingModel.rescheduleBooking(bookingId, userId, startDateTimeStr, endDateTimeStr);
+      if (!result || result.affectedRows === 0) {
+        return redirectWithHistoryError(res, 'Gagal mengubah jadwal peminjaman. Silakan muat ulang halaman.');
+      }
+
+      return res.redirect('/history?success=Jadwal peminjaman berhasil diubah dan menunggu persetujuan admin.');
+    } catch (error) {
+      console.error('Error rescheduling booking:', error);
+      return redirectWithHistoryError(res, 'Terjadi kesalahan server saat mengubah jadwal peminjaman.');
     }
   }
 };

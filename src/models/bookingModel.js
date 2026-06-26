@@ -30,6 +30,21 @@ module.exports = {
     return rows.length > 0;
   },
 
+  async checkAvailabilityExcludingBooking(roomId, startDateTime, endDateTime, bookingId) {
+    const sql = `
+      SELECT id FROM bookings
+      WHERE room_id = ?
+      AND id <> ?
+      AND status = 'approved'
+      AND (
+        (start_datetime < ? AND end_datetime > ?)
+      )
+      LIMIT 1
+    `;
+    const rows = await query(sql, [roomId, bookingId, endDateTime, startDateTime]);
+    return rows.length > 0;
+  },
+
   async getCalendarBookings(roomId, rangeStart, rangeEnd) {
     const sql = `
       SELECT
@@ -123,6 +138,55 @@ module.exports = {
     return await query(sql, [status, adminId, bookingId]);
   },
 
+  async getBookingForUser(bookingId, userId) {
+    const sql = `
+      SELECT
+        b.*,
+        r.name AS room_name,
+        r.gedung,
+        r.nomor_ruang,
+        r.capacity
+      FROM bookings b
+      JOIN rooms r ON b.room_id = r.id
+      WHERE b.id = ? AND b.requester_id = ?
+      LIMIT 1
+    `;
+    const rows = await query(sql, [bookingId, userId]);
+    return rows[0] || null;
+  },
+
+  async cancelBooking(bookingId, userId) {
+    const sql = `
+      UPDATE bookings
+      SET status = 'cancelled', updated_at = NOW()
+      WHERE id = ?
+        AND requester_id = ?
+        AND status IN ('pending', 'approved')
+    `;
+    return await query(sql, [bookingId, userId]);
+  },
+
+  async rescheduleBooking(bookingId, userId, startDateTime, endDateTime) {
+    const sql = `
+      UPDATE bookings
+      SET
+        start_datetime = ?,
+        end_datetime = ?,
+        status = 'pending',
+        approved_by = NULL,
+        approved_at = NULL,
+        updated_at = NOW()
+      WHERE id = ?
+        AND requester_id = ?
+        AND status IN ('pending', 'approved')
+    `;
+    const result = await query(sql, [startDateTime, endDateTime, bookingId, userId]);
+    if (result && result.affectedRows > 0) {
+      await query('DELETE FROM booking_reminders WHERE booking_id = ?', [bookingId]);
+    }
+    return result;
+  },
+
   async getDashboardStats() {
 
   const sqlMonth = `SELECT COUNT(*) as total FROM bookings WHERE MONTH(start_datetime) = MONTH(NOW()) AND YEAR(start_datetime) = YEAR(NOW())`;
@@ -185,5 +249,69 @@ async getRecentPendingBookings(limit = 5) {
       ORDER BY b.created_at DESC 
     `;
     return await query(sql, [userId]);
+  },
+
+  async ensureReminderSchema() {
+    await query(`
+      CREATE TABLE IF NOT EXISTS booking_reminders (
+        id BIGINT(20) NOT NULL AUTO_INCREMENT,
+        booking_id BIGINT(20) NOT NULL,
+        reminder_type VARCHAR(30) NOT NULL,
+        status ENUM('sent','failed') NOT NULL DEFAULT 'sent',
+        message TEXT DEFAULT NULL,
+        error_message TEXT DEFAULT NULL,
+        sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uk_booking_reminders_once (booking_id, reminder_type),
+        KEY idx_booking_reminders_booking (booking_id),
+        KEY idx_booking_reminders_type (reminder_type),
+        CONSTRAINT booking_reminders_booking_fk
+          FOREIGN KEY (booking_id) REFERENCES bookings (id)
+          ON DELETE CASCADE ON UPDATE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+    `);
+  },
+
+  async getBookingsNeedingReminder(reminderType, hoursBefore) {
+    const sql = `
+      SELECT
+        b.id,
+        b.requester_id,
+        b.room_id,
+        b.start_datetime,
+        b.end_datetime,
+        b.description,
+        r.name AS room_name,
+        r.gedung,
+        r.nomor_ruang
+      FROM bookings b
+      JOIN rooms r ON r.id = b.room_id
+      LEFT JOIN booking_reminders br
+        ON br.booking_id = b.id
+        AND br.reminder_type = ?
+      WHERE b.status = 'approved'
+        AND b.start_datetime > NOW()
+        AND b.start_datetime <= DATE_ADD(NOW(), INTERVAL ? HOUR)
+        AND br.id IS NULL
+      ORDER BY b.start_datetime ASC
+      LIMIT 50
+    `;
+    return await query(sql, [reminderType, hoursBefore]);
+  },
+
+  async logReminder(bookingId, reminderType, status, message, errorMessage = null) {
+    const sql = `
+      INSERT INTO booking_reminders (
+        booking_id,
+        reminder_type,
+        status,
+        message,
+        error_message,
+        sent_at,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+    `;
+    return await query(sql, [bookingId, reminderType, status, message, errorMessage]);
   }
 };

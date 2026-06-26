@@ -135,6 +135,42 @@
             </table>
         </div>
     </div>
+
+    <div class="pengajuan-card" id="dibatalkan">
+        <h3>Dibatalkan</h3>
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>NIM</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Nama Kelas</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% const cancelled = bookings.filter(b => b.status === 'Dibatalkan'); %>
+
+                    <% if (cancelled.length > 0) { %>
+                        <% cancelled.forEach(item => { %>
+                        <tr>
+                            <td><%= item.nim %></td>
+                            <td><%= item.date %></td>
+                            <td><%= item.time %></td>
+                            <td><%= item.room %></td>
+                            <td><span class="badge badge-tolak">Dibatalkan</span></td>
+                            <td>-</td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr class="empty-row"><td colspan="6">Belum ada data dibatalkan.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 </div> <div class="modal-overlay" id="editModal">

@@ -151,6 +151,8 @@ app.get('/listRuangan', ensureUser, async (req, res) => {
 app.get('/api/rooms/:id/availability', roomController.getRoomAvailability);
 app.get('/room/:id', roomController.getRoomDetail);
 app.post('/booking/create', ensureUser, bookingController.processBooking);
+app.post('/booking/:id/cancel', ensureAuth, bookingController.cancelBooking);
+app.post('/booking/:id/reschedule', ensureAuth, bookingController.rescheduleBooking);
 
 app.get('/profile', ensureAuth, async (req, res) => {
     try {
@@ -323,6 +325,7 @@ app.get('/admin/pengajuan', ensureAdmin, async (req, res) => {
             let statusDisplay = 'Menunggu';
             if (b.status === 'approved') statusDisplay = 'Disetujui';
             if (b.status === 'rejected') statusDisplay = 'Ditolak';
+            if (b.status === 'cancelled') statusDisplay = 'Dibatalkan';
 
             return {
                 id: b.id,
