@@ -64,6 +64,92 @@
     </div>
   </section>
 
+  <section class="reviews-section" id="ulasan">
+    <div class="reviews-header">
+      <div>
+        <span class="section-label">Rating & Ulasan</span>
+        <h2>Pengalaman Pengguna</h2>
+      </div>
+      <div class="rating-summary">
+        <strong><%= Number(reviewSummary.average_rating || 0).toFixed(1) %></strong>
+        <span><%= reviewSummary.total_reviews || 0 %> ulasan</span>
+      </div>
+    </div>
+
+    <% if (reviewFlash && reviewFlash.error) { %>
+      <div class="form-alert error"><%= reviewFlash.error %></div>
+    <% } %>
+    <% if (reviewFlash && reviewFlash.success) { %>
+      <div class="form-alert success"><%= reviewFlash.success %></div>
+    <% } %>
+
+    <div class="reviews-layout">
+      <div class="review-list">
+        <% if (reviews && reviews.length > 0) { %>
+          <% reviews.forEach((review) => { %>
+            <article class="review-item">
+              <div class="review-topline">
+                <strong><%= review.user_name || 'Pengguna' %></strong>
+                <span class="review-stars" aria-label="Rating <%= review.rating %> dari 5">
+                  <%= '★★★★★'.slice(0, review.rating) %><%= '☆☆☆☆☆'.slice(0, 5 - review.rating) %>
+                </span>
+              </div>
+              <p><%= review.comment %></p>
+              <small><%= new Date(review.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) %></small>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <div class="review-empty">Belum ada ulasan yang ditampilkan untuk ruangan ini.</div>
+        <% } %>
+      </div>
+
+      <aside class="review-form-card">
+        <h3>Beri Ulasan</h3>
+
+        <% if (!isLoggedIn) { %>
+          <p class="review-note">Login dan selesaikan booking ruangan ini untuk memberikan ulasan.</p>
+          <a class="review-login-link" href="/login?redirect=/room/<%= room.id %>#ulasan">Login</a>
+        <% } else if (eligibleReviewBookings && eligibleReviewBookings.length > 0) { %>
+          <form action="/room/<%= room.id %>/reviews" method="POST">
+            <div class="row">
+              <label for="booking_id">Booking selesai</label>
+              <select id="booking_id" name="booking_id" required>
+                <% eligibleReviewBookings.forEach((booking) => { %>
+                  <option value="<%= booking.id %>">
+                    <%= new Date(booking.end_datetime).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) %> - <%= booking.penanggung_jawab || 'Peminjaman' %>
+                  </option>
+                <% }); %>
+              </select>
+            </div>
+
+            <div class="row">
+              <label for="rating">Rating</label>
+              <select id="rating" name="rating" required>
+                <option value="">Pilih rating</option>
+                <option value="5">5 - Sangat baik</option>
+                <option value="4">4 - Baik</option>
+                <option value="3">3 - Cukup</option>
+                <option value="2">2 - Kurang</option>
+                <option value="1">1 - Buruk</option>
+              </select>
+            </div>
+
+            <div class="row">
+              <label for="comment">Komentar</label>
+              <textarea id="comment" name="comment" rows="4" maxlength="1000" placeholder="Bagikan pengalaman Anda menggunakan ruangan ini" required></textarea>
+            </div>
+
+            <button type="submit" class="submit-booking">Kirim Ulasan</button>
+            <p class="small-info">Ulasan dapat dimoderasi oleh admin.</p>
+          </form>
+        <% } else { %>
+          <p class="review-note">Anda dapat memberi ulasan setelah memiliki booking ruangan ini yang sudah selesai dan disetujui.</p>
+        <% } %>
+      </aside>
+    </div>
+  </section>
+
+
   <section
     class="availability-shell"
     id="kalender-ketersediaan"

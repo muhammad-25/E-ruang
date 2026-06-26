@@ -3,6 +3,7 @@ const RoomPhoto = require('../models/roomphoto');
 const RoomFacilities = require('../models/roomFacilities');
 const RoomSchedule = require('../models/roomSchedule');
 const BookingModel = require('../models/bookingModel');
+const ReviewModel = require('../models/reviewModel');
 
 function normalizeTime(value) {
   if (!value) return null;
@@ -80,6 +81,11 @@ module.exports = {
       const rooms = await RoomModel.listRooms({ onlyActive: true });
       const schedulesRaw = await RoomSchedule.getSchedulesByRoom(roomId);
       const schedules = schedulesRaw.length ? formatSchedules(schedulesRaw) : getFallbackSchedules(roomId);
+      const reviews = await ReviewModel.listVisibleByRoom(roomId);
+      const reviewSummary = await ReviewModel.getRoomSummary(roomId);
+      const eligibleReviewBookings = req.session && req.session.userId
+        ? await ReviewModel.listEligibleBookings(req.session.userId, roomId)
+        : [];
 
       res.render('pages/detail_ruangan', {
         title: `Detail ${room.name}`,
@@ -90,7 +96,14 @@ module.exports = {
         photos: photos,
         mainPhoto: mainPhoto,
         facilities: facilities,
-        schedules: schedules
+        schedules: schedules,
+        reviews: reviews,
+        reviewSummary: reviewSummary,
+        eligibleReviewBookings: eligibleReviewBookings,
+        reviewFlash: {
+          error: req.query.reviewError || '',
+          success: req.query.reviewSuccess || ''
+        }
       });
 
     } catch (error) {

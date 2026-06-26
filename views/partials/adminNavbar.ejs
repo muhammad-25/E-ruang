@@ -40,6 +40,12 @@
             </li>
 
             <li>
+                <a href="/admin/reviews" class="<%= (typeof path !== 'undefined' && path === '/admin/reviews') || (typeof currentRoute !== 'undefined' && currentRoute === '/admin/reviews') ? 'active' : '' %>">
+                    <i class="fa-solid fa-star"></i> Ulasan
+                </a>
+            </li>
+
+            <li>
                 <a href="/admin-settings"><i class="fa-solid fa-gear"></i> Pengaturan</a>
             </li>
             <li>

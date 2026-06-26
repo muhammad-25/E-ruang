@@ -92,6 +92,12 @@
 .btn-group {
     display: flex;
     gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-group form {
+    margin: 0;
 }
 
 /* Empty State Text */
@@ -277,4 +283,14 @@
     line-height: 1.5;
     color: #555;
     min-height: 60px;
+}
+
+.rating-admin {
+    color: #f1c40f;
+    white-space: nowrap;
+}
+
+.review-comment-cell {
+    max-width: 320px;
+    line-height: 1.5;
 }
