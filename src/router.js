@@ -152,12 +152,10 @@ app.get('/listRuangan', ensureUser, async (req, res) => {
 app.get('/api/rooms/:id/availability', roomController.getRoomAvailability);
 app.get('/room/:id', roomController.getRoomDetail);
 app.post('/booking/create', ensureUser, bookingController.processBooking);
-<<<<<<< HEAD
+
 app.post('/booking/:id/cancel', ensureAuth, bookingController.cancelBooking);
 app.post('/booking/:id/reschedule', ensureAuth, bookingController.rescheduleBooking);
-=======
 app.post('/room/:id/reviews', ensureAuth, reviewController.create);
->>>>>>> feat/ulasan
 
 app.get('/profile', ensureAuth, async (req, res) => {
     try {
