@@ -52,4 +52,4 @@ h1{font-size:20px; margin:0 0 18px; color:#0b1220}
 .chip.panggung{background:linear-gradient(90deg,#fff7ed,#ffedd5); color:#92400e}
 .chip.komp{background:linear-gradient(90deg,#f0fdf4,#dcfce7); color:#14532d}
 
-@media (max-width:420px){ body{padding:16px} .media{height:140px} }
+@media (max-width:420px){ .media{height:140px} }
