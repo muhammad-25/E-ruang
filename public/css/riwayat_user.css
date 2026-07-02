@@ -573,3 +573,56 @@
 @media (min-width: 640px) {
     .grid-2-col-responsive { grid-template-columns: repeat(2, 1fr); }
 }
+
+@media (max-width: 767px) {
+    .timeline-line {
+        display: none !important;
+    }
+    .timeline-layout .p-6 {
+        position: relative;
+        padding: 1.25rem !important;
+    }
+    .timeline-layout .p-6 .absolute {
+        position: absolute !important;
+        top: 1.25rem !important;
+        right: 1.25rem !important;
+    }
+    .timeline-layout .card-image-container {
+        height: 10rem;
+    }
+    .timeline-date-box {
+        padding: 1.25rem !important;
+    }
+    .timeline-date-box i {
+        display: none !important; /* Hide calendar icon on mobile to save vertical space */
+    }
+    .timeline-date-box .text-center {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .timeline-date-box .text-center .opacity-90 {
+        font-weight: 600;
+    }
+    .timeline-date-box .text-center .opacity-90::after {
+        content: ":";
+    }
+    .timeline-date-box .text-center .mb-1 {
+        margin-bottom: 0 !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .flex-col.sm-row {
+        gap: 10px;
+    }
+    .flex-col.sm-row > div,
+    .flex-col.sm-row .flex.gap-3,
+    .flex-col.sm-row .relative {
+        width: 100% !important;
+        flex: none !important;
+    }
+    .select-field {
+        width: 100% !important;
+    }
+}

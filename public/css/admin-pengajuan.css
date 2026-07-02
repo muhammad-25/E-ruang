@@ -294,3 +294,17 @@
     max-width: 320px;
     line-height: 1.5;
 }
+
+@media (max-width: 768px) {
+    .pengajuan-container {
+        padding: 15px !important;
+        min-height: auto;
+    }
+    .pengajuan-card {
+        padding: 15px !important;
+        margin-bottom: 20px !important;
+    }
+    .detail-row {
+        flex: 1 1 100% !important;
+    }
+}

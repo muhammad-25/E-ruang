@@ -339,3 +339,28 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+    .main-container {
+        height: auto !important;
+        overflow: visible !important;
+        padding: 15px !important;
+    }
+    .main-header {
+        padding: 15px !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 15px !important;
+    }
+    .admin-badge {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    .content-area {
+        padding-top: 15px !important;
+        overflow: visible !important;
+    }
+    .actions-bar {
+        margin-bottom: 20px !important;
+    }
+}

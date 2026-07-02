@@ -16,32 +16,34 @@
 <div class="recent-requests">
     <h2 class="section-title">Belum diproses</h2>
     
-    <table>
-        <thead>
-            <tr>
-                <th>Nama Pemohon</th>
-                <th>Ruang</th>
-                <th>Tanggal</th>
-                <th>Waktu</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (requests.length > 0) { %>
-                <% requests.forEach(req => { %>
-                    <tr>
-                        <td><%= req.user_name %></td>
-                        <td><%= req.room_name %></td>
-                        <td><%= req.date %></td>
-                        <td><%= req.time %></td>
-                        <td><span class="badge pending">Menunggu</span></td>
-                    </tr>
-                <% }); %>
-            <% } else { %>
+    <div class="table-responsive">
+        <table>
+            <thead>
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 20px;">Tidak ada pengajuan yang perlu diproses.</td>
+                    <th>Nama Pemohon</th>
+                    <th>Ruang</th>
+                    <th>Tanggal</th>
+                    <th>Waktu</th>
+                    <th>Status</th>
                 </tr>
-            <% } %>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <% if (requests.length > 0) { %>
+                    <% requests.forEach(req => { %>
+                        <tr>
+                            <td><%= req.user_name %></td>
+                            <td><%= req.room_name %></td>
+                            <td><%= req.date %></td>
+                            <td><%= req.time %></td>
+                            <td><span class="badge pending">Menunggu</span></td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">Tidak ada pengajuan yang perlu diproses.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
 </div>

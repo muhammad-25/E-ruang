@@ -141,6 +141,12 @@ h2.login-title {
 
 /* Responsif */
 @media (max-width: 768px) {
+    body {
+        height: auto;
+        min-height: 100vh;
+        padding: 20px 10px;
+        align-items: flex-start;
+    }
     .login-container {
         flex-direction: column;
         height: auto;

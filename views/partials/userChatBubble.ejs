@@ -43,12 +43,15 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script id="chat-user-data" type="application/json">
+    <%- JSON.stringify({
+        id: user.userId || null,
+        name: user.userName || 'User',
+        email: user.userEmail || ''
+    }) %>
+</script>
 <script>
-    const chatUser = {
-        id: <%- JSON.stringify(user.userId || null) %>,
-        name: <%- JSON.stringify(user.userName || 'User') %>,
-        email: <%- JSON.stringify(user.userEmail || '') %>
-    };
+    const chatUser = JSON.parse(document.getElementById('chat-user-data').textContent);
 
     let chatSocket = null;
     let activeConversation = null;

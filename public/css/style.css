@@ -1,7 +1,9 @@
-body {
+html, body {
     margin: 0;
     padding: 0;
     background-color: #f2f2f2;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 a {
@@ -35,6 +37,34 @@ nav {
     width: 45px;
 }
 
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 26px;
+    height: 19px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+
+.hamburger span {
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    transform-origin: left center;
+}
 
 .menu {
     display: flex;
@@ -126,6 +156,83 @@ nav {
 .btn.login:hover {
     filter: brightness(1.1);
     transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    nav {
+        padding: 10px 20px;
+    }
+    
+    .hamburger {
+        display: flex;
+    }
+    
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg);
+        margin-top: -1px;
+    }
+    
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+        width: 0;
+    }
+    
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg);
+        margin-top: 1px;
+    }
+
+    .nav-right {
+        position: fixed;
+        right: -100%;
+        top: 62px;
+        width: 250px;
+        height: calc(100vh - 62px);
+        background: #262834;
+        border-left: 2px solid #4DA8E4;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 40px 30px;
+        gap: 30px;
+        transition: right 0.3s ease-in-out;
+        z-index: 998;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+    }
+
+    .nav-right.active {
+        right: 0;
+    }
+
+    .menu {
+        flex-direction: column;
+        width: 100%;
+        gap: 20px;
+    }
+    
+    .menu a {
+        display: block;
+        width: 100%;
+        padding: 8px 0;
+    }
+    
+    .menu a::after, .menu a.active::after {
+        display: none;
+    }
+    
+    .menu a.active {
+        border-left: 3px solid #4DA8E4;
+        padding-left: 10px;
+    }
+
+    .buttons {
+        width: 100%;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .buttons a, .buttons button {
+        width: 100%;
+    }
 }
 
 
@@ -237,7 +344,7 @@ nav {
 .site-footer{
     padding:28px 20px;
     border-radius:18px;
-    margin:16px
+    margin:0
 }
 .footer-inner{
     grid-template-columns:1fr;

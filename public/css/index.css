@@ -339,3 +339,79 @@ details[open] .answer[aria-js-disabled]{
   color:#334155
 }
 
+@media (max-width: 768px) {
+  .hero {
+    height: 400px;
+    padding: 24px 20px;
+  }
+  .hero h1 {
+    font-size: 30px;
+    line-height: 1.2;
+  }
+  .hero p {
+    font-size: 14px;
+    margin: 8px 0 20px;
+  }
+  .stats-wrap {
+    flex-direction: column;
+    margin: -30px 20px 30px !important;
+    gap: 10px;
+    align-items: stretch;
+    padding: 18px !important;
+  }
+  .stat {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    justify-content: flex-start;
+  }
+  .stat:last-child {
+    border-bottom: none;
+  }
+  .faq {
+    padding: 18px;
+    margin: 0 10px;
+  }
+  summary {
+    padding: 12px;
+  }
+  .q {
+    font-size: 0.95rem;
+  }
+  
+  /* List Ruangan Page Responsive */
+  .rooms-page {
+    padding: 20px;
+    margin: 10px auto;
+  }
+  .page-header h2 {
+    font-size: 26px;
+  }
+  .filters-card {
+    padding: 12px 15px;
+    gap: 12px;
+  }
+  .filters-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .search {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+  .filters-controls select {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

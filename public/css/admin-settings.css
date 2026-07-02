@@ -173,3 +173,40 @@ input:focus {
 .warning-box strong {
     color: #d69e2e;
 }
+
+/* Responsive UI Layout */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 15px;
+    }
+    
+    .settings-header {
+        padding: 20px;
+    }
+    
+    .settings-card {
+        padding: 20px;
+    }
+    
+    .settings-tabs {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .tab-btn {
+        padding: 10px 5px;
+        font-size: 14px;
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .btn-save {
+        width: 100%;
+        justify-content: center;
+    }
+}

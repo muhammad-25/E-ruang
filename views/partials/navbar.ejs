@@ -4,41 +4,48 @@
     <span>E-Ruang UNJ</span>
   </div>
 
-  <div class="menu">
-    <a href="/">Beranda</a>
-    <a href="listRuangan">Ruangan</a>
-    <a href="/history">Riwayat</a>
-  </div> 
+  <div class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
-  <div class="buttons">
-    <% if (isLoggedIn) { %>
-      
-      <a href="/profile"><button class="btn login">Profil</button></a>
-      
-    <% } else { %>
-      <a href="/register"><button class="btn">Register</button></a>
-      <a href="/login"><button class="btn login">Log In</button></a>
-    <% } %>
+  <div class="nav-right" id="nav-right">
+    <div class="menu">
+      <a href="/">Beranda</a>
+      <a href="listRuangan">Ruangan</a>
+      <a href="/history">Riwayat</a>
+    </div> 
+
+    <div class="buttons">
+      <% if (isLoggedIn) { %>
+        <a href="/profile"><button class="btn login">Profil</button></a>
+      <% } else { %>
+        <a href="/register"><button class="btn">Register</button></a>
+        <a href="/login"><button class="btn login">Log In</button></a>
+      <% } %>
+    </div>
   </div>
 
   <script>
-    // Ambil path URL saat ini (misal: "/history" atau "/")
     const currentPath = window.location.pathname;
-    
-    // Ambil semua elemen link di dalam menu
     const menuLinks = document.querySelectorAll('.menu a');
 
     menuLinks.forEach(link => {
-      // Ambil nilai href dari link tersebut
       const linkPath = link.getAttribute('href');
-
-      // Cek apakah href link sama dengan URL saat ini
-      // ATAU jika URL saat ini kosong/index, tandai link yang mengarah ke '/'
-      if (linkPath === currentPath) {
+      if (linkPath === currentPath || (linkPath.startsWith('/') && linkPath === currentPath) || (!linkPath.startsWith('/') && '/' + linkPath === currentPath)) {
         link.classList.add('active');
       } else {
         link.classList.remove('active');
       }
+    });
+
+    const hamburger = document.getElementById('hamburger');
+    const navRight = document.getElementById('nav-right');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      navRight.classList.toggle('active');
     });
   </script>
 </nav>

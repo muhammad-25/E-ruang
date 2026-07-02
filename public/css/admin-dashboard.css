@@ -277,3 +277,81 @@ table td {
 .btn-approve { background-color: #4285F4; }
 .btn-reject { background-color: #FF4D4D; }
 .btn-edit { background-color: #4285F4; width: 60px;}
+
+/* --- MOBILE RESPONSIVE STYLES --- */
+.admin-mobile-header {
+    display: none;
+    align-items: center;
+    background-color: #545F71;
+    color: white;
+    padding: 10px 20px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 1002;
+    border-bottom: 2px solid #fff;
+}
+
+.admin-sidebar-toggle {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+.admin-mobile-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.admin-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.admin-sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        background-color: #f4f4f4;
+    }
+
+    .admin-mobile-header {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        height: 100vh;
+        z-index: 1001;
+        transition: left 0.3s ease;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        margin: 0;
+        border-radius: 0;
+        padding: 20px 15px;
+        min-height: calc(100vh - 60px);
+    }
+}

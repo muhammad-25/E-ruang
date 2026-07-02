@@ -13,6 +13,13 @@
 </head>
 <body>
 
+    <div class="admin-mobile-header">
+        <button class="admin-sidebar-toggle" id="adminSidebarToggle" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="admin-mobile-title">E-Ruang Admin</span>
+    </div>
+
     <%- include('../partials/adminNavbar') %>
 
     <main class="main-content">
@@ -21,5 +28,28 @@
 
     </main>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggleBtn = document.getElementById('adminSidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            // Create overlay element
+            const overlay = document.createElement('div');
+            overlay.className = 'admin-sidebar-overlay';
+            document.body.appendChild(overlay);
+
+            if (toggleBtn && sidebar) {
+                toggleBtn.addEventListener('click', function () {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+            }
+            
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        });
+    </script>
 </body>
 </html>
